@@ -1,12 +1,24 @@
 {
-  "name": "@calpheonlabs",
-  "module": "index.ts",
-  "type": "module",
-  "private": true,
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^7.0.2"
-  }
+    "name": "@calpheonlabs",
+    "private": true,
+    "workspaces": {
+        "packages": [
+            "packages/*"
+        ],
+        "catalog": {
+            "typescript": "^7.0.2"
+        }
+    },
+    "scripts": {
+        "format": "bun --bun oxfmt"
+    },
+    "devDependencies": {
+        "@types/bun": "latest",
+        "oxfmt": "^0.61.0",
+        "oxlint": "^1.76.0",
+        "oxlint-tsgolint": "^7.0.2001"
+    },
+    "peerDependencies": {
+        "typescript": "catalog:"
+    }
 }
