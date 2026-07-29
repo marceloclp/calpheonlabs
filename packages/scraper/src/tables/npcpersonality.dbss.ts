@@ -1,15 +1,16 @@
 import { array, reserved, struct, u16, u32 } from "@marceloclp/bsd";
+
 import { dbss } from "./common/helpers";
 
 /**
- * Unpacks the stored upper half of an IEEE-754 float
- * into its integer-valued meaning.
+ * Unpacks the stored upper half of an IEEE-754 float into its integer-valued
+ * meaning.
  */
 function unpackf(bits: number) {
     const buffer = new ArrayBuffer(4);
-	const view = new DataView(buffer);
-	view.setUint16(2, bits, true);
-	return Math.round(view.getFloat32(0, true));
+    const view = new DataView(buffer);
+    view.setUint16(2, bits, true);
+    return Math.round(view.getFloat32(0, true));
 }
 
 /** One conversation-topic requirement. */
@@ -58,7 +59,7 @@ const NpcPersonalityRow = struct({
 });
 
 export const NpcPersonalityDbss = dbss(
-    "gamecommondata/binary/npcpersonality.dbss"
+    "gamecommondata/binary/npcpersonality.dbss",
 )({
     rows: array(u32(), NpcPersonalityRow),
 });

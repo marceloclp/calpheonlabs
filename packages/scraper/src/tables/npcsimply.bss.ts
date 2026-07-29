@@ -1,15 +1,12 @@
-import {
-    array,
-    bool,
-    bytes,
-    struct,
-    u16,
-    u32,
-} from "@marceloclp/bsd";
-import { bss } from "./common/helpers";
-import { mixedstr } from "./common/bsd";
+import { array, bool, bytes, struct, u16, u32 } from "@marceloclp/bsd";
 
-/** One fixed 33-byte compact NPC row with pool references left as physical indices. */
+import { mixedstr } from "./common/bsd";
+import { bss } from "./common/helpers";
+
+/**
+ * One fixed 33-byte compact NPC row with pool references left as physical
+ * indices.
+ */
 const NpcSimplyRow = struct({
     /** Global character key. */
     characterKey: u16(),
@@ -37,8 +34,6 @@ const NpcSimplyRow = struct({
 
 /** Physical compact-NPC table, mixed string pool, and validated pool pointer. */
 const NpcSimplyBss = bss("gamecommondata/binary/npcsimply.bss")({
-    /** Four-byte Pearl Abyss table signature. */
-    magic: bytes(4).ascii().is("PABR"),
     /** Fixed-width compact NPC rows. */
     rows: array(u32(), NpcSimplyRow),
     /** @todo: extract structured data from the string pool */

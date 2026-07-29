@@ -3,40 +3,46 @@
  *
  * BDO archive tables store numeric fields in little-endian order, so the first
  * byte is the least significant part of the value. JavaScript bitwise
- * operations operate on signed 32-bit integers, so the final `>>> 0` coerces the
- * result back into the unsigned range used by archive offsets, sizes, and IDs.
+ * operations operate on signed 32-bit integers, so the final `>>> 0` coerces
+ * the result back into the unsigned range used by archive offsets, sizes, and
+ * IDs.
  *
  * @param buffer Byte buffer that contains the integer.
  * @param offset Zero-based byte offset where the 4-byte integer starts.
  * @returns The decoded unsigned 32-bit value.
  */
 export function readUInt32LE(buffer: Uint8Array, offset: number): number {
-	return (
-		((buffer[offset] ?? 0) |
-			((buffer[offset + 1] ?? 0) << 8) |
-			((buffer[offset + 2] ?? 0) << 16) |
-			((buffer[offset + 3] ?? 0) << 24)) >>>
-		0
-	);
+    return (
+        ((buffer[offset] ?? 0) |
+            ((buffer[offset + 1] ?? 0) << 8) |
+            ((buffer[offset + 2] ?? 0) << 16) |
+            ((buffer[offset + 3] ?? 0) << 24)) >>>
+        0
+    );
 }
 
 /**
  * Writes an unsigned 32-bit little-endian integer into a byte buffer.
  *
  * The custom BDO decompressor sometimes copies a four-byte literal block into
- * the output stream. This helper performs that write explicitly instead of using
- * a `DataView`, keeping the hot path simple and matching the archive's
+ * the output stream. This helper performs that write explicitly instead of
+ * using a `DataView`, keeping the hot path simple and matching the archive's
  * little-endian layout.
  *
  * @param buffer Destination byte buffer.
- * @param offset Zero-based byte offset where the 4-byte integer should be written.
+ * @param offset Zero-based byte offset where the 4-byte integer should be
+ *   written.
  * @param value Unsigned 32-bit value to write.
  */
-export function writeUInt32LE(buffer: Uint8Array, offset: number, value: number): void {
-	buffer[offset] = value & 0xff;
-	buffer[offset + 1] = (value >>> 8) & 0xff;
-	buffer[offset + 2] = (value >>> 16) & 0xff;
-	buffer[offset + 3] = (value >>> 24) & 0xff;
+export function writeUInt32LE(
+    buffer: Uint8Array,
+    offset: number,
+    value: number,
+): void {
+    buffer[offset] = value & 0xff;
+    buffer[offset + 1] = (value >>> 8) & 0xff;
+    buffer[offset + 2] = (value >>> 16) & 0xff;
+    buffer[offset + 3] = (value >>> 24) & 0xff;
 }
 
 const dataLengthTable = new Uint8Array([
