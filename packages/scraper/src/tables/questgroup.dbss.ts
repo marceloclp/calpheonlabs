@@ -24,7 +24,7 @@ const QuestGroupRow = struct({
     groupTextNumber: u16().pad(6),
     /** Korean group display name without its optional null terminator. */
     korenGroupName: find(u16(), (v) => v < 0x20)
-        .pipe((x, r) => bytes(x - r.byteOffset).utf16le())
+        .pipe((x, r) => bytes(x - r.byteOffset).utf16())
         .pad((_, r) => (r.uint(16, false) === 0 ? 2 : 0)),
     /** Quest identifiers without their decoder-only count or zero trailer. */
     members: array(u32(), QuestId).pad((v) => v.length ? 4 : 2),

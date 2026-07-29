@@ -1,8 +1,6 @@
-import { array, bytes, struct, u16, u32, type BsdInfer } from "@marceloclp/bsd";
+import { array, bytes, struct, u16, u32 } from "@marceloclp/bsd";
 
 import { dbss } from "./common/helpers";
-
-export type NpcGiftDataRow = BsdInfer<typeof NpcGiftDataRowBSD>;
 
 const NpcGiftDataRowBSD = struct({
     /** Character key owning the response. */
@@ -15,9 +13,9 @@ const NpcGiftDataRowBSD = struct({
     /** Korean response text. */
     response: bytes(
         u32()
-            .skip(4)
+            .pad(4)
             .transform((x) => x * 2),
-    ).utf16le(),
+    ).utf16(),
     /**
      * Four-byte row trailer whose captured values vary and whose meaning is
      * unresolved.

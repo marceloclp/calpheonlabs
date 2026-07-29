@@ -1,4 +1,17 @@
-import { bool, bytes, eager, u32 } from "@marceloclp/bsd";
+import { bool, bytes, custom, eager, u32 } from "@marceloclp/bsd";
+
+export const Cstring = custom((reader) => {
+    const buffer = reader.buffer;
+    const start = reader.byteOffset;
+
+    let end = start;
+    while (end < buffer.length && buffer[end] !== 0) {
+        end++;
+    }
+
+    reader.byteOffset = Math.min(end + 1, reader.limit);
+    return Buffer.from(buffer.subarray(start, end)).toString("utf8");
+});
 
 /**
  * Represents a string with mixed encoding.
@@ -9,7 +22,8 @@ import { bool, bytes, eager, u32 } from "@marceloclp/bsd";
  * The next 4 bytes represent the string length.
  */
 export function mixedstr() {
-    return eager(bool(), (f) =>
-        f ? bytes(u32()).utf16le() : bytes(u32()).utf8(),
-    );
+    return bool().pipe((f) => f ? bytes(u32()).utf16() : bytes(u32()).utf8());
+    // return eager(bool(), (f) =>
+    //     f ? bytes(u32()).utf16le() : bytes(u32()).utf8(),
+    // );
 }

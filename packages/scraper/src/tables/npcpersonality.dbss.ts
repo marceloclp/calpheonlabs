@@ -1,4 +1,4 @@
-import { array, reserved, struct, u16, u32 } from "@marceloclp/bsd";
+import { array, bytes, struct, u16, u32 } from "@marceloclp/bsd";
 
 import { dbss } from "./common/helpers";
 
@@ -43,15 +43,15 @@ const NpcPersonalityRow = struct({
      */
     interestLevelMin: u16().transform(unpackf),
     /** Required unused lower half of the serialized float slot. */
-    interestLevelMinPadding: reserved(2),
+    interestLevelMinPadding: bytes(2).reserved(),
     /** Stored upper float bits for maximum interest level. */
     interestLevelMax: u16().transform(unpackf),
     /** Required unused lower half of the serialized float slot. */
-    interestLevelMaxPadding: reserved(2),
+    interestLevelMaxPadding: bytes(2).reserved(),
     /** Stored upper float bits for minimum favor. */
     favorMin: u16().transform(unpackf),
     /** Required unused lower half of the serialized float slot. */
-    favorMinPadding: reserved(2),
+    favorMinPadding: bytes(2).reserved(),
     /** Stored upper float bits for maximum favor. */
     favorMax: u16().transform(unpackf),
     /** Foreign key into `zodiacsignorder.dbss`. */

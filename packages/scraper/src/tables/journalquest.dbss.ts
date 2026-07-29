@@ -17,17 +17,17 @@ const JournalQuestRow = struct({
     /** Byte-sized layout variant. */
     layoutVariantCode: bool(),
     /** Journal-level title physically stored in the row. */
-    journalTitle: bytes(u32().skip(4).transform((x) => x * 2)).utf16le(),
+    journalTitle: bytes(u32().pad(4).transform((x) => x * 2)).utf16(),
     /** Journal-level description physically stored in the row. */
-    journalDescription: bytes(u32().skip(4).transform((x) => x * 2)).utf16le(),
+    journalDescription: bytes(u32().pad(4).transform((x) => x * 2)).utf16(),
     /** Volume title physically stored in the row. */
-    volumeTitle: bytes(u32().skip(4).transform((x) => x * 2)).utf16le(),
+    volumeTitle: bytes(u32().pad(4).transform((x) => x * 2)).utf16(),
     /** Unlock-condition text physically stored in the row. */
-    unlockConditionText: bytes(u32().skip(4).transform((x) => x * 2)).utf16le(),
+    unlockConditionText: bytes(u32().pad(4).transform((x) => x * 2)).utf16(),
     /** Bookshelf UI resource key. */
-    bookshelfUiKey: bytes(u32().skip(4)).ascii(),
+    bookshelfUiKey: bytes(u32().pad(4)).ascii(),
     /** Bookshelf object resource key. */
-    bookshelfObjectKey: bytes(u32().skip(4)).ascii(),
+    bookshelfObjectKey: bytes(u32().pad(4)).ascii(),
     /** Count-prefixed quests belonging to the volume. */
     quests: array(u32(), QuestId),
 }).pad(4);

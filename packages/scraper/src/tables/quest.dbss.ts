@@ -1,4 +1,4 @@
-import { remaining, reserved, u32 } from "@marceloclp/bsd";
+import { bytes, remaining, u32 } from "@marceloclp/bsd";
 
 import { dbss } from "./common/helpers";
 
@@ -8,9 +8,9 @@ export const QuestDbss = dbss("gamecommondata/binary/quest.dbss")({
     /** Version/format marker observed as `0x00010000`. */
     formatMarker: u32().is(0x00010000),
     /** Four required zero header words. */
-    reservedHeader: reserved(16),
+    reservedHeader: bytes(16).reserved(),
     /** Exact unframed quest record stream retained as a zero-copy byte view. */
-    recordData: remaining().transform((x) => Array.from(x)),
+    recordData: remaining().reserved(),
 });
 
 if (import.meta.main) {

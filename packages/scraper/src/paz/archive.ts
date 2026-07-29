@@ -3,7 +3,6 @@ import { join } from "node:path/posix";
 import {
     array,
     bytes,
-    cstring,
     repeat,
     struct,
     u32,
@@ -12,6 +11,7 @@ import {
 
 import { decompress, readUInt32LE } from "./decompress";
 import { IceKey } from "./ice";
+import { Cstring } from "../tables/common/bsd";
 
 const BDO_ICE_KEY = new Uint8Array([
     0x51, 0xf3, 0x0f, 0x11, 0x04, 0x24, 0x6a, 0x00,
@@ -67,16 +67,14 @@ const FileEntryBSD = struct({
 const MetaFileBSD = struct({
     /** The client version. */
     version: u32(),
-    pazCount: u32()
-        .peek()
-        .skip(u32().transform((x) => x * 12)),
+    pazCount: u32().pad((x) => x * 12),
     fileEntries: array(u32(), FileEntryBSD),
     folderNames: bytes(u32().transform((x) => x - 8))
         .transform(decrypt)
         .transform((x) => x.slice(8))
-        .frame(repeat(cstring().skip(8)))
-        .skip(8),
-    fileNames: bytes(u32()).transform(decrypt).frame(repeat(cstring())),
+        .frame(repeat(Cstring.pad(8)))
+        .pad(8),
+    fileNames: bytes(u32()).transform(decrypt).frame(repeat(Cstring)),
 });
 
 export namespace PAZ {

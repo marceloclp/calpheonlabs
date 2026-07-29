@@ -1,4 +1,4 @@
-import { array, bytes, padded, reserved, struct, u16, u32, u8 } from "@marceloclp/bsd";
+import { array, bytes, padded, struct, u16, u32, u8 } from "@marceloclp/bsd";
 import { bss } from "./common/helpers";
 
 /** One Quest-window entry containing only physical indexes and controls. */
@@ -37,7 +37,7 @@ export const NewQuestBss = bss("gamecommondata/binary/newquest.bss")({
     /** Quest-window lists. */
     rows: array(u32(), NewQuestRow),
     /** String pool. */
-    stringPool: array(u32(), padded(1, bytes(u32()).utf16le())),
+    stringPool: array(u32(), padded(1, bytes(u32()).utf16())),
    	/** Eight-byte footer pointing back to the start of `stringPool`. */
     footer: struct({
         /** Absolute string-pool offset repeated at end of file. */

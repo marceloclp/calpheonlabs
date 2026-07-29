@@ -1,4 +1,4 @@
-import { array, reserved, struct, u16, u32 } from "@marceloclp/bsd";
+import { array, bytes, struct, u16, u32 } from "@marceloclp/bsd";
 
 import { bss } from "./common/helpers";
 
@@ -14,7 +14,7 @@ export const OlviaAcademyPassQuestListBss = bss(
     "gamecommondata/binary/olviaacademypassquestlist.bss",
 )({
     rows: array(u32(), QuestIdRow),
-    footer: reserved(12),
+    footer: bytes(12).reserved(),
 });
 
 if (import.meta.main) {

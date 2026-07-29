@@ -1,4 +1,4 @@
-import { array, bool, bytes, struct, u16, u32 } from "@marceloclp/bsd";
+import { array, bool, struct, u16, u32 } from "@marceloclp/bsd";
 
 import { mixedstr } from "./common/bsd";
 import { bss } from "./common/helpers";
@@ -42,7 +42,7 @@ const NpcSimplyBss = bss("gamecommondata/binary/npcsimply.bss")({
     /** Footer pointing back to the string pool. */
     footer: struct({
         stringPoolOffset: u32(),
-    }).skip(4),
+    }).pad(4),
 });
 
 if (import.meta.main) {
