@@ -1,6 +1,19 @@
-import { array, bool, bytes, f32, literal, offset, padded, struct, u16, u32, u8, union } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import {
+    array,
+    bool,
+    bytes,
+    f32,
+    literal,
+    padded,
+    struct,
+    u16,
+    u32,
+    u8,
+    union,
+} from "@marceloclp/bsd";
+
 import { asciiText, utf16Text } from "./common/bsd";
+import { dbss } from "./common/helpers";
 
 /** Identity-only transform slot used by the shared compact/housing suffix. */
 const TransformMatrix = array(16, f32());
@@ -15,12 +28,16 @@ const CharacterObjectCommonAttributes = struct({
     transformMatrixA: TransformMatrix,
     /** Second ordinal serializer transform slot. */
     transformMatrixB: TransformMatrix.pad(4),
-    /** Selects housing-geometry handling instead of the compact-structure profile. */
+    /**
+     * Selects housing-geometry handling instead of the compact-structure
+     * profile.
+     */
     usesHousingGeometryProfile: bool(),
     /**
-    * Historical object armor/impact-material code.
-    * @see {@link https://github.com/freedDog/bdoemu/blob/master/game-logic/src/main/data/sqlite3/bdo.sqlite3 | archived `Object_Table.ArmorMaterial`}
-    */
+     * Historical object armor/impact-material code.
+     *
+     * @see {@link https://github.com/freedDog/bdoemu/blob/master/game-logic/src/main/data/sqlite3/bdo.sqlite3 | archived `Object_Table.ArmorMaterial`}
+     */
     armorMaterialCode: u8().in([4, 6, 7]),
     /** Neutral variant member control at suffix offset `+150`. */
     field150: u8(),
@@ -42,20 +59,22 @@ const CharacterObjectCommonAttributes = struct({
     sentinel226: u32().is(0xffffffff),
     /** Required zero trailer. */
     reserved230: bytes(4).reserved(),
-}).fixedLength(234).omit({
-    reserved00: true,
-    field150: true,
-    field151: true,
-    field210: true,
-    field218: true,
-    reserved144: true,
-    sentinel152: true,
-    reserved154: true,
-    reserved211: true,
-    reserved219: true,
-    sentinel226: true,
-    reserved230: true,
-});
+})
+    .fixedLength(234)
+    .omit({
+        reserved00: true,
+        field150: true,
+        field151: true,
+        field210: true,
+        field218: true,
+        reserved144: true,
+        sentinel152: true,
+        reserved154: true,
+        reserved211: true,
+        reserved219: true,
+        sentinel226: true,
+        reserved230: true,
+    });
 
 /** Sequential post-geometry layout for type-0 and named-structure rows. */
 const CharacterObjectType0CommonSuffixProperties = struct({
@@ -70,23 +89,27 @@ const CharacterObjectType0NumericHousingProperties = struct({
     type: literal("numericHousing"),
     /**
      * Historical `Desc_Area` text stored as printable ASCII digits.
+     *
      * @see {@link https://github.com/freedDog/bdoemu/blob/master/game-logic/src/main/data/sqlite3/bdo.sqlite3 | archived `Object_Table.Desc_Area`}
      */
     areaDescription: asciiText(),
     /**
      * Historical `Desc_Feature1` text in source order.
+     *
      * @see {@link https://github.com/freedDog/bdoemu/blob/master/game-logic/src/main/data/sqlite3/bdo.sqlite3 | archived `Object_Table.Desc_Feature1` and `Desc_Feature2`}
      */
-    featureA: asciiText(),
+    featureA: utf16Text(),
     /**
      * Historical `Desc_Feature2` text in source order.
+     *
      * @see {@link https://github.com/freedDog/bdoemu/blob/master/game-logic/src/main/data/sqlite3/bdo.sqlite3 | archived `Object_Table.Desc_Feature1` and `Desc_Feature2`}
      */
-    featureB: asciiText(),
+    featureB: utf16Text(),
     /** Fixed base-object transforms and neutral control. */
     base: bytes(162).reserved(),
     /**
      * Four historical house screenshot asset slots, including empty slots.
+     *
      * @see {@link https://github.com/freedDog/bdoemu/blob/master/game-logic/src/main/data/sqlite3/bdo.sqlite3 | archived `Object_Table.HouseScreenShotPath_1..4`}
      */
     screenshotPaths: array(4, asciiText()),
@@ -100,25 +123,6 @@ const CharacterObjectType0NumericHousingProperties = struct({
         reserved20: bytes(4).reserved(),
     }).fixedLength(24),
 }).omit({ trailerField16: true });
-
-// we can probably inline this inside characterObjectType0?
-const CharacterObjectType0Geometry = struct({
-    /** Stored geometry-layout version or alternate-world flag. */
-    formatVersion: u8().lte(1),
-    /** Triangle counts for every mesh in every layer. */
-    collisionMeshTriangleCounts: array(
-        /** Number of mesh layers. */
-        u32().pad(4),
-        /** Triangle counts inside each mesh layer. */
-        array(u32(), MeshTriangle),
-    ),
-    // /** common properties ??? */
-    reserved00: bytes(333).reserved(),
-    /** Material-preview asset serialized immediately after the common properties. */
-    materialPreviewPath: asciiText().pad(16),
-    /** Complete sequential variant after the material preview. */
-    propertiesAndAssets: CharacterObjectType0CommonSuffixProperties
-});
 
 const CharacterObjectType0 = struct({
     /** Body family supplied by the physical low-byte type code. */
@@ -136,17 +140,18 @@ const CharacterObjectType0 = struct({
         /** Triangle counts inside each mesh layer. */
         array(u32(), MeshTriangle),
     ),
-    // /** common properties ??? */
+    /** Opaque common-property block following the collision geometry. */
     reserved00: bytes(333).reserved(),
-    /** Material-preview asset serialized immediately after the common properties. */
+    /**
+     * Material-preview asset serialized immediately after the common
+     * properties.
+     */
     materialPreviewPath: asciiText().pad(16),
     /** Complete sequential variant after the material preview. */
     propertiesAndAssets: union(
-        CharacterObjectType0NumericHousingProperties,
         CharacterObjectType0CommonSuffixProperties,
+        CharacterObjectType0NumericHousingProperties,
     ),
-    // /** Count-derived collision geometry plus the complete sequential properties/assets suffix. */
-    // geometry: CharacterObjectType0Geometry,
 });
 
 const CharacterObjectType2 = struct({
@@ -184,7 +189,9 @@ const CharacterObjectType2 = struct({
         reserved: bytes(40).reserved(),
         terminalSentinel: u32().is(0xffffffff),
         repairItemId: u32(),
-    }).fixedLength(48).omit({ reserved: true, terminalSentinel: true }),
+    })
+        .fixedLength(48)
+        .omit({ reserved: true, terminalSentinel: true }),
 });
 
 /** Shared compact siege/guild structure body. */
@@ -205,58 +212,14 @@ const CharacterObjectTypeCompact = struct({
     commonSuffix: CharacterObjectCommonAttributes,
 }).omit({ reservedAfterMaterial: true });
 
-// function CharacterObjectRow(typeCode: number) {
-//     return struct({
-//         /** Object key repeated by the companion directory. */
-//         objectKey: u16(),
-//         /** Packed low-byte object kind and high-byte independent flags. */
-//         typeCode: u16().peek(),
-//         objectKindCode: u16().transform((x) => x & 0xff).peek(),
-//         layoutTypeFlags: u16().transform((x) => x >>> 8),
-//         /** Independent standard-compact-layout flag. */
-//         layoutFlag: u16(),
-//         /** Primary render or vegetation asset. */
-//         primaryAssetPath: asciiText(),
-//         // /** Conditional object body selected by `typeCode`. */
-//         // body: CharacterObjectTypeCompact,
-//     });
-// }
-
-const HOUSING_GEOMETRY_CODES = new Set([1, 4, 5, 6, 8, 9, 25, 36]);
-const COMPACT_STRUCTURE_CODES = new Set([
-    3, 7, 10, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 23, 24, 26, 27, 28, 29, 34, 35, 37,
-]);
-function CharacterObjectRowBody(typeCode: number) {
-    const objectKind = typeCode & 0xff;
-    if (objectKind === 0) return CharacterObjectType0;
-    if (objectKind === 2) return CharacterObjectType2;
-    if (HOUSING_GEOMETRY_CODES.has(objectKind)) return CharacterObjectType0;
-    return CharacterObjectTypeCompact;
-}
-
-// function CharacterObjectRow2(typeCode: number) {
-//     return struct({
-//         /** Object key repeated by the companion directory. */
-//         objectKey: u16(),
-//         /** Packed low-byte object kind and high-byte independent flags. */
-//         typeCode: u16().peek(),
-//         objectKindCode: u16().transform((x) => x & 0xff).peek(),
-//         layoutTypeFlags: u16().transform((x) => x >>> 8),
-//         /** Independent standard-compact-layout flag. */
-//         layoutFlag: u16(),
-//         /** Primary render or vegetation asset. */
-//         primaryAssetPath: asciiText(),
-//         /** Conditional object body selected by `typeCode`. */
-//         body: CharacterObjectRowBody(typeCode),
-//     });
-// }
-
 const CharacterObjectRow = struct({
     /** Object key repeated by the companion directory. */
     objectKey: u16(),
     /** Packed low-byte object kind and high-byte independent flags. */
     typeCode: u16().peek(),
-    objectKindCode: u16().transform((x) => x & 0xff).peek(),
+    objectKindCode: u16()
+        .transform((x) => x & 0xff)
+        .peek(),
     layoutTypeFlags: u16().transform((x) => x >>> 8),
     /** Independent standard-compact-layout flag. */
     layoutFlag: u16(),
@@ -264,20 +227,16 @@ const CharacterObjectRow = struct({
     primaryAssetPath: asciiText(),
     /** Conditional object body selected by `typeCode`. */
     body: union(
-        CharacterObjectType0,
         CharacterObjectType2,
         CharacterObjectTypeCompact,
+        CharacterObjectType0,
     ),
 });
 
 export const CharacterObjectDbss = dbss("characterobject.dbss")({
-    // rows: array(u32(), padded(2, u16()).peek().pipe(CharacterObjectRow2))
     rows: array(u32(), CharacterObjectRow),
 });
 
 if (import.meta.main) {
-    // const buf = await CharacterObjectDbss.extract();
-    // const slice = buf.subarray(23822, 24619)
-    // console.log(CharacterObjectRow.decode(slice));
     await CharacterObjectDbss.load();
 }
