@@ -20,7 +20,7 @@
     "packages/scraper": {
       "name": "@calpheonlabs/scraper",
       "dependencies": {
-        "@marceloclp/bsd": "link:@marceloclp/bsd",
+        "@marceloclp/bsd": "^0.1.5",
       },
       "devDependencies": {
         "@types/bun": "latest",
@@ -36,7 +36,7 @@
   "packages": {
     "@calpheonlabs/scraper": ["@calpheonlabs/scraper@workspace:packages/scraper"],
 
-    "@marceloclp/bsd": ["@marceloclp/bsd@link:@marceloclp/bsd", {}],
+    "@marceloclp/bsd": ["@marceloclp/bsd@0.1.5", "", {}, "sha512-FdbNDoq0wXxxcs5AIQqdOlaSj+ENeuJP3GtKzdvNO565nqgRj3mgm3Oi2ZXgqWFG9Ywn0m7UagrPM8yap/cFkA=="],
 
     "@oxfmt/binding-android-arm-eabi": ["@oxfmt/binding-android-arm-eabi@0.61.0", "", { "os": "android", "cpu": "arm" }, "sha512-BaS+1OVvg9sr+Xav0+KdWedQRcAzrdoEcwMZeqoc2F6ieC1s/t5eM35YQoRPQ7vAqkZ+p3tbQb1r9I9mrV5oGA=="],
 

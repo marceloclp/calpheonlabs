@@ -72,7 +72,7 @@ const MetaFileBSD = struct({
     folderNames: bytes(u32().transform((x) => x - 8))
         .transform(decrypt)
         .transform((x) => x.slice(8))
-        .frame(repeat(Cstring.pad(8)))
+        .frame(repeat(Cstring.pad((_, r) => r.remaining === 0 ? 0 : 8)))
         .pad(8),
     fileNames: bytes(u32()).transform(decrypt).frame(repeat(Cstring)),
 });
