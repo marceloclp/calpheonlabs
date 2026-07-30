@@ -1,0 +1,48 @@
+---
+title: "npcsimply.bss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the npcsimply decoder used by calpheonlabs."
+sidebar:
+    label: "npcsimply.bss"
+    icon: database
+search:
+    tags: [tables, npcs-characters, table]
+---
+
+## Investigation status
+
+| Status             | Value                                          |
+| ------------------ | ---------------------------------------------- |
+| Coverage           | 100%                                           |
+| Iteration          | 1                                              |
+| Review state       | No open blockers                               |
+| Last reviewed      | 2026-07-16                                     |
+| Captures examined  | installed                                      |
+| Decoder            | `packages/scraper/src/tables/npcsimply.bss.ts` |
+| Remaining blockers | None                                           |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::note[Ported confidence ledger]
+This evidence was ported from the reference decoder. Keep it synchronized with the BSD schema and its snapshot-parity proof whenever the decoder changes.
+:::
+
+## Field ledger
+
+| Field/path                                                                           | Offset and width   | Representation                     | Claimed meaning                                        | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                 | Status |
+| ------------------------------------------------------------------------------------ | ------------------ | ---------------------------------- | ------------------------------------------------------ | ------------------- | ------------------------- | ------------------- | -------------------------------------------------------- | ------ |
+| PABR/pool/footer                                                                     | table framing      | controls validated/omitted         | rows and local strings                                 | Certain             | Certain                   | Certain             | Exact framing                                            | Closed |
+| `characterKey`, `navigationSortRank`, `serviceRoleCode`                              | row `+0..+7`       | retained                           | NPC identity/navigation/service category               | Certain             | Certain                   | High                | Legacy/client namespace correlations                     | Closed |
+| `knowledgeStringIndex`, `nameStringIndex`, `titleStringIndex`, `reservedStringIndex` | four `u32` indices | retained, zero constraint on final | local-pool references                                  | Certain             | Certain                   | Certain             | All 6,510 meaningful uses in range; corruption rejection | Closed |
+| rental fields                                                                        | row `+12..+20`     | retained                           | item, contribution cost, enhancement, condition switch | Certain             | Certain                   | High                | Legacy/client representation and strict Boolean          | Closed |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                         | Evidence                                   | Schema/documentation impact        | Status |
+| ---- | --------------------------------------------------------------- | ------------------------------------------ | ---------------------------------- | ------ |
+| F-01 | All stored string references are structural local-pool indices. | Exhaustive bounds plus targeted rejection. | Decoder now validates every index. | Closed |

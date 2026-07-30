@@ -1,0 +1,52 @@
+---
+title: "quest.dbss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the quest decoder used by calpheonlabs."
+sidebar:
+    label: "quest.dbss"
+    icon: database
+search:
+    tags: [tables, quests, table]
+---
+
+## Investigation status
+
+| Status             | Value                                                 |
+| ------------------ | ----------------------------------------------------- |
+| Coverage           | 100% physical stream; identity anchors indexed        |
+| Iteration          | 2                                                     |
+| Review state       | No open blockers                                      |
+| Last reviewed      | 2026-07-16                                            |
+| Captures examined  | committed, installed                                  |
+| Decoder            | `packages/scraper/src/tables/quest.dbss.ts`           |
+| Remaining blockers | None; non-anchor row boundaries are explicit unknowns |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::note[Ported confidence ledger]
+This evidence was ported from the reference decoder. Keep it synchronized with the BSD schema and its snapshot-parity proof whenever the decoder changes.
+:::
+
+## Field ledger
+
+| Field/path                          | Offset and width                     | Representation        | Claimed meaning                           | Physical confidence | Representation confidence | Semantic confidence    | Evidence                                                                               | Status |
+| ----------------------------------- | ------------------------------------ | --------------------- | ----------------------------------------- | ------------------- | ------------------------- | ---------------------- | -------------------------------------------------------------------------------------- | ------ |
+| `recordCount`                       | `0x00`, `u32`                        | retained              | quest count                               | Certain             | Certain                   | Certain                | Equals canonical-list and anchor counts in both builds                                 | Closed |
+| `formatMarker`                      | `0x04`, `u32`                        | validated/omitted     | format marker `0x00010000`                | Certain             | Certain                   | Unknown                | Intrinsic fixed header value                                                           | Closed |
+| reserved header                     | `0x08..0x17`, 16 bytes               | validated/omitted     | reserved zeros                            | Certain             | Certain                   | Certain                | All bytes structurally consumed                                                        | Closed |
+| `recordData`                        | `0x18..EOF`                          | zero-copy raw view    | unframed quest-record stream              | Certain             | Certain                   | Unknown beyond anchors | Exact file coverage                                                                    | Closed |
+| `QuestIdentityAnchor.objectiveText` | counted UTF-16LE inside `recordData` | derived, raw retained | objective text                            | Certain             | Certain                   | High                   | Self-framed text followed by canonical identity; exact one-to-one result in two builds | Closed |
+| anchor kind and quest ID            | 8 bytes after objective              | derived, raw retained | kind code and canonical `(group, number)` | Certain             | Certain                   | High                   | Unique canonical join, physical-order agreement, duplicate/missing rejection           | Closed |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                               | Evidence                                                                                                                                     | Schema/documentation impact                                                                      | Status |
+| ---- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ------ |
+| F-01 | An anchor does not establish a complete row boundary.                 | Only the objective and following identity are self-framed.                                                                                   | The indexer returns anchors separately and retains `recordData`.                                 | Closed |
+| F-02 | Every canonical quest has exactly one ordered anchor.                 | 18,853 committed and 18,857 installed anchors; no misses or duplicates.                                                                      | Added `indexQuestIdentityAnchors` and rejecting tests.                                           | Closed |
+| F-03 | Generated record boundaries are not an independent structural oracle. | The producer explicitly detects plausible strings and infers starts from proximity patterns, with documented incomplete exceptional layouts. | No confidence change; heuristic `quest.records.json` is not imported into the production schema. | Closed |

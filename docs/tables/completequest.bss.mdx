@@ -1,0 +1,50 @@
+---
+title: "completequest.bss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the completequest decoder used by calpheonlabs."
+sidebar:
+    label: "completequest.bss"
+    icon: database
+search:
+    tags: [tables, quests, table]
+---
+
+## Investigation status
+
+| Status             | Value                                              |
+| ------------------ | -------------------------------------------------- |
+| Coverage           | 100%                                               |
+| Iteration          | 2                                                  |
+| Review state       | No open blockers                                   |
+| Last reviewed      | 2026-07-16                                         |
+| Captures examined  | committed, installed                               |
+| Decoder            | `packages/scraper/src/tables/completequest.bss.ts` |
+| Remaining blockers | None                                               |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::note[Ported confidence ledger]
+This evidence was ported from the reference decoder. Keep it synchronized with the BSD schema and its snapshot-parity proof whenever the decoder changes.
+:::
+
+## Field ledger
+
+| Field/path                    | Offset and width    | Representation    | Claimed meaning                                       | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                            | Status |
+| ----------------------------- | ------------------- | ----------------- | ----------------------------------------------------- | ------------------- | ------------------------- | ------------------- | ----------------------------------------------------------------------------------- | ------ |
+| PABR framing                  | header/footer       | validated/omitted | counted bindings                                      | Certain             | Certain                   | Certain             | Intrinsic framing                                                                   | Closed |
+| `npcId`                       | row `+0`, `u16`     | retained          | completion NPC or zero                                | Certain             | Certain                   | High                | Legacy/client naming and row covariance                                             | Closed |
+| `questGroupId`, `questNumber` | row `+2`, two `u16` | retained          | canonical quest ID                                    | Certain             | Certain                   | Certain             | Every pair resolves in `allquestlist.bss`                                           | Closed |
+| `npcIndex`                    | row `+6`, `u16`     | retained          | second component of composite completion-NPC identity | Certain             | Certain                   | High                | 3,082 exact local `meet(npcId,npcIndex)` joins; `59875/73` resolves as Igor Bartali | Closed |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                 | Evidence                                                                                                                  | Schema/documentation impact                                                          | Status |
+| ---- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | ------ |
+| F-01 | Quest IDs form a total canonical join.                                  | Complete committed and installed captures.                                                                                | Relationship covered by aggregate tests.                                             | Closed |
+| F-02 | `npcIndex` is the second composite entity-identity component.           | 3,082 exact expression joins, independent variation, consumer vocabulary, and the representative `59875/73` entity agree. | Semantic confidence increased from Medium to High; TSDoc now links the exact entity. | Closed |
+| F-03 | A binding identifies one completion entity, not every objective target. | Multi-target expressions can contain other indexes for the same `npcId`.                                                  | Documentation distinguishes the binding from objective-list membership.              | Closed |

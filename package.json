@@ -10,6 +10,11 @@
         }
     },
     "scripts": {
+        "docs:audit": "bunx --bun blume audit --fail-on warning --skip site_not_set,title_length",
+        "docs:build": "bunx --bun blume build",
+        "docs:check": "bun test docs/documentation.test.ts && bunx --bun blume check --strict && bunx --bun blume validate --strict",
+        "docs:dev": "bunx --bun blume dev --port 4321",
+        "docs:preview": "bunx --bun blume preview",
         "format": "bun --bun oxfmt"
     },
     "dependencies": {
@@ -17,6 +22,7 @@
     },
     "devDependencies": {
         "@types/bun": "latest",
+        "blume": "^1.2.1",
         "oxfmt": "^0.61.0",
         "oxlint": "^1.76.0",
         "oxlint-tsgolint": "^7.0.2001"

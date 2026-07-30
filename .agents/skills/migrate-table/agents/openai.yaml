@@ -1,4 +1,4 @@
 interface:
     display_name: "Migrate Table Decoder"
-    short_description: "Port legacy BDO tables to verified BSD schemas"
-    default_prompt: "Use $migrate-table to port a decoded BDO table into calpheonlabs with BSD primitives and exact snapshot parity."
+    short_description: "Goal-driven BDO table migrations with parity"
+    default_prompt: "Use $migrate-table in /goal mode to port a decoded BDO table with BSD primitives, exact snapshot parity, and a synchronized Blume confidence ledger."

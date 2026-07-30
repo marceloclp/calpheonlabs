@@ -1,0 +1,47 @@
+---
+title: "questrandomgroup.bss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the questrandomgroup decoder used by calpheonlabs."
+sidebar:
+    label: "questrandomgroup.bss"
+    icon: database
+search:
+    tags: [tables, quests, table]
+---
+
+## Investigation status
+
+| Status             | Value                                                 |
+| ------------------ | ----------------------------------------------------- |
+| Coverage           | 100%                                                  |
+| Iteration          | 2                                                     |
+| Review state       | No open blockers                                      |
+| Last reviewed      | 2026-07-16                                            |
+| Captures examined  | committed, installed                                  |
+| Decoder            | `packages/scraper/src/tables/questrandomgroup.bss.ts` |
+| Remaining blockers | None                                                  |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::note[Ported confidence ledger]
+This evidence was ported from the reference decoder. Keep it synchronized with the BSD schema and its snapshot-parity proof whenever the decoder changes.
+:::
+
+## Field ledger
+
+| Field/path   | Offset and width | Representation        | Claimed meaning                 | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                             | Status         |
+| ------------ | ---------------- | --------------------- | ------------------------------- | ------------------- | ------------------------- | ------------------- | -------------------------------------------------------------------- | -------------- |
+| PABR framing | header/footer    | validated and omitted | one fixed record                | Certain             | Certain                   | Certain             | Intrinsic count, width, and self-pointer                             | Closed         |
+| row          | 32 bytes         | zero-copy bytes       | unresolved random-group payload | Certain             | Certain                   | Unknown             | Exact coverage in both builds; internal boundaries are not justified | Closed neutral |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                            | Evidence                                                                                                                                                                                                       | Schema/documentation impact                                                                                          | Status |
+| ---- | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ------ |
+| F-01 | A typed internal decomposition is not justified.                   | The leading eight bytes are build-specific pointer-like values, offsets `+12` and `+16` also change between builds, and no count, delimiter, join, or consumer selects one width hypothesis over alternatives. | The proposed `u64/u32/u32/u16/u16/u32/u32/u32` layout was rejected; the exact 32-byte row remains intentionally raw. | Closed |
+| F-02 | Outer PABR framing is fully proven independently of row semantics. | Both captures contain one row, exact count-derived size, and a valid self-referential footer; all framing corruptions reject.                                                                                  | Physical framing confidence remains Certain.                                                                         | Closed |

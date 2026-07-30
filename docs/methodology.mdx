@@ -1,0 +1,74 @@
+---
+title: Decoder confidence methodology
+description: How calpheonlabs records physical layout, representation fidelity, semantic meaning, and verification evidence for binary table decoders.
+sidebar:
+    icon: microscope
+search:
+    tags: [methodology, confidence, binary-schema]
+---
+
+## Governing rule
+
+A decoder claim starts with the binary capture and is complete only after the
+schema consumes the full file and its physical-order output exactly matches a
+transformed snapshot from the reference decoder.
+
+## Separate confidence dimensions
+
+- **Physical confidence** covers offsets, widths, signedness, endianness,
+  framing, optionality, repetition, discriminators, padding, and byte coverage.
+- **Representation confidence** covers whether the schema preserves the
+  physical evidence without lossy conversions, accidental joins, misleading
+  aliases, or capture-specific invariants.
+- **Semantic confidence** covers field meaning, naming, units, domains,
+  sentinels, gameplay behavior, and cross-table relationships.
+
+Complete byte coverage is not semantic proof. A physically certain field may
+keep a neutral name when its meaning is unknown.
+
+## Confidence vocabulary
+
+| Level       | Evidence threshold                                                                                                                                |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Certain** | Self-describing structure or exhaustive byte coverage plus independent local evidence, with attempted falsification and no surviving alternative. |
+| **High**    | Multiple independent local correlations across every applicable variant, with counterexamples sought and no plausible competing meaning left.     |
+| **Medium**  | A strong pattern remains subject to a material alternative or missing discriminating evidence.                                                    |
+| **Low**     | A tentative hypothesis is supported only by sparse evidence.                                                                                      |
+| **Unknown** | No semantic claim is made; a neutral name and structurally proven representation are retained.                                                    |
+
+A completed migration requires certain physical and representation confidence.
+A non-neutral semantic name requires high or certain confidence. Medium and low
+claims belong in **Active assumptions** until they are proven, neutralized, or
+rejected.
+
+## Required table-page sections
+
+Every `docs/tables/<table>.<table-type>.mdx` page is a current-state ledger and
+contains these sections:
+
+1. **Investigation status** records the iteration, review date, capture set,
+   byte coverage, decoder path, and blockers.
+2. **Field ledger** records offsets and widths, representation, claimed
+   meaning, independent physical, representation, and semantic confidence,
+   evidence, and status.
+3. **Active assumptions** records falsifiable claims and the next check needed
+   to resolve them.
+4. **Findings** preserves decisions that materially justify a schema,
+   validation, union, neutral name, or rejected alternative.
+
+Update the whole page whenever its decoder changes. Remove stale assumptions,
+blockers, captured domains, and source-decoder behavior. Offset tables may
+support migration evidence, but the production decoder must derive its own row
+and variant boundaries.
+
+The field table uses this exact confidence contract:
+
+| Field/path | Offset and width | Representation | Claimed meaning | Physical confidence | Representation confidence | Semantic confidence | Evidence | Status |
+| ---------- | ---------------- | -------------- | --------------- | ------------------- | ------------------------- | ------------------- | -------- | ------ |
+
+The canonical page name comes from the basename passed to `bss(...)` or
+`dbss(...)`, including its actual extension. For example,
+`dbss("gamecommondata/binary/characterfunction.dbss")` maps to
+`docs/tables/characterfunction.dbss.mdx` and the route
+`/tables/characterfunction.dbss`, regardless of the TypeScript decoder
+filename.

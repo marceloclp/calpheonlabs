@@ -1,0 +1,63 @@
+---
+title: "alchemystatdata.bss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the alchemystatdata decoder used by calpheonlabs."
+sidebar:
+    label: "alchemystatdata.bss"
+    icon: database
+search:
+    tags: [tables, recipes-production, bss]
+---
+
+## Investigation status
+
+| Status             | Value                                                |
+| ------------------ | ---------------------------------------------------- |
+| Coverage           | 100%                                                 |
+| Iteration          | 3                                                    |
+| Review state       | No open blockers                                     |
+| Last reviewed      | 2026-07-17                                           |
+| Captures examined  | installed (61 rows)                                  |
+| Decoder            | `packages/scraper/src/tables/alchemystatdata.bss.ts` |
+| Remaining blockers | None                                                 |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::note[Ported confidence ledger]
+This evidence was ported from the reference decoder. Keep it synchronized with the BSD schema and its snapshot-parity proof whenever the decoder changes.
+:::
+
+## Field ledger
+
+| Field/path                        | Offset and width  | Representation | Claimed meaning                                 | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                 | Status |
+| --------------------------------- | ----------------- | -------------- | ----------------------------------------------- | ------------------- | ------------------------- | ------------------- | ------------------------------------------------------------------------ | ------ |
+| `alchemyMasteryThreshold`         | `f32`             | retained       | Alchemy Mastery threshold                       | Certain             | Certain                   | Certain             | Exact client/public breakpoint sequence                                  | Closed |
+| `productAmountIncreaseMillionths` | `u32`             | retained       | Product amount increase                         | Certain             | Certain                   | Certain             | Client `_basicMaxDropRate` and published mastery column                  | Closed |
+| `royalTradeSilverBonusMillionths` | `u32`             | retained       | Imperial/royal delivery silver bonus            | Certain             | Certain                   | Certain             | Client `_addRoyalTradeBonus` and published mastery column                | Closed |
+| `eventDropChannels[].channelKey`  | three `u32` ids   | retained       | Ordered common/special/rare extra-item channels | Certain             | Certain                   | Certain             | Stable keys 15690–15692 paired with the exact three tooltip indices      | Closed |
+| `conditionalRateMillionths`       | three `u32` rates | retained       | Conditional selector rates for those channels   | Certain             | Certain                   | Certain             | `getEventDropRateForTooltip(0..2)` and client probability formulas       | Closed |
+| `eventDropRateMillionths`         | `u32`             | retained       | Overall probability of an extra-item event      | Certain             | Certain                   | Certain             | Client `_eventDropRate`; three displayed probabilities sum to this value | Closed |
+
+The client calculates the published probabilities as:
+
+- common: `eventRate × (1 - rareConditional) × (1 - specialConditional)`
+- special: `eventRate × (1 - rareConditional) × specialConditional`
+- rare: `eventRate × rareConditional`
+
+Channel zero's conditional rate is always 1,000,000 and identifies the common branch; it is not multiplied into the displayed common formula.
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID    | Finding                                                                | Evidence                                                  | Schema impact                                                     | Status   |
+| ----- | ---------------------------------------------------------------------- | --------------------------------------------------------- | ----------------------------------------------------------------- | -------- |
+| AS-01 | The six words at `+12..+35` are three key/rate pairs                   | Sequential keys, tooltip index API, and exact UI formulas | Modeled as three physical channel records                         | Resolved |
+| AS-02 | Published common/special/rare chances are derived, not stored directly | Decompiled client formulas reproduce every row            | Decoder preserves source probabilities without derived transforms | Resolved |
+
+Client evidence and the displayed-probability formulas come from
+`panel_characterinfo_life_all_2.luac`; column labels are independently corroborated by the
+[Alchemy Mastery table](https://bdocodex.com/us/alchemymastery/).

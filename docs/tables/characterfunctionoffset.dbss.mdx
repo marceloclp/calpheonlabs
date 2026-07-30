@@ -1,0 +1,59 @@
+---
+title: "characterfunctionoffset.dbss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the characterfunctionoffset decoder used by calpheonlabs."
+sidebar:
+    label: "characterfunctionoffset.dbss"
+    icon: database
+search:
+    tags: [tables, npcs-characters, table]
+---
+
+## Investigation status
+
+| Status             | Value                                                         |
+| ------------------ | ------------------------------------------------------------- |
+| Coverage           | 100%                                                          |
+| Iteration          | 2                                                             |
+| Review state       | No open blockers                                              |
+| Last reviewed      | 2026-07-16                                                    |
+| Captures examined  | installed, independent decoder                                |
+| Decoder            | `packages/scraper/src/tables/characterfunctionoffset.dbss.ts` |
+| Remaining blockers | None                                                          |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::note[Ported confidence ledger]
+This evidence was ported from the reference decoder. Keep it synchronized with the BSD schema and its snapshot-parity proof whenever the decoder changes.
+:::
+
+## Related table
+
+<CardGroup cols={1}>
+    <Card
+        title="characterfunction"
+        href="/tables/characterfunction.dbss"
+        icon="network"
+    >
+        Open the payload table whose rows this pointer directory frames.
+    </Card>
+</CardGroup>
+
+## Field ledger
+
+| Field/path        | Offset and width | Representation    | Claimed meaning                      | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                                                                         | Status |
+| ----------------- | ---------------- | ----------------- | ------------------------------------ | ------------------- | ------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| PABR controls     | header/footer    | validated/omitted | pointer framing                      | Certain             | Certain                   | Certain             | Exact decode and malformed framing rejection in the shared PABR schema                                                           | Closed |
+| key/offset/length | 10-byte rows     | retained          | character-function identity and span | Certain             | Certain                   | Certain             | Both decoders return the same 2,083 triples; key repetition, exact full-file partition, and out-of-bounds mutation checks reject | Closed |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                | Evidence                                                                                                     | Schema/documentation impact                                    | Status |
+| ---- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- | ------ |
+| F-01 | The companion is structurally required and independently reproducible. | Primary rows do not prove their ends; the legacy and Eke directories agree field-for-field.                  | Dependency remains explicit in `CharacterFunctionDbss.decode`. | Closed |
+| F-02 | Pointer corruption cannot silently redirect a row.                     | An out-of-bounds offset mutation rejects before payload decoding; partition checks reject gaps and overlaps. | Physical confidence remains Certain.                           | Closed |

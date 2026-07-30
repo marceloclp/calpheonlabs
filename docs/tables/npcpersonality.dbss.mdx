@@ -1,0 +1,62 @@
+---
+title: "npcpersonality.dbss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the npcpersonality decoder used by calpheonlabs."
+sidebar:
+    label: "npcpersonality.dbss"
+    icon: database
+search:
+    tags: [tables, npcs-characters, table]
+---
+
+## Investigation status
+
+| Status             | Value                                                |
+| ------------------ | ---------------------------------------------------- |
+| Coverage           | 100%                                                 |
+| Iteration          | 2                                                    |
+| Review state       | No open blockers                                     |
+| Last reviewed      | 2026-07-17                                           |
+| Captures examined  | installed; targeted BDOCodex corroboration           |
+| Decoder            | `packages/scraper/src/tables/npcpersonality.dbss.ts` |
+| Remaining blockers | None                                                 |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::note[Ported confidence ledger]
+This evidence was ported from the reference decoder. Keep it synchronized with the BSD schema and its snapshot-parity proof whenever the decoder changes.
+:::
+
+## Related table
+
+<CardGroup cols={1}>
+    <Card
+        title="npcpersonalityoffset"
+        href="/tables/npcpersonalityoffset.dbss"
+        icon="network"
+    >
+        Open the companion pointer directory used to frame and validate this
+        payload.
+    </Card>
+</CardGroup>
+
+## Field ledger
+
+| Field/path                                | Offset and width                | Representation                            | Claimed meaning                 | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                | Status |
+| ----------------------------------------- | ------------------------------- | ----------------------------------------- | ------------------------------- | ------------------- | ------------------------- | ------------------- | ----------------------------------------------------------------------- | ------ |
+| `npcId` and repeated ID                   | prefix `u16`, payload `u32`     | repeated value validated; one ID returned | owning NPC                      | Certain             | Certain                   | Certain             | Intrinsic equality                                                      | Closed |
+| three `topics`                            | payload `+0`, three 4-byte rows | retained                                  | mental theme and required count | Certain             | Certain                   | High                | All 3,546 theme keys resolve; three public NPCs reproduce names/counts  | Closed |
+| four packed range halves and zero padding | four upper `u16` halves         | raw bits retained plus derived integers   | interest/favor min/max          | Certain             | Certain                   | High                | IEEE representation and exact public values for three diverse NPCs      | Closed |
+| `zodiacSignOrderId`                       | final `u16`                     | retained FK                               | zodiac ordering key             | Certain             | Certain                   | Certain             | Every value resolves through `zodiacsignorder.dbss` to a localized sign | Closed |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                 | Evidence                                                   | Schema/documentation impact                          | Status |
+| ---- | ----------------------------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------- | ------ |
+| F-01 | Topic keys and required counts are conversation knowledge requirements. | Exact theme joins and Tranan/Crio/Alustin public displays. | Confidence promoted; precise TSDoc links added.      | Closed |
+| F-02 | Zodiac order keys resolve to one of twelve localized horoscope signs.   | Complete personality/order join and localization type 7.   | Aggregate code can expose sign name and description. | Closed |

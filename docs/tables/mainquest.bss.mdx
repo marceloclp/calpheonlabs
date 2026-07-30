@@ -1,0 +1,51 @@
+---
+title: "mainquest.bss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the mainquest decoder used by calpheonlabs."
+sidebar:
+    label: "mainquest.bss"
+    icon: database
+search:
+    tags: [tables, quests, table]
+---
+
+## Investigation status
+
+| Status             | Value                                               |
+| ------------------ | --------------------------------------------------- |
+| Coverage           | 100%                                                |
+| Iteration          | 2                                                   |
+| Review state       | No open blockers                                    |
+| Last reviewed      | 2026-07-16                                          |
+| Captures examined  | committed, installed                                |
+| Decoder            | `packages/scraper/src/tables/mainquest.bss.ts`      |
+| Remaining blockers | None; both unresolved controls remain neutral codes |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::note[Ported confidence ledger]
+This evidence was ported from the reference decoder. Keep it synchronized with the BSD schema and its snapshot-parity proof whenever the decoder changes.
+:::
+
+## Field ledger
+
+| Field/path                  | Offset and width                     | Representation            | Claimed meaning                         | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                      | Status         |
+| --------------------------- | ------------------------------------ | ------------------------- | --------------------------------------- | ------------------- | ------------------------- | ------------------- | ----------------------------------------------------------------------------- | -------------- |
+| signature/counts/footer     | variable                             | validated/omitted         | PABR-like menu framing and pool pointer | Certain             | Certain                   | Certain             | Exact consumption and footer self-pointer                                     | Closed         |
+| row IDs and entry quest IDs | counted rows                         | retained                  | list identity and quest composite IDs   | Certain             | Certain                   | High                | Stable layout and canonical correlations                                      | Closed         |
+| six string-index fields     | `u32` values                         | retained physical indices | references into own pool                | Certain             | Certain                   | Certain             | Every use in four tables and two builds is in range; rejecting mutation added | Closed         |
+| `displayCategoryCode`       | row byte                             | retained neutral code     | display category/control                | Certain             | Certain                   | Unknown             | Varies without independent enum evidence                                      | Closed unknown |
+| `entryFlagCode`             | entry byte                           | retained neutral code     | entry control                           | Certain             | Certain                   | Unknown             | Seven nonzero observations do not discriminate meaning                        | Closed unknown |
+| string pool                 | counted mixed control/string records | decoded strings           | local labels and expressions            | Certain             | Certain                   | High                | Self-describing lengths and index graph                                       | Closed         |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                   | Evidence                                                                                                                  | Schema/documentation impact                                  | Status |
+| ---- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ | ------ |
+| F-01 | Pool indices are structural references, not merely observed small values. | Self-contained pool and exhaustive two-build bounds.                                                                      | Decoder now rejects out-of-range indices.                    | Closed |
+| F-02 | Rare menu-control populations do not identify private enum members.       | Repository/client-symbol searches add no accessor or enum; seven nonzero entry controls remain observationally ambiguous. | No confidence change; both fields retain neutral code names. | Closed |

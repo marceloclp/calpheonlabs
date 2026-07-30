@@ -1,0 +1,47 @@
+---
+title: "npcgift.dbss"
+description: "Current physical, representation, and semantic confidence, evidence gaps, and decoder location for the npcgift.dbss table in calpheonlabs."
+sidebar:
+    label: "npcgift.dbss"
+    icon: database
+search:
+    tags: [tables, dbss, confidence]
+---
+
+## Investigation status
+
+| Status             | Value                                                                |
+| ------------------ | -------------------------------------------------------------------- |
+| Coverage           | Not established                                                      |
+| Iteration          | 0                                                                    |
+| Review state       | Confidence evidence has not been ported                              |
+| Last reviewed      | 2026-07-30                                                           |
+| Captures examined  | None recorded in the reference confidence corpus                     |
+| Decoder            | `packages/scraper/src/tables/npcgift.dbss.ts`                        |
+| Remaining blockers | Build the transformed legacy snapshot and prove exact decoder parity |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::warning[Evidence gap]
+The BSD decoder exists, but the reference repository has no table confidence ledger to port.
+Do not infer confidence from the presence of a schema. Run the migration evidence workflow and
+replace this placeholder with field-level claims.
+:::
+
+## Field ledger
+
+| Field/path       | Offset and width | Representation | Claimed meaning | Physical confidence | Representation confidence | Semantic confidence | Evidence                                      | Status |
+| ---------------- | ---------------- | -------------- | --------------- | ------------------- | ------------------------- | ------------------- | --------------------------------------------- | ------ |
+| decoder envelope | See decoder      | BSD schema     | Current output  | Unknown             | Unknown                   | Unknown             | No migrated snapshot or field ledger recorded | Open   |
+
+## Active assumptions
+
+| ID   | Assumption                                                       | Supporting evidence           | Missing validation or counterexample                  | Next check                             | Confidence |
+| ---- | ---------------------------------------------------------------- | ----------------------------- | ----------------------------------------------------- | -------------------------------------- | ---------- |
+| A-01 | The current BSD schema reproduces the intended reference output. | A decoder is present in-repo. | Exact physical-order snapshot parity is not recorded. | Run the `migrate-table` snapshot gate. | Unknown    |
+
+## Findings
+
+| ID   | Finding                                                        | Evidence                                  | Schema/documentation impact                         | Status |
+| ---- | -------------------------------------------------------------- | ----------------------------------------- | --------------------------------------------------- | ------ |
+| F-01 | No matching reference confidence ledger was available to port. | Reference documentation inventory checked | Keep all confidence neutral until evidence is added | Open   |

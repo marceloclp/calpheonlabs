@@ -1,0 +1,57 @@
+---
+title: "npcpersonalityoffset.dbss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the npcpersonalityoffset decoder used by calpheonlabs."
+sidebar:
+    label: "npcpersonalityoffset.dbss"
+    icon: database
+search:
+    tags: [tables, npcs-characters, table]
+---
+
+## Investigation status
+
+| Status             | Value                                                      |
+| ------------------ | ---------------------------------------------------------- |
+| Coverage           | 100%                                                       |
+| Iteration          | 1                                                          |
+| Review state       | No open blockers                                           |
+| Last reviewed      | 2026-07-16                                                 |
+| Captures examined  | installed                                                  |
+| Decoder            | `packages/scraper/src/tables/npcpersonalityoffset.dbss.ts` |
+| Remaining blockers | None                                                       |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::note[Ported confidence ledger]
+This evidence was ported from the reference decoder. Keep it synchronized with the BSD schema and its snapshot-parity proof whenever the decoder changes.
+:::
+
+## Related table
+
+<CardGroup cols={1}>
+    <Card
+        title="npcpersonality"
+        href="/tables/npcpersonality.dbss"
+        icon="network"
+    >
+        Open the payload table whose rows this pointer directory frames.
+    </Card>
+</CardGroup>
+
+## Field ledger
+
+| Field/path                 | Offset and width | Representation                   | Claimed meaning               | Physical confidence | Representation confidence | Semantic confidence | Evidence                                            | Status |
+| -------------------------- | ---------------- | -------------------------------- | ----------------------------- | ------------------- | ------------------------- | ------------------- | --------------------------------------------------- | ------ |
+| count and 10-byte pointers | complete file    | count omitted; pointers retained | NPC personality identity/span | Certain             | Certain                   | Certain             | All spans target fixed 34-byte rows and repeat keys | Closed |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                             | Evidence                  | Schema/documentation impact                       | Status |
+| ---- | --------------------------------------------------- | ------------------------- | ------------------------------------------------- | ------ |
+| F-01 | Offset keys independently corroborate row identity. | Complete installed match. | Production fixed-row decoder remains independent. | Closed |

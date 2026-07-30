@@ -1,0 +1,72 @@
+---
+title: "base_dialog.dbss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the base_dialog decoder used by calpheonlabs."
+sidebar:
+    label: "base_dialog.dbss"
+    icon: database
+search:
+    tags: [tables, npcs-characters, table]
+---
+
+## Investigation status
+
+| Status             | Value                                             |
+| ------------------ | ------------------------------------------------- |
+| Coverage           | 100%                                              |
+| Iteration          | 2                                                 |
+| Review state       | No open blockers                                  |
+| Last reviewed      | 2026-07-20                                        |
+| Captures examined  | installed client 2923, prior-build ledger         |
+| Decoder            | `packages/scraper/src/tables/base_dialog.dbss.ts` |
+| Remaining blockers | None                                              |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::note[Ported confidence ledger]
+This evidence was ported from the reference decoder. Keep it synchronized with the BSD schema and its snapshot-parity proof whenever the decoder changes.
+:::
+
+## Related table
+
+<CardGroup cols={1}>
+    <Card
+        title="base_dialogoffset"
+        href="/tables/base_dialogoffset.dbss"
+        icon="network"
+    >
+        Open the companion pointer directory used to frame and validate this
+        payload.
+    </Card>
+</CardGroup>
+
+## Field ledger
+
+| Field/path                   | Offset and width                                             | Representation                                  | Claimed meaning                             | Physical confidence | Representation confidence | Semantic confidence  | Evidence                                                                                                                                                                                                | Status |
+| ---------------------------- | ------------------------------------------------------------ | ----------------------------------------------- | ------------------------------------------- | ------------------- | ------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| `rows` + encoded DBSS count  | file `+0` count, then variable rows                          | array retained in physical order; count omitted | base-dialogue row sequence                  | Certain             | Certain                   | Certain (structural) | The count drives complete sequential decoding to EOF in both captures; client 2923 has 58,537 retained rows, and a `count + 1` mutation rejects                                                         | Closed |
+| `dialogKey`                  | row `+0`, `u32`                                              | retained losslessly                             | packed `(dialogId << 16) \| npcId` identity | Certain             | Certain                   | Certain              | Every key agrees with the companion and `detail_dialog`; 20,215 archived `(Npc, DialogIndex)` pairs overlap, and representative packed key `2,425,414` decomposes to `582/37`                           | Closed |
+| `speakerLabel` length        | row `+4` then variable per row, `u32` UTF-16 code-unit count | consumed to size the string; omitted            | string framing                              | Certain             | Certain                   | Certain (structural) | Independent raw scan reaches the next field exactly for every row                                                                                                                                       | Closed |
+| `speakerLabel` reserved word | after its length, `u32 == 0`                                 | validated and omitted                           | reserved serializer word                    | Certain             | Certain                   | Certain (reserved)   | All applicable words are zero in both captures; a nonzero mutation rejects                                                                                                                              | Closed |
+| `speakerLabel`               | counted UTF-16LE code units                                  | decoded and retained                            | speaker role or name                        | Certain             | Certain                   | High                 | 20,113/20,186 exact archived `Dialog_Table.Name` root matches; 73 recognizable historical/localization drifts; BDOCodex identifies representative [Andro `582/37`](https://bdocodex.com/us/npc/582/37/) | Closed |
+| `lines` + encoded count      | after `speakerLabel`, `u32` then variable strings            | ordered array retained; count omitted           | generic-line list and its physical length   | Certain             | Certain                   | Certain (structural) | The counted elements plus footer end at the independently addressed boundary for all 58,537 rows                                                                                                        | Closed |
+| `lines[]` length             | each line `+0`, `u32` UTF-16 code-unit count                 | consumed and omitted                            | line-string framing                         | Certain             | Certain                   | Certain (structural) | Independent raw scan covers every line without gaps or overrun                                                                                                                                          | Closed |
+| `lines[]` reserved word      | each line `+4`, `u32 == 0`                                   | validated and omitted                           | reserved serializer word                    | Certain             | Certain                   | Certain (reserved)   | Together with the speaker fields, all 68,702 current string-control words are zero; a line mutation rejects                                                                                             | Closed |
+| `lines[]`                    | counted UTF-16LE code units                                  | decoded and retained in order                   | generic dialogue text                       | Certain             | Certain                   | High                 | 20,131/20,186 exact archived `Dialog_Table.Bubble1..Bubble10` lists; 55 recognizable historical text drifts                                                                                             | Closed |
+| row `footer`                 | final 5 bytes                                                | required zeros; omitted                         | reserved row terminator                     | Certain             | Certain                   | Certain (reserved)   | Every row ends with five zeros at the companion-confirmed boundary; a targeted mutation rejects                                                                                                         | Closed |
+| derived `npcId`              | no additional bytes; low 16 bits of `dialogKey`              | retained alongside the physical key             | NPC identifier                              | Certain             | Certain                   | Certain              | Exact bit identity for every row, cross-table equality, archived `Dialog_Table.Npc`, and BDOCodex `582/37`                                                                                              | Closed |
+| derived `dialogId`           | no additional bytes; high 16 bits of `dialogKey`             | retained alongside the physical key             | dialogue variant/index                      | Certain             | Certain                   | Certain              | Exact bit identity for every row, cross-table equality, archived `Dialog_Table.DialogIndex`, and BDOCodex `582/37`                                                                                      | Closed |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID     | Finding                                                                                                 | Evidence                                                                                                                                                                                                                          | Schema/documentation impact                                                                                      | Status |
+| ------ | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ------ |
+| BD-F01 | The formerly skipped word in every string envelope is required zero framing.                            | An independent scanner examined all 68,702 current words; every value is zero, the prior capture has the same domain, and speaker/line violations reject.                                                                         | `.skip(4)` was replaced by `reserved(4)`; no serialized byte is silently ignored.                                | Closed |
+| BD-F02 | Intrinsic row framing and the companion directory are exact, independent descriptions of the same data. | The 58,537 unique pointer spans partition `[4, 2,038,989)` without gaps/overlap; every pointer key equals its physical and decoded key. Key, offset, and length corruptions are detected by the companion audit.                  | Production decoding remains intrinsic; the companion is exhaustive verification, not a runtime dependency.       | Closed |
+| BD-F03 | Archived dialogue data corroborates meaning but not current binary layout.                              | The archive has 27,424 rows/20,474 unique pairs; 20,215 pairs overlap the current 58,537, while 259 are archive-only and 38,322 current-only. It contains no offsets, string controls, footer bytes, or current-domain guarantee. | Exact archived columns and representative keys appear in TSDoc; no archive data is used by the decoder or tests. | Closed |
+| BD-F04 | Captured totals and string ranges are observations, not format invariants.                              | Client 2923 has 58,537 rows, 10,165 lines, and 2,038,989 bytes; observed rows have 0–10 lines, but counts are self-describing.                                                                                                    | No literal row, line, size, or string-length cap appears in the schema.                                          | Closed |

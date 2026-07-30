@@ -1,12 +1,36 @@
 ---
 name: migrate-table
-description: Migrate an already decoded Black Desert BSS/DBSS table from `C:\Users\Marcelo\Github\bdo-scraper\src\tables2` into `packages/scraper/src/tables` using `@marceloclp/bsd`. Use when porting a legacy Eke or custom table decoder, replacing an offset-table dependency with an intrinsic BSD schema or unions, transforming a legacy JSON decode into a physical-order snapshot, or proving exact output parity before completing a table migration.
+description: Migrate an already decoded Black Desert BSS/DBSS table from `C:\Users\Marcelo\Github\bdo-scraper\src\tables2` into `packages/scraper/src/tables` using `@marceloclp/bsd`, and port its confidence ledger into Blume. Require `/goal` mode for the migration until the transformed reference snapshot and new decoder snapshot match exactly. Use when porting a legacy Eke or custom table decoder, replacing an offset-table dependency with an intrinsic BSD schema or unions, transforming a legacy JSON decode into a physical-order snapshot, proving exact output parity, or creating a type-qualified `docs/tables` confidence page for a migrated table.
 ---
 
 # Migrate a table decoder
 
 Port the physical binary grammar to BSD and prove the result against the
 existing decoder's complete output. Never edit the reference repository.
+
+## Run the migration as a goal
+
+Perform every table migration in `/goal` mode:
+
+1. Inspect the current goal before investigating or editing.
+2. Continue only when the active goal names the exact table and requires exact
+   snapshot parity. If no matching goal is active, stop and ask the user to
+   start `/goal` or explicitly authorize creating that goal. Do not infer goal
+   authorization from an ordinary migration request or an implicit skill
+   trigger.
+3. Keep the goal active through every decoder change, mismatch investigation,
+   and full-table comparison.
+4. Treat the transformed, physical-order reference snapshot as the old
+   snapshot and the strict BSD decode as the new snapshot. A partial match,
+   representative-row match, histogram match, or matching row count is not
+   parity.
+5. Do not mark the goal complete while any normalized value differs. Complete
+   it only after the comparison reports an exact full-snapshot match and the
+   entire verification gate below passes.
+6. Report the matched row count and normalized digest when completing the
+   goal. Do not complete or block the goal merely because its budget is low.
+   Mark it blocked only when the same external blocker has repeated for the
+   required consecutive goal turns and no in-scope progress remains.
 
 ## Preserve the evidence
 
@@ -17,8 +41,8 @@ Before editing:
 2. Record hashes for every reference decoder and JSON file in scope so the
    final check can prove they were not changed.
 3. Read the complete reference decoder, its generated JSON, its offset decoder
-   and JSON when present, relevant table documentation, and adjacent
-   `src/tables2` decoders.
+   and JSON when present, the current confidence ledger under
+   `docs/tables/<table>.mdx` when present, and adjacent `src/tables2` decoders.
 4. Read the destination table, `packages/scraper/src/tables/common/bsd.ts`,
    `packages/scraper/src/tables/common/helpers.ts`, and nearby BSD decoders.
 5. Inspect consumers before intentionally changing names or output shape.
@@ -184,6 +208,115 @@ Add succinct TSDoc for every schema constant and meaningful property:
 Do not claim that skipped or reserved bytes are zero unless the schema actually
 validates that invariant.
 
+## Port the confidence ledger to Blume
+
+Derive the canonical name from the basename passed to `bss(...)` or
+`dbss(...)`, not from the TypeScript filename. If the declaration is
+`dbss("gamecommondata/binary/characterfunction.dbss")`, `<table>` is
+`characterfunction`, `<table-type>` is `dbss`, the page is
+`docs/tables/characterfunction.dbss.mdx`, and the route is
+`/tables/characterfunction.dbss`.
+
+Create or update that type-qualified page, its `docs/table-catalog.ts` entry,
+and its row in `docs/tables/index.mdx`. The catalog entry records:
+
+```ts
+{
+    decoder: "characterfunction.ts",
+    evidenceState: "reconciled",
+    name: "characterfunction.dbss",
+    sourceLedger: true,
+    type: "dbss",
+}
+```
+
+`sourceLedger` records provenance only. `evidenceState` is `pending` before the
+destination audit, `ported` after copying still-unreconciled source evidence,
+and `reconciled` only after the final schema and snapshot proof agree with the
+page. Keep catalog entries and overview labels in canonical-name order. Update
+inbound related-table links to use the type-qualified routes.
+
+Treat the page as part of the migration output and as a live description of
+the destination BSD decoder, not as an archival copy of the reference notes.
+
+When the reference repository has `docs/tables/<table>.mdx`, port its evidence
+into the destination page before reconciling it. Never edit the reference page.
+
+1. Preserve still-relevant evidence lineage, still-valid assumptions, and
+   findings. Preserve a rejected hypothesis only when it justifies a neutral
+   name, guards a regression, or prevents repeating a plausible mistake.
+2. Change the title, sidebar label, route links, and decoder path to the
+   type-qualified destination page and decoder.
+3. Reconcile every field path and representation with the final BSD output.
+   Remove claims about raw fields, aliases, joins, omitted controls, or branch
+   behavior that the destination no longer emits.
+4. Recast an offset table as migration or falsification evidence when
+   appropriate. Never describe it as a production framing dependency after
+   the new decoder becomes intrinsic.
+5. Update the review date, iteration, capture set, coverage, blockers,
+   assumptions, and findings to the state proven by this migration.
+6. Record reproducible capture evidence: an exact build/capture identifier
+   when available, primary byte length, snapshot row count, normalized digest,
+   and overlap/mismatch counts that support carried semantic claims. Avoid
+   labels such as `installed complete capture` without identifying evidence.
+
+When no reference ledger exists, create the page before completing the
+migration. Do not invent confidence. Start unresolved claims at `Unknown`,
+record the missing evidence as an active assumption or blocker, and promote
+them only as the snapshot and field investigation justify it. The page may be
+`pending` during the work, but completing the migration still requires
+`reconciled`.
+
+Every page must keep these sections in order:
+
+- `## Investigation status`
+- `## Field ledger`
+- `## Active assumptions`
+- `## Findings`
+
+Use this exact field-ledger header:
+
+```md
+| Field/path | Offset and width | Representation | Claimed meaning | Physical confidence | Representation confidence | Semantic confidence | Evidence | Status |
+| ---------- | ---------------- | -------------- | --------------- | ------------------- | ------------------------- | ------------------- | -------- | ------ |
+```
+
+Assess three independent dimensions while revising the ledger:
+
+- physical confidence for framing, widths, offsets, discriminators, padding,
+  and complete byte coverage;
+- representation confidence for lossless evidence preservation, intentional
+  omissions, joins, aliases, and capture-specific assumptions;
+- semantic confidence for names, units, domains, sentinels, gameplay meaning,
+  and cross-table relationships.
+
+Use `Certain`, `High`, `Medium`, `Low`, and `Unknown` consistently with
+[`docs/methodology.mdx`](../../../docs/methodology.mdx). A completed migration
+requires certain physical and representation confidence. A non-neutral
+semantic name requires high or certain confidence. Before completion,
+**Active assumptions** must be empty and **Remaining blockers** must be
+`None`. Convert irreducible semantic unknowns to neutral, structurally bounded
+fields instead of leaving speculative assumptions open.
+
+### Cold-audit the destination ledger
+
+Do not treat a successful Blume build as evidence that the ledger is accurate.
+After snapshot parity, reread the final decoder and map all of these to field
+ledger rows:
+
+- every serialized and derived output field;
+- every header, count, nested member, trailer, and union branch;
+- every skipped, padded, reserved, opaque, or raw byte range;
+- every validation, discriminator, omission, alias, transform, and deferred
+  join.
+
+Compare the page's row count, digest, capture identity, and variant counts with
+the current verification artifacts. Search the destination page and related
+pages for stale `src/tables2` paths, obsolete output fields, and language that
+describes an offset table as a production dependency. Review the overview,
+catalog state, frontmatter title/label, canonical route, and inbound related
+links in the same pass.
+
 ## Verification gate
 
 Do not complete the migration until all of these pass:
@@ -197,10 +330,21 @@ Do not complete the migration until all of these pass:
   physical row order;
 - every union variant present in the capture is represented and compared;
 - TSDoc covers schemas, fields, invariants, and unresolved meanings;
+- the type-qualified Blume page exists, is catalogued, and accurately
+  describes the final BSD representation and confidence;
+- the confidence ledger contains no stale source paths, offset dependencies,
+  assumptions, blockers, or claims invalidated by the migration;
+- every decoder field, omission, validation, and union branch is accounted for
+  by the cold ledger audit;
+- the catalog and overview both mark the page `reconciled`, **Active
+  assumptions** is empty, and **Remaining blockers** is `None`;
 - the real module runs successfully and emits parseable JSON;
 - `bunx tsc --noEmit -p packages/scraper/tsconfig.json` passes;
 - `bun --bun oxfmt --check <changed-files>` passes;
 - `bun --bun oxlint <changed-typescript-files>` passes;
+- `bun run docs:check` passes;
+- `bun run docs:build` passes;
+- `bun run docs:audit` passes;
 - `git diff --check` passes;
 - final reference-file hashes equal the hashes recorded before migration.
 

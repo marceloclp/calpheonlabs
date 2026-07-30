@@ -1,0 +1,45 @@
+---
+title: "newquest.bss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the newquest decoder used by calpheonlabs."
+sidebar:
+    label: "newquest.bss"
+    icon: database
+search:
+    tags: [tables, quests, table]
+---
+
+## Investigation status
+
+| Status             | Value                                         |
+| ------------------ | --------------------------------------------- |
+| Coverage           | 100%                                          |
+| Iteration          | 1                                             |
+| Review state       | Documented caveats                            |
+| Last reviewed      | 2026-07-16                                    |
+| Captures examined  | committed, installed                          |
+| Decoder            | `packages/scraper/src/tables/newquest.bss.ts` |
+| Remaining blockers | Shared neutral control codes only             |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::note[Ported confidence ledger]
+This evidence was ported from the reference decoder. Keep it synchronized with the BSD schema and its snapshot-parity proof whenever the decoder changes.
+:::
+
+## Field ledger
+
+| Field/path     | Offset and width        | Representation | Claimed meaning                 | Physical confidence | Representation confidence | Semantic confidence | Evidence                                               | Status |
+| -------------- | ----------------------- | -------------- | ------------------------------- | ------------------- | ------------------------- | ------------------- | ------------------------------------------------------ | ------ |
+| complete table | shared variable grammar | `QuestMenuBss` | newly promoted/event quest menu | Certain             | Certain                   | High                | Full decode in both builds; all pool indices validated | Closed |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                              | Evidence                          | Schema/documentation impact       | Status |
+| ---- | ---------------------------------------------------- | --------------------------------- | --------------------------------- | ------ |
+| F-01 | Shared grammar includes exact local pool references. | Exhaustive bounds in both builds. | Uses shared rejecting validation. | Closed |

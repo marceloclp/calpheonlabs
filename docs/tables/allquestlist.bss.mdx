@@ -1,0 +1,47 @@
+---
+title: "allquestlist.bss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the allquestlist decoder used by calpheonlabs."
+sidebar:
+    label: "allquestlist.bss"
+    icon: database
+search:
+    tags: [tables, quests, table]
+---
+
+## Investigation status
+
+| Status             | Value                                             |
+| ------------------ | ------------------------------------------------- |
+| Coverage           | 100%                                              |
+| Iteration          | 1                                                 |
+| Review state       | No open blockers                                  |
+| Last reviewed      | 2026-07-16                                        |
+| Captures examined  | committed, installed                              |
+| Decoder            | `packages/scraper/src/tables/allquestlist.bss.ts` |
+| Remaining blockers | None                                              |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::note[Ported confidence ledger]
+This evidence was ported from the reference decoder. Keep it synchronized with the BSD schema and its snapshot-parity proof whenever the decoder changes.
+:::
+
+## Field ledger
+
+| Field/path     | Offset and width | Representation    | Claimed meaning        | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                 | Status |
+| -------------- | ---------------- | ----------------- | ---------------------- | ------------------- | ------------------------- | ------------------- | -------------------------------------------------------- | ------ |
+| PABR framing   | header/footer    | validated/omitted | counted canonical list | Certain             | Certain                   | Certain             | Exact PABR framing and complete consumption              | Closed |
+| `questGroupId` | row `+0`, `u16`  | retained          | quest group            | Certain             | Certain                   | High                | Exact join to every quest anchor and accept/complete row | Closed |
+| `questNumber`  | row `+2`, `u16`  | retained          | quest number in group  | Certain             | Certain                   | High                | Same exhaustive joins; composite IDs are unique          | Closed |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                    | Evidence                                                                    | Schema/documentation impact                            | Status |
+| ---- | ------------------------------------------ | --------------------------------------------------------------------------- | ------------------------------------------------------ | ------ |
+| F-01 | Serialized order is canonical quest order. | It exactly matches strictly increasing quest-anchor offsets in both builds. | Order is preserved and required by the anchor indexer. | Closed |

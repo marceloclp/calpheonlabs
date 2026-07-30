@@ -184,7 +184,7 @@ const CharacterObjectType2 = struct({
     interactionActionHash: u32(),
     /** Optional housing/object UI icon. */
     iconPath: asciiText(),
-    /** Fixed trailer and repair ite`m. */
+    /** Fixed trailer and repair item. */
     trailer: struct({
         reserved: bytes(40).reserved(),
         terminalSentinel: u32().is(0xffffffff),
