@@ -1,8 +1,8 @@
 # Snapshot adapters
 
 Use an adapter when the legacy JSON has a different output shape or row order
-from the BSD decoder. Keep adapters under ignored `out/`; they are migration
-evidence, not production dependencies.
+from the BSD decoder. Keep adapters under `out-migration/`; they are temporary
+migration evidence, not production dependencies.
 
 ## Adapter contract
 
@@ -107,9 +107,9 @@ silently drops duplicate keys.
 bun .agents/skills/migrate-table/scripts/compare-snapshots.ts `
   --legacy C:\Users\Marcelo\Github\bdo-scraper\src\tables2\<table>.json `
   --offsets C:\Users\Marcelo\Github\bdo-scraper\src\tables2\<table>offset.json `
-  --actual out\<table>.dbss.json `
-  --adapter out\<table>.snapshot-adapter.ts `
-  --expected out\<table>.dbss.expected.json
+  --actual out-migration\<table>.dbss.json `
+  --adapter out-migration\<table>.snapshot-adapter.ts `
+  --expected out-migration\<table>.dbss.expected.json
 ```
 
 On mismatch, use the reported first JSON path to isolate the corresponding
@@ -119,10 +119,10 @@ physical row. On success, retain the printed digest as verification evidence.
 
 Prefer the real module's public output path. If the current `Table` helper's
 private schema or hard-coded output path blocks strict isolated verification,
-use this pattern only in an ignored migration harness:
+use this pattern only in a temporary migration harness:
 
 ```ts
-import { CharacterObjectDbss } from "../../packages/scraper/src/tables/characterobject.dbss";
+import { CharacterObjectDbss } from "../packages/scraper/src/tables/characterobject.dbss";
 
 interface StrictTable {
     extract(): Promise<Uint8Array>;
@@ -135,7 +135,7 @@ const table = CharacterObjectDbss as unknown as StrictTable;
 const input = await table.extract();
 const actual = table.schema.decode(input, { strict: true });
 await Bun.write(
-    "out/characterobject.dbss.actual.json",
+    "out-migration/characterobject.dbss.actual.json",
     JSON.stringify(actual, null, 4),
 );
 ```
@@ -143,3 +143,11 @@ await Bun.write(
 Adapt the import and output paths to the table. Do not move this runtime-private
 access into production or change the destination decoder merely to expose a
 test seam.
+
+## Clean up after parity
+
+After recording the final row count, digest, and supporting evidence in the
+ledger and a prepared pull-request summary, delete the adapter, harnesses,
+snapshots, diagnostic slices, and other files created for the migration from
+`out-migration/`. Verify the resolved cleanup target first, preserve
+pre-existing or user-owned files, and remove the directory only when empty.

@@ -19,18 +19,38 @@ Perform every table migration in `/goal` mode:
    authorization from an ordinary migration request or an implicit skill
    trigger.
 3. Keep the goal active through every decoder change, mismatch investigation,
-   and full-table comparison.
+   full-table comparison, temporary-artifact cleanup, and pull-request
+   creation.
 4. Treat the transformed, physical-order reference snapshot as the old
    snapshot and the strict BSD decode as the new snapshot. A partial match,
    representative-row match, histogram match, or matching row count is not
    parity.
 5. Do not mark the goal complete while any normalized value differs. Complete
-   it only after the comparison reports an exact full-snapshot match and the
-   entire verification gate below passes.
-6. Report the matched row count and normalized digest when completing the
-   goal. Do not complete or block the goal merely because its budget is low.
-   Mark it blocked only when the same external blocker has repeated for the
-   required consecutive goal turns and no in-scope progress remains.
+   it only after the comparison reports an exact full-snapshot match, the
+   entire verification gate below passes, and the pull request is open.
+6. Report the matched row count, normalized digest, and pull-request URL when
+   completing the goal. Do not complete or block the goal merely because its
+   budget is low. Mark it blocked only when the same external blocker has
+   repeated for the required consecutive goal turns and no in-scope progress
+   remains.
+
+## Work on a migration branch and deliver a PR
+
+For every migrated table:
+
+1. Derive `<table>.<table-ext>` from the canonical basename, such as
+   `charactersimply.bss` or `characterfunction.dbss`.
+2. Before making migration edits, create and switch to a new branch named
+   `migrate/<table>.<table-ext>`.
+3. Preserve all pre-existing worktree changes as user-owned. Never include
+   unrelated changes in the migration commit or pull request; stop and ask for
+   direction if they cannot be isolated safely.
+4. Perform the decoder, snapshot, ledger, and verification work on that
+   branch.
+5. After the full verification gate passes and temporary migration artifacts
+   are deleted, commit only the migration changes, push the branch, and open a
+   pull request.
+6. Link the pull request in the final response so the user can review it.
 
 ## Preserve the evidence
 
@@ -58,6 +78,24 @@ the comparison evidence. Inspect a reference module's main block before
 running it; prefer the already generated JSON when the module contains debug
 logging, early exits, or other user work.
 
+## Use a disposable migration workspace
+
+Write every migration-only adapter, harness, expected or actual snapshot,
+diagnostic slice, hash manifest, and other generated artifact under the
+repository-root `out-migration/` directory. Never write migration artifacts to
+`out/`, a production source directory, or the reference repository.
+
+After the migration evidence has been recorded in the reconciled ledger and a
+pull-request summary has been prepared:
+
+1. Resolve and verify that the cleanup target is the intended
+   `<repository>/out-migration/` directory.
+2. Delete every file created for the completed migration.
+3. Preserve pre-existing or user-owned files if the directory was already in
+   use, and remove the directory itself only when it is empty.
+4. Confirm `git status` contains no migration artifact before committing or
+   opening the pull request.
+
 ## Build the snapshot oracle first
 
 Create a red-capable comparison loop before diagnosing or changing the new
@@ -75,7 +113,7 @@ schema:
     - verify that spans are contiguous from the table header through EOF when
       the available evidence permits it;
     - return only transformed data rows, never companion offsets.
-4. Save the expected snapshot under ignored `out/` artifacts.
+4. Save the expected snapshot under `out-migration/`.
 5. Generate the new decoder's actual JSON from the same game capture.
 6. Compare the entire normalized values, not representative rows or
    histograms.
@@ -121,6 +159,37 @@ and post-decode reparsing unless BSD primitives genuinely cannot express the
 layout. If an escape hatch is unavoidable, bound it tightly, explain why in
 TSDoc, and preserve the same strict snapshot gate.
 
+### Model table footers as informational schemas
+
+When a table has a footer, define it as a separate
+`const <Table>Footer = struct(...)` schema. Add TSDoc to the footer schema and
+every field, explaining offsets, pointers, reserved capacity, or other known
+roles.
+
+Footers are valuable while first decoding a table because their stored offsets
+can help falsify layout assumptions. Once the physical layout is proven, treat
+the footer as documentation-only framing: consume it declaratively, omit it
+from the destination output, and do not add `.check()`, `.is()`, `.in()`,
+custom validation, or cross-field pointer validation to the footer or its
+fields. Keep footer assumptions in `out-migration/` investigation harnesses,
+not in the production schema.
+
+For example:
+
+```ts
+/** Informational footer following the compact-character string pool. */
+const CharacterSimplyFooter = struct({
+    /** Absolute byte offset of the string-pool count. */
+    stringPoolOffset: u32(),
+    /** Required zero four-byte footer trailer. */
+    reserved: bytes(4).reserved(),
+});
+```
+
+`reserved()` consumes and omits the trailer without validating that it is
+zero. An evidence-backed footer comment may document a known zero role, but
+must not turn that observation into a runtime footer check.
+
 ### Compose variants with unions
 
 Use `union(...)` instead of selecting a schema with a function, `switch`, type
@@ -130,7 +199,7 @@ BSD unions try branches in declaration order and return the first successful
 decode. Therefore:
 
 1. Give every branch intrinsic evidence: sentinels, fixed tokens, bounded
-   counts, profile flags, exact lengths, or validated trailers.
+   counts, profile flags, exact lengths, or validated branch-local trailers.
 2. Order the strongest and most specific branch before a permissive branch.
 3. Treat a mismatch that reports the wrong variant as a union-discrimination
    failure, not an output-normalization problem.
@@ -163,12 +232,12 @@ silently retain the offset dependency or invent a capture-specific heuristic.
 
 Run the real table module and require parseable JSON. The current `Table`
 helper does not expose a public strict-decode or output-path API. When that
-prevents isolated verification, use a temporary ignored harness that:
+prevents isolated verification, use a temporary migration harness that:
 
 1. imports the exported table;
 2. calls its public `extract()` method;
 3. accesses the private schema only at runtime to decode with `{ strict: true }`;
-4. writes the actual snapshot under `out/`.
+4. writes the actual snapshot under `out-migration/`.
 
 Treat this as a verification-only escape hatch required by the current helper.
 Do not add test hooks to the production decoder or relax the rule against
@@ -205,8 +274,9 @@ Add succinct TSDoc for every schema constant and meaningful property:
 - add precise `{@link ...}` sources only when they materially establish a
   semantic meaning.
 
-Do not claim that skipped or reserved bytes are zero unless the schema actually
-validates that invariant.
+Outside the informational table-footer exception above, do not claim that
+skipped or reserved bytes are zero unless the schema actually validates that
+invariant.
 
 ## Port the confidence ledger to Blume
 
@@ -347,6 +417,10 @@ Do not complete the migration until all of these pass:
 - `bun run docs:audit` passes;
 - `git diff --check` passes;
 - final reference-file hashes equal the hashes recorded before migration.
+- every file created under `out-migration/` for this migration has been
+  deleted;
+- the current branch is `migrate/<table>.<table-ext>`, contains only the
+  intended migration commit, has been pushed, and has an open pull request.
 
 Report the snapshot row count and digest as verification evidence, not as
-production invariants.
+production invariants. Link the pull request as the final migration handoff.

@@ -1,0 +1,69 @@
+---
+title: "characterobjectoffset.dbss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the BSD characterobjectoffset decoder."
+sidebar:
+    label: "characterobjectoffset.dbss"
+    icon: database
+search:
+    tags: [tables, npcs-characters, dbss]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                           |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                            |
+| Iteration          | 3                                                                                                                                                                                               |
+| Review state       | BSD migration reconciled                                                                                                                                                                        |
+| Last reviewed      | 2026-07-30                                                                                                                                                                                      |
+| Captures examined  | 51,200-byte table SHA-256 `49902322131fb77a10b6b6fc1e49fc507f7c16af8eb4fd128b3bf9674d629d12`; 5,118 rows; normalized SHA-256 `da0a37bc8d847edf3cd45826f7bf26c19b953eac933c18842e748952da9dcc69` |
+| Decoder            | `packages/scraper/src/tables/characterobjectoffset.dbss.ts`                                                                                                                                     |
+| Remaining blockers | None                                                                                                                                                                                            |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The strict BSD decoder consumes the complete installed table and matches all 5,118 transformed
+reference rows with zero normalized mismatches. The companion is decoded independently and is not
+a production framing dependency of the intrinsic `characterobject.dbss` decoder.
+:::
+
+## Related table
+
+<CardGroup cols={1}>
+    <Card
+        title="characterobject.dbss"
+        href="/tables/characterobject.dbss"
+        icon="network"
+    >
+        Open the intrinsically framed payload table whose rows these pointers
+        describe.
+    </Card>
+</CardGroup>
+
+## Field ledger
+
+| Field/path                 | Offset and width                         | Representation                                                 | Claimed meaning                      | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                                                                                                        | Status         |
+| -------------------------- | ---------------------------------------- | -------------------------------------------------------------- | ------------------------------------ | ------------------- | ------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| `magic`, encoded row count | table `+0..+7`                           | `"PABR"` validated and omitted; `u32` count consumed by `rows` | PABR directory framing and row count | Certain             | Certain                   | Certain             | Strict decoding validates the signature, consumes exactly 5,118 count-derived rows, and reaches the footer at byte 51,188; signature and count mutations reject | Closed         |
+| `rows`                     | table `+8..+51,187`; 5,118 × 10 bytes    | array retained in directory-file order                         | character-object pointer directory   | Certain             | Certain                   | Certain             | Complete transformed-reference equality; the output deliberately preserves directory order rather than sorting by target offset                                 | Closed         |
+| `rows[].key`               | row `+0..+1`; `u16`                      | retained                                                       | character-object identity            | Certain             | Certain                   | Certain             | Every key equals the `u16` identity at its pointed-to primary-row start; 5,118 checks, zero mismatches                                                          | Closed         |
+| `rows[].offset`            | row `+2..+5`; `u32`                      | retained                                                       | absolute primary-row start           | Certain             | Certain                   | Certain             | Sorting only for falsification partitions the 8,155,260-byte `characterobject.dbss` capture from byte 4 through EOF with zero gaps or overlaps                  | Closed         |
+| `rows[].byteLength`        | row `+6..+9`; `u32`                      | retained                                                       | exact primary-row extent             | Certain             | Certain                   | Certain             | Every span ends at the next physical row and the final span ends at primary EOF; 5,118 spans, zero gaps or overlaps                                             | Closed         |
+| footer zero words          | footer `+0..+3` and `+8..+11`; two `u32` | validated as zero and omitted                                  | PABR footer framing                  | Certain             | Certain                   | Neutral             | Both words are structurally validated before strict EOF; independent mutations to either word reject                                                            | Closed neutral |
+| footer self-reference      | footer `+4..+7`; `u32`                   | validated and omitted                                          | absolute footer start                | Certain             | Certain                   | Certain             | The stored value equals byte 51,188 in this capture and is checked dynamically against the decoder cursor; a mismatching value rejects                          | Closed         |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                                     | Evidence                                                                                                                                                                                                                                              | Schema/documentation impact                                                                                                         | Status |
+| ---- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| F-01 | Directory-file order and target-payload order are different.                                | The first directory entry points to primary byte 3,011,279, while the physical first primary row begins at byte 4; all 5,118 directory entries still match the reference order exactly.                                                               | Production output preserves the table's encoded row order; target offsets are used only for falsification evidence.                 | Closed |
+| F-02 | The pointer triples completely describe the same-capture primary table.                     | The 5,118 spans cover the 8,155,260-byte `characterobject.dbss` capture from byte 4 through EOF with zero gaps, overlaps, key mismatches, or count mismatches; primary SHA-256 is `7c44bfee461da5b4833be64403dc9f24e2d1d9a29366fe129a99f61e0919317c`. | `key`, `offset`, and `byteLength` retain their established semantic names at Certain confidence.                                    | Closed |
+| F-03 | The footer is relational framing, not an opaque twelve-byte region.                         | Its middle word equals the footer's absolute start and its outer words are zero.                                                                                                                                                                      | BSD validates both zero words and the dynamic self-reference, then omits the decoder-only footer.                                   | Closed |
+| F-04 | The directory remains independently useful without framing the destination payload decoder. | Snapshot parity proves this table on its own; `characterobject.dbss.ts` consumes its complete primary stream intrinsically and imports no offset table.                                                                                               | The offset table is documented as an independent directory and migration oracle, not a production dependency of the payload schema. | Closed |

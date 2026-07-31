@@ -92,6 +92,20 @@ export const tablePages = [
         type: "dbss",
     },
     {
+        decoder: "characterobjectoffset.dbss.ts",
+        evidenceState: "reconciled",
+        name: "characterobjectoffset.dbss",
+        sourceLedger: true,
+        type: "dbss",
+    },
+    {
+        decoder: "charactersimply.bss.ts",
+        evidenceState: "reconciled",
+        name: "charactersimply.bss",
+        sourceLedger: true,
+        type: "bss",
+    },
+    {
         decoder: "completequest.bss.ts",
         evidenceState: "ported",
         name: "completequest.bss",

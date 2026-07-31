@@ -1,6 +1,5 @@
-import { array, bool, struct, u16, u32 } from "@marceloclp/bsd";
-
-import { mixedstr } from "./common/bsd";
+import { array, bool, bytes, struct, u16, u32 } from "@marceloclp/bsd";
+import { mixedText } from "./common/bsd";
 import { bss } from "./common/helpers";
 
 /**
@@ -32,17 +31,21 @@ const NpcSimplyRow = struct({
     reservedStringIndex: u32().is(0),
 });
 
+const NpcSimplyFooter = struct({
+    /** Absolute offset to the string pool; used for initial validation of physical layout. */
+    stringPoolOffset: u32(),
+    /** Footer padding. */
+    reserved: bytes(4).reserved(),
+}).omit({ reserved: true });
+
 /** Physical compact-NPC table, mixed string pool, and validated pool pointer. */
 const NpcSimplyBss = bss("gamecommondata/binary/npcsimply.bss")({
     /** Fixed-width compact NPC rows. */
     rows: array(u32(), NpcSimplyRow),
-    /** @todo: extract structured data from the string pool */
     /** Mixed UTF-8/UTF-16 pool and its absolute start offset. */
-    stringPool: array(u32(), mixedstr()),
+    stringPool: array(u32(), mixedText()),
     /** Footer pointing back to the string pool. */
-    footer: struct({
-        stringPoolOffset: u32(),
-    }).pad(4),
+    footer: NpcSimplyFooter,
 });
 
 if (import.meta.main) {

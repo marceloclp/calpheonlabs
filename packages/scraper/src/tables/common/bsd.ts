@@ -21,7 +21,7 @@ export const Cstring = custom((reader) => {
  *
  * The next 4 bytes represent the string length.
  */
-export function mixedstr() {
+export function mixedText() {
     return bool().pipe((f) => f ? bytes(u32()).utf16() : bytes(u32()).utf8());
 }
 
