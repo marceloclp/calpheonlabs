@@ -1,0 +1,68 @@
+---
+title: "itemimprovement.dbss"
+description: "Physical layout, representation confidence, semantic evidence, and exact BSD snapshot parity for item-improvement result groups in build 2938."
+sidebar:
+    label: "itemimprovement.dbss"
+    icon: database
+search:
+    tags: [tables, items-knowledge-mental, dbss]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                                                                                                                                                                       |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                                                                                                                                                                        |
+| Iteration          | 2                                                                                                                                                                                                                                                                                                                                           |
+| Review state       | BSD migration reconciled                                                                                                                                                                                                                                                                                                                    |
+| Last reviewed      | 2026-07-31                                                                                                                                                                                                                                                                                                                                  |
+| Captures examined  | Build 2938; `pad00000.meta` SHA-256 `b7eefe6059818f84c0545f10020fe93bd3bd5d0647e043120caf78726ccafe8f`; archive entry hash `1682198288`; 173,916-byte primary SHA-256 `bfe169dd47fae68c4df46f6f731cc9f00ce7ed829c2bc372787aaf200757e952`; 3,896 rows; normalized SHA-256 `a6c4411eead28d9d127115c6f572ad8257576c2b171ef8cd4f139eb80f867b84` |
+| Decoder            | `packages/scraper/src/tables/itemimprovement.dbss.ts`                                                                                                                                                                                                                                                                                       |
+| Remaining blockers | None                                                                                                                                                                                                                                                                                                                                        |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The strict BSD decoder consumes the complete primary file and exactly matches the
+3,896-row current reference decode in physical order. The production schema has no
+offset-table dependency.
+:::
+
+<CardGroup cols={1}>
+    <Card
+        title="itemimprovementoffset.dbss"
+        href="/tables/itemimprovementoffset.dbss"
+        icon="network"
+    >
+        Open the companion pointer directory used only to falsify the intrinsic
+        row grammar.
+    </Card>
+</CardGroup>
+
+## Field ledger
+
+| Field/path                   | Offset and width     | Representation                                                      | Claimed meaning                 | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                           | Status         |
+| ---------------------------- | -------------------- | ------------------------------------------------------------------- | ------------------------------- | ------------------- | ------------------------- | ------------------- | ---------------------------------------------------------------------------------- | -------------- |
+| Table row count              | file `+0`, 4         | `u32` count consumed by `array`; rows retained in physical order    | row framing                     | Certain             | Certain                   | Certain             | Count is 3,896 and strict decoding ends at byte 173,916                            | Closed         |
+| `rows[].improvementResultId` | row `+0`, 4          | positive `u32` retained                                             | result-group identifier         | Certain             | Certain                   | High                | Matches every companion key; archived `Item_ImprovementResult_Table.index` lineage | Closed         |
+| Result-item count            | row `+4`, 4          | `u32` count consumed by intrinsic array                             | frames `groupItemIds`           | Certain             | Certain                   | Certain             | 88 one-item and 3,808 five-item rows; inferred spans match every companion length  | Closed         |
+| Reserved array-control range | row `+8`, 4          | `bytes(4).reserved()` consumed and omitted without value validation | unknown array control           | Certain             | Certain                   | Unknown             | Exact structural position between count and members across all rows                | Closed neutral |
+| `rows[].groupItemIds[]`      | row `+12`, count × 4 | positive `u32[]` retained                                           | ordered result item identifiers | Certain             | Certain                   | High                | Exact snapshot equality and archived positional `groupItem0..4` lineage            | Closed         |
+| `rows[].itemNameControl`     | after items, 1       | `u8` retained                                                       | unknown compiled-name control   | Certain             | Certain                   | Unknown             | Fixed position; current value is not used as a production invariant                | Closed neutral |
+| `rows[].itemNameIndex`       | after items `+1`, 4  | `u32` retained                                                      | compiled text/name index        | Certain             | Certain                   | High                | Historical field position and current 1–37 reused-index domain                     | Closed         |
+| `rows[].itemNameTail`        | after items `+5`, 8  | `Uint8Array` retained losslessly                                    | unknown compiled-name tail      | Certain             | Certain                   | Unknown             | All eight bytes remain represented for every row; no padding assumption            | Closed neutral |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID     | Finding                                                                               | Evidence                                                                                                                          | Schema/documentation impact                                                                 | Status |
+| ------ | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ------ |
+| IIR-01 | The primary row stream is intrinsically count-framed.                                 | All 3,896 companion spans match the primary key, begin at the inferred cursor, and close byte 173,916 with no gaps.               | Production uses nested BSD arrays and does not read `itemimprovementoffset.dbss`.           | Closed |
+| IIR-02 | The migrated BSD output is exactly reference-equivalent on the current capture.       | Full physical-order comparison matched 3,896 rows with digest `a6c4411eead28d9d127115c6f572ad8257576c2b171ef8cd4f139eb80f867b84`. | Physical and representation confidence are Certain.                                         | Closed |
+| IIR-03 | The checked-in 3,823-row legacy JSON predates build 2938.                             | The unchanged legacy schema decodes 3,896 rows from the current hashed primary bytes.                                             | Current-byte reference output is the parity oracle; the older JSON remains provenance only. | Closed |
+| IIR-04 | Only the numeric name index has established meaning in the final 13-byte name region. | The control and tail lack independent semantic evidence.                                                                          | The index is named; the remaining fields stay retained and neutral.                         | Closed |

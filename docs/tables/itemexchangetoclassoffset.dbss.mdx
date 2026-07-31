@@ -1,0 +1,63 @@
+---
+title: "itemexchangetoclassoffset.dbss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the BSD itemexchangetoclassoffset decoder."
+sidebar:
+    label: "itemexchangetoclassoffset.dbss"
+    icon: database
+search:
+    tags: [tables, items-knowledge-mental, dbss]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                                                                                                                                          |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                                                                                                                                           |
+| Iteration          | 2                                                                                                                                                                                                                                                                                                              |
+| Review state       | BSD migration reconciled                                                                                                                                                                                                                                                                                       |
+| Last reviewed      | 2026-07-31                                                                                                                                                                                                                                                                                                     |
+| Captures examined  | Installed build 2938; `pad00000.meta` SHA-256 `b7eefe6059818f84c0545f10020fe93bd3bd5d0647e043120caf78726ccafe8f`; 2,404-byte table SHA-256 `f35fbc0389cf51493acb2ba5a5fd3c2d4e70ec408a5c72aa245611417f8e050e`; 200 rows; normalized SHA-256 `a33478454268c58c27a09fc547dce3b9f5c8e66717beeb6abc9e27dec29aeaa1` |
+| Decoder            | `packages/scraper/src/tables/itemexchangetoclassoffset.dbss.ts`                                                                                                                                                                                                                                                |
+| Remaining blockers | None                                                                                                                                                                                                                                                                                                           |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The strict BSD decoder consumes the complete installed directory and matches all
+200 reference rows with zero normalized mismatches.
+:::
+
+## Related table
+
+<CardGroup cols={1}>
+    <Card
+        title="itemexchangetoclass.dbss"
+        href="/tables/itemexchangetoclass.dbss"
+        icon="network"
+    >
+        Open the fixed-width primary table described by these pointers.
+    </Card>
+</CardGroup>
+
+## Field ledger
+
+| Field/path               | Offset and width                   | Representation                      | Claimed meaning                            | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                         | Status |
+| ------------------------ | ---------------------------------- | ----------------------------------- | ------------------------------------------ | ------------------- | ------------------------- | ------------------- | -------------------------------------------------------------------------------- | ------ |
+| encoded row count        | table `+0..+3`; `u32`              | consumed by `array`; not emitted    | number of directory entries                | Certain             | Certain                   | Certain             | Count selects 200 twelve-byte entries and strict decoding reaches byte 2,404     | Closed |
+| `rows`                   | table `+4..+2,403`; 200 × 12 bytes | retained in encoded directory order | class-exchange pointer directory           | Certain             | Certain                   | Certain             | Complete reference equality                                                      | Closed |
+| `rows[].exchangeGroupId` | row `+0..+3`; positive `u32`       | retained                            | class-exchange group identity              | Certain             | Certain                   | High                | Every key resolves to both copies of the identity in the primary table           | Closed |
+| `rows[].offset`          | row `+4..+7`; `u32`                | retained                            | absolute start of the repeated payload key | Certain             | Certain                   | Certain             | All 200 values equal physical row start plus four bytes; zero pointer mismatches | Closed |
+| `rows[].byteLength`      | row `+8..+11`; `u32`               | retained                            | payload width excluding the outer key      | Certain             | Certain                   | Certain             | Every current value is 193, exactly the remainder of each 197-byte primary row   | Closed |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                | Evidence                                                                                                       | Schema/documentation impact                                                           | Status |
+| ---- | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------ |
+| F-01 | Pointer order differs from physical primary-row order. | Key-based comparison resolves all 200 spans with zero mismatches, while encoded entries are not offset-sorted. | Production preserves encoded order and does not use this table to frame primary rows. | Closed |
+| F-02 | Every pointer selects the repeated-key payload.        | Each offset is four bytes after its 197-byte row start and each byte length is 193.                            | The field descriptions distinguish the outer key from the indexed payload.            | Closed |

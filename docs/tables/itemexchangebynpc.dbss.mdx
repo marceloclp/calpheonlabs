@@ -1,0 +1,73 @@
+---
+title: "itemexchangebynpc.dbss"
+description: "Complete BSD layout, snapshot parity, byte coverage, and confidence ledger for the itemexchangebynpc.dbss table."
+sidebar:
+    label: "itemexchangebynpc.dbss"
+    icon: database
+search:
+    tags: [tables, npcs-characters, dbss]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                                                                                                                                          |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                                                                                                                                           |
+| Iteration          | 2                                                                                                                                                                                                                                                                                                              |
+| Review state       | BSD migration reconciled                                                                                                                                                                                                                                                                                       |
+| Last reviewed      | 2026-07-31                                                                                                                                                                                                                                                                                                     |
+| Captures examined  | Installed build 2938; `pad00000.meta` SHA-256 `b7eefe6059818f84c0545f10020fe93bd3bd5d0647e043120caf78726ccafe8f`; 5,856-byte table SHA-256 `626a8cd4bfd2e50a4e74c0f7ccf2b74c02005f951cf9c03e4ce931fe7a8a50b5`; 209 rows; normalized SHA-256 `94d968844de00c81b30a123f1c1de4408f9c912ba437175e4042e166590e833e` |
+| Decoder            | `packages/scraper/src/tables/itemexchangebynpc.dbss.ts`                                                                                                                                                                                                                                                        |
+| Remaining blockers | None                                                                                                                                                                                                                                                                                                           |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The strict BSD decoder consumes the complete installed table and matches all 209
+transformed reference rows with zero normalized mismatches.
+:::
+
+## Related tables
+
+<CardGroup cols={2}>
+    <Card
+        title="itemexchangebynpcoffset.dbss"
+        href="/tables/itemexchangebynpcoffset.dbss"
+        icon="network"
+    >
+        Open the independent directory whose pointers corroborate every payload
+        identity and extent.
+    </Card>
+    <Card
+        title="itemexchangesource.bss"
+        href="/tables/itemexchangesource.bss"
+        icon="network"
+    >
+        Open the worker and workshop production-recipe exchange table.
+    </Card>
+</CardGroup>
+
+## Field ledger
+
+| Field/path                                             | Offset and width                      | Representation                                     | Claimed meaning                  | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                                                     | Status |
+| ------------------------------------------------------ | ------------------------------------- | -------------------------------------------------- | -------------------------------- | ------------------- | ------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------ | ------ |
+| encoded row count                                      | table `+0..+3`; `u32`                 | consumed by `array`; not emitted                   | number of fixed-width rows       | Certain             | Certain                   | Certain             | Count selects exactly 209 rows and strict decoding reaches byte 5,856                                        | Closed |
+| `rows`                                                 | table `+4..+5,855`; 209 × 28 bytes    | retained in physical order                         | NPC item-exchange recipes        | Certain             | Certain                   | High                | Complete transformed-reference equality and exact fixed-length consumption                                   | Closed |
+| `rows[].outerExchangeId`                               | row `+0..+1`; `u16`                   | retained                                           | outer exchange identity          | Certain             | Certain                   | Certain             | Equals both `payload.exchangeId` and the companion key for all 209 rows                                      | Closed |
+| `rows[].payload.exchangeId`                            | row `+2..+3`; payload `+0..+1`; `u16` | retained                                           | indexed payload identity         | Certain             | Certain                   | Certain             | Repeated identity is checked by the BSD row schema; zero mismatches                                          | Closed |
+| `payload.requiredItemId`, `payload.rewardItemId`       | payload `+2..+5` and `+14..+17`       | two `u32` values retained                          | consumed and granted items       | Certain             | Certain                   | High                | Complete reference equality preserves every identifier; established reference joins resolve the observed IDs | Closed |
+| `payload.requiredItemCount`, `payload.rewardItemCount` | payload `+6..+13` and `+18..+25`      | two `u64` values retained as exact decimal strings | consumed and granted quantities  | Certain             | Certain                   | High                | Decimal conversion is lossless and full-snapshot equality covers both 64-bit channels                        | Closed |
+| row identity validation                                | complete 28-byte row                  | equality check; no field omitted                   | outer and payload IDs must agree | Certain             | Certain                   | Certain             | The schema rejects unequal copies while retaining both physical values                                       | Closed |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                             | Evidence                                                                                                                               | Schema/documentation impact                                                                     | Status |
+| ---- | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------ |
+| F-01 | The two-byte outer identity is part of each physical row, not decoder-only framing. | Every 28-byte row contains the outer key before the 26-byte indexed payload; all repeated identities match.                            | Both copies are retained and validated instead of flattening away the outer key.                | Closed |
+| F-02 | Directory order and primary physical order diverge near the end of the capture.     | Same-index comparison differs for 17 rows, while sorting the 209 directory entries by offset gives zero identity or extent mismatches. | The primary decoder remains intrinsic; the offset table is used only as falsification evidence. | Closed |

@@ -1,0 +1,50 @@
+---
+title: "itemequipgroup.bss"
+description: "Binary layout, equipment-group membership semantics, and exact snapshot evidence for the itemequipgroup.bss decoder in calpheonlabs."
+sidebar:
+    label: "itemequipgroup.bss"
+    icon: database
+search:
+    tags: [tables, items-knowledge-mental, bss]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                          |
+| ------------------ | -------------------------------------------------------------------------------------------------------------- |
+| Evidence state     | Reconciled                                                                                                     |
+| Coverage           | 100%                                                                                                           |
+| Iteration          | 3                                                                                                              |
+| Last reviewed      | 2026-07-31                                                                                                     |
+| Captures examined  | Build 2938; `Paz/pad00000.meta` SHA-256 `b7eefe6059818f84c0545f10020fe93bd3bd5d0647e043120caf78726ccafe8f`     |
+| Primary bytes      | 5,284; SHA-256 `686b9767bea689fa2e303429711f95cfa793aa80fb4fa316f2b0732ed5698f15`                              |
+| Snapshot proof     | 56 rows / 1,204 members; normalized SHA-256 `197bdb4200752c89803b62c95eaf77386d4457bb72eecd2810efc82d889856ca` |
+| Decoder            | `packages/scraper/src/tables/itemequipgroup.bss.ts`                                                            |
+| Remaining blockers | None                                                                                                           |
+
+See [Decoder methodology](/methodology).
+
+## Field ledger
+
+| Field/path                               | Offset and width          | Representation                      | Claimed meaning                   | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                                 | Status |
+| ---------------------------------------- | ------------------------- | ----------------------------------- | --------------------------------- | ------------------- | ------------------------- | ------------------- | ---------------------------------------------------------------------------------------- | ------ |
+| PABR signature                           | file `+0`, 4              | checked `bytes(4).reserved()`       | Table framing                     | Certain             | Certain                   | Certain             | Exact `PABR` bytes; byte-only framing is intentionally omitted                           | Closed |
+| `rowCount`, `rows[]`                     | file `+4`, 4; remainder   | retained `u32`, counted array       | Group count and rows              | Certain             | Certain                   | Certain             | 56 rows consume exactly to the footer under strict decode                                | Closed |
+| `rows[].groupId`                         | row `+0`, 2               | `u16`                               | Equipment-family identifier       | Certain             | Certain                   | High                | Unique captured identities immediately repeated in each row                              | Closed |
+| `rows[].repeatedGroupId`                 | row `+2`, 2               | `u16` plus equality check           | Integrity copy of `groupId`       | Certain             | Certain                   | Certain             | Equality holds for all rows and is enforced intrinsically                                | Closed |
+| `rows[].memberCount`, `rows[].itemIds[]` | row `+4`, 4; then 4 each  | retained `u32`, counted `u32` array | Member count and item identifiers | Certain             | Certain                   | High                | 1,204 members consume every variable row exactly and resolve as item families            | Closed |
+| `footer.reserved00`, `footer.reserved08` | final outer words, 4 each | `bytes(4).reserved()`               | Byte-only PABR framing            | Certain             | Certain                   | Unknown             | Explicitly consumed and intentionally omitted                                            | Closed |
+| `footer.footerOffset`                    | final middle word, 4      | retained `u32`                      | Footer position                   | Certain             | Certain                   | Certain             | Matches the observed footer start; footer is informational and unvalidated in production | Closed |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The reconciled decoder has no unresolved physical or representation assumptions.
+:::
+
+## Findings
+
+| ID     | Finding                                                              | Evidence                                                               | Schema/documentation impact                                                      | Status   |
+| ------ | -------------------------------------------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------- | -------- |
+| IEG-01 | Both the table count and each member count are data-bearing scalars. | The full transformed reference and BSD snapshots agree exactly.        | Both counts are retained with `peek()` rather than hidden inside array controls. | Resolved |
+| IEG-02 | The repeated group id is intrinsic row evidence.                     | All 56 rows repeat the same `u16` and strict equality checking passes. | Row alignment does not rely on a companion table.                                | Resolved |

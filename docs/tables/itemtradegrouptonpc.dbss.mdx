@@ -1,0 +1,78 @@
+---
+title: "itemtradegrouptonpc.dbss"
+description: "Binary layout, byte coverage, field semantics, and exact snapshot evidence for the intrinsic BSD itemtradegrouptonpc decoder."
+sidebar:
+    label: "itemtradegrouptonpc.dbss"
+    icon: database
+search:
+    tags: [tables, items-knowledge-mental, dbss]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                                                                                                                                                                |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Coverage           | 100%                                                                                                                                                                                                                                                                                                                                 |
+| Iteration          | 4                                                                                                                                                                                                                                                                                                                                    |
+| Review state       | BSD migration reconciled                                                                                                                                                                                                                                                                                                             |
+| Last reviewed      | 2026-07-31                                                                                                                                                                                                                                                                                                                           |
+| Captures examined  | Build 2938; installed `pad00000.meta` SHA-256 `b7eefe6059818f84c0545f10020fe93bd3bd5d0647e043120caf78726ccafe8f`; 207,256-byte primary SHA-256 `62586ce4a817a29495dc9b720e2fc34fcd47912b7e933bebdbe1babf4a2b031b`; 125 rows and 1,626 entries; normalized SHA-256 `deb6e24199324c215facf6527c8410ca99e5e166a1b1c9e02f11101b3f841076` |
+| Decoder            | `packages/scraper/src/tables/itemtradegrouptonpc.dbss.ts`                                                                                                                                                                                                                                                                            |
+| Remaining blockers | None                                                                                                                                                                                                                                                                                                                                 |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The strict intrinsic BSD decoder consumes all 207,256 bytes and exactly matches
+all 125 physical rows and 1,626 entries from the reference snapshot. The
+offset directory was used only to falsify inferred spans.
+:::
+
+<CardGroup cols={1}>
+    <Card
+        title="itemtradegrouptonpcoffset.dbss"
+        href="/tables/itemtradegrouptonpcoffset.dbss"
+        icon="network"
+    >
+        Open the independently decoded pointer directory used as migration
+        evidence.
+    </Card>
+</CardGroup>
+
+## Field ledger
+
+| Field/path                              | Offset and width           | Representation                              | Claimed meaning               | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                                                           | Status |
+| --------------------------------------- | -------------------------- | ------------------------------------------- | ----------------------------- | ------------------- | ------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------ | ------ |
+| `rowCount`, `rows[]`                    | table `+0`, 4 then rows    | retained `u32` peek and counted array       | NPC trade rows                | Certain             | Certain                   | High                | Count frames 125 intrinsic rows; strict decoding ends at byte 207,256; all rows match the reference                | Closed |
+| `rows[].npcId`                          | row `+0`, 2                | retained `u16`                              | Owner NPC identifier          | Certain             | Certain                   | Certain             | Exact compact-table and both-directory key-set match                                                               | Closed |
+| `rows[].entryCount`, `entries[]`        | row `+2`, 4 then `127*n`   | retained `u32` peek and counted array       | Entry count and list          | Certain             | Certain                   | Certain             | Counts derive all 125 companion byte lengths and partition the primary table without gaps                          | Closed |
+| repeated NPC validation                 | complete nested row        | relational `.check()`                       | Stored owner-key invariant    | Certain             | Certain                   | Certain             | All 1,626 entries repeat the enclosing NPC ID; validator rejects a mutated repeat                                  | Closed |
+| `entries[].npcId`                       | entry `+0`, 2              | retained `u16`                              | Repeated owner NPC identifier | Certain             | Certain                   | Certain             | Exhaustive equality with enclosing row IDs                                                                         | Closed |
+| `entries[].tradeItemId`                 | entry `+2`, 4              | retained `u32`                              | Traded item identifier        | Certain             | Certain                   | Certain             | All values resolve to level-zero item rows; lookup is intentionally deferred                                       | Closed |
+| `entries[].reserved06`                  | entry `+6..+53`, 48        | zero-validated reserved byte range, omitted | Structural padding            | Certain             | Certain                   | Unknown             | Every captured byte is zero and BSD rejects nonzero mutations                                                      | Closed |
+| `entries[].field54`                     | entry `+54`, 2             | retained overlapping `u16` peek             | Raw trade control             | Certain             | Certain                   | Unknown             | Exact reference equality over both following byte views                                                            | Closed |
+| `entries[].namespaceCode`               | entry `+54`, 1             | retained overlapping `u8`                   | Internal trade namespace code | Certain             | Certain                   | High                | Exact four-code set match with both source and target codes in `itemtradeetc.bss`                                  | Closed |
+| `entries[].field55`                     | entry `+55`, 1             | retained overlapping `u8`                   | Neutral high-byte control     | Certain             | Certain                   | Unknown             | Recombines exactly with `namespaceCode` into `field54`; no capture-specific value validation                       | Closed |
+| `entries[].reserved56`                  | entry `+56..+106`, 51      | zero-validated reserved byte range, omitted | Structural padding            | Certain             | Certain                   | Unknown             | Every captured byte is zero and BSD rejects nonzero mutations                                                      | Closed |
+| `entries[].field107`                    | entry `+107`, 2            | retained overlapping `u16` peek             | Neutral control               | Certain             | Certain                   | Unknown             | Exact reference equality and exhaustive recomposition from the two byte views                                      | Closed |
+| `entries[].field107LowByte`, `field108` | entry `+107`, 1; `+108`, 1 | retained overlapping `u8` views             | Neutral byte controls         | Certain             | Certain                   | Unknown             | Recompose `field107` exactly in all 1,626 entries                                                                  | Closed |
+| `entries[].reserved109`                 | entry `+109..+123`, 15     | zero-validated reserved byte range, omitted | Structural padding            | Certain             | Certain                   | Unknown             | Every captured byte is zero and BSD rejects nonzero mutations                                                      | Closed |
+| `entries[].field124`                    | entry `+124`, 2            | retained overlapping `u16` peek             | Neutral control               | Certain             | Certain                   | Unknown             | Exact reference equality and exhaustive recomposition from the two byte views                                      | Closed |
+| `entries[].field124LowByte`, `field125` | entry `+124`, 1; `+125`, 1 | retained overlapping `u8` views             | Neutral byte controls         | Certain             | Certain                   | Unknown             | Recompose `field124` exactly in all 1,626 entries                                                                  | Closed |
+| `entries[].reserved126`                 | entry `+126`, 1            | zero-validated reserved byte range, omitted | Structural padding            | Certain             | Certain                   | Unknown             | Every captured byte is zero and BSD rejects nonzero mutations                                                      | Closed |
+| entry framing                           | each entry, 127            | `struct(...).fixedLength(127)` validation   | Complete entry grammar        | Certain             | Certain                   | Certain             | Every non-byte field is retained, every omission is a reserved byte range, and all 1,626 entries consume 127 bytes | Closed |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID      | Finding                                                                           | Evidence                                                                                                                                  | Schema/documentation impact                                        | Status |
+| ------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | ------ |
+| ITGT-01 | The primary table is intrinsically framed without the offset directory.           | Each row is `6 + entryCount * 127` bytes; inferred starts and lengths equal all 125 directory spans and end at EOF                        | Production schema imports no offset decoder                        | Closed |
+| ITGT-02 | `field54` contains a separately useful namespace byte.                            | Both complete builds use the distinctive code set present in both directions of `itemtradeetc.bss`; raw and byte views agree exhaustively | Namespace name remains High-confidence; no closed-domain validator | Closed |
+| ITGT-03 | Origin/category labels for the controls at 107 and 124 remain under-proven.       | No exact local mapping or discriminator survives falsification                                                                            | Neutral names preserve the values without speculative semantics    | Closed |
+| ITGT-04 | The BSD migration is exactly output-equivalent to the complete reference decoder. | All 125 rows and 1,626 entries match with normalized SHA-256 `deb6e24199324c215facf6527c8410ca99e5e166a1b1c9e02f11101b3f841076`           | No compatibility adapter or post-decode deletion is required       | Closed |

@@ -13,13 +13,26 @@ export function dbss(path: string) {
 
 export function bss(path: string) {
     return <S extends BsdShape>(shape: S) => {
-        return new Table<S>(
+        return new Table(
             path,
             struct({
-                /** Four-byte Pearl Abyss table signature. */
-                magic: bytes(4).ascii().is("PABR"),
+                /**
+                 * Validated four-byte Pearl Abyss table signature.
+                 *
+                 * The signature is framing rather than table data, so the
+                 * reserved byte range is intentionally absent from output.
+                 */
+                magic: bytes(4)
+                    .check(
+                        (value) =>
+                            value[0] === 0x50 &&
+                            value[1] === 0x41 &&
+                            value[2] === 0x42 &&
+                            value[3] === 0x52,
+                    )
+                    .reserved(),
                 ...shape,
-            }).omit({ magic: true }) as any,
+            }),
         );
     };
 }
@@ -34,7 +47,8 @@ class Table<S extends BsdShape> {
     async load(bdoPath = Bun.env.BDO_GAME_PATH) {
         const meta = await PAZ.readMeta(bdoPath);
         const entry = meta.find((entry) => {
-            return this.name === entry.fileName;
+            const path = join(entry.folderName, entry.fileName);
+            return this.name === entry.fileName || this.name === path;
         });
 
         if (!entry) {
@@ -50,14 +64,16 @@ class Table<S extends BsdShape> {
         const sink = file.writer({ highWaterMark: 1024 * 1024 });
         const stream = new JsonStreamStringify(decoded, undefined, 4);
         for await (const chunk of stream) {
-            sink.write(chunk);
+            await sink.write(chunk);
         }
+        await sink.end();
     }
 
     async extract(bdoPath = Bun.env.BDO_GAME_PATH) {
         const meta = await PAZ.readMeta(bdoPath);
         const entry = meta.find((entry) => {
-            return this.name === entry.fileName;
+            const path = join(entry.folderName, entry.fileName);
+            return this.name === entry.fileName || this.name === path;
         });
 
         if (!entry) {

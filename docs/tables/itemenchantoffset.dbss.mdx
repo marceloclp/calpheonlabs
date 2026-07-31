@@ -1,0 +1,54 @@
+---
+title: "itemenchantoffset.dbss"
+description: "Binary layout, pointer semantics, byte coverage, and exact snapshot evidence for the itemenchantoffset.dbss decoder in calpheonlabs."
+sidebar:
+    label: "itemenchantoffset.dbss"
+    icon: database
+search:
+    tags: [tables, items-knowledge-mental, dbss]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                      |
+| ------------------ | ---------------------------------------------------------------------------------------------------------- |
+| Evidence state     | Reconciled                                                                                                 |
+| Coverage           | 100%                                                                                                       |
+| Iteration          | 3                                                                                                          |
+| Last reviewed      | 2026-07-31                                                                                                 |
+| Captures examined  | Build 2938; `Paz/pad00000.meta` SHA-256 `b7eefe6059818f84c0545f10020fe93bd3bd5d0647e043120caf78726ccafe8f` |
+| Primary bytes      | 2,016,752; SHA-256 `0240be32df653547fa5330b9b3d8c82950145cdcc3d01c981bbb3af61870b2b0`                      |
+| Snapshot proof     | 168,061 rows; normalized SHA-256 `e2336e1bfdcf38b6438f97e686f0881a6f07320eb5b3dd826e4ba61c5a9a6ef3`        |
+| Decoder            | `packages/scraper/src/tables/itemenchantoffset.dbss.ts`                                                    |
+| Remaining blockers | None                                                                                                       |
+
+See [Decoder methodology](/methodology). The pointer relationships below are
+migration/falsification evidence for
+[itemenchant.dbss](/tables/itemenchant.dbss), not a production dependency of
+that payload decoder.
+
+## Field ledger
+
+| Field/path                               | Offset and width           | Representation                | Claimed meaning           | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                              | Status |
+| ---------------------------------------- | -------------------------- | ----------------------------- | ------------------------- | ------------------- | ------------------------- | ------------------- | ------------------------------------------------------------------------------------- | ------ |
+| `magic` (PABR signature)                 | file `+0`, 4               | checked `bytes(4).reserved()` | Table framing             | Certain             | Certain                   | Certain             | Exact `PABR` bytes; byte-only framing is intentionally omitted                        | Closed |
+| `rowCount`, `rows[]`                     | file `+4`, 4; then 12 each | retained `u32`, counted array | Pointer count and rows    | Certain             | Certain                   | Certain             | Count equals 168,061 and strict decode consumes the full table                        | Closed |
+| `rows[].itemId`                          | row `+0`, 3                | `u24`                         | Item-family identifier    | Certain             | Certain                   | Certain             | Low three bytes match the pointed payload identity in every row                       | Closed |
+| `rows[].enhancementLevel`                | row `+3`, 1                | `u8`                          | Enhancement discriminator | Certain             | Certain                   | High                | High packed byte matches the pointed payload identity exhaustively                    | Closed |
+| `rows[].offset`                          | row `+4`, 4                | `u32`                         | Payload-row start         | Certain             | Certain                   | Certain             | Sorted spans partition `itemenchant.dbss` from byte 4 through EOF                     | Closed |
+| `rows[].byteLength`                      | row `+8`, 4                | `u32`                         | Payload-row width         | Certain             | Certain                   | Certain             | Every span reaches the next physical row or EOF                                       | Closed |
+| `footer.reserved00`, `footer.reserved08` | final outer words, 4 each  | `bytes(4).reserved()`         | Byte-only PABR framing    | Certain             | Certain                   | Unknown             | Explicitly consumed and intentionally omitted                                         | Closed |
+| `footer.footerOffset`                    | final middle word, 4       | retained `u32`                | Footer position           | Certain             | Certain                   | Certain             | Stored value 2,016,740 equals the observed footer start; footer remains informational | Closed |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The reconciled decoder has no unresolved physical or representation assumptions.
+:::
+
+## Findings
+
+| ID     | Finding                                                                        | Evidence                                                                                    | Schema/documentation impact                                                     | Status   |
+| ------ | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | -------- |
+| IEO-01 | The directory is complete migration evidence but no longer production framing. | All 168,061 spans and packed keys agree with the intrinsic payload decode.                  | `itemenchant.dbss.ts` has no import, join, or runtime dependency on this table. | Resolved |
+| IEO-02 | Stored counts and the informational footer pointer remain visible.             | The strict BSD snapshot includes both values and matches the transformed reference exactly. | No scalar framing value is hidden; only byte ranges use `reserved()`.           | Resolved |
