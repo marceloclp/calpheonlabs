@@ -4,8 +4,6 @@
 | `mainquest.bss`       | Extract structured data from the string pool |
 | `charactersimply.bss` | Extract structured data from the string pool |
 
-// characterspawntypeoffset
-// characterstatic
 // contentsgroupoptionstaticstatusmanager
 // cookingstatdata
 // cutscenecharacterdata

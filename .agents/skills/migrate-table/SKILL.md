@@ -63,6 +63,10 @@ Before editing:
    `docs/tables/<table>.mdx` when present, and adjacent `src/tables2` decoders.
 4. Read the destination table, `packages/scraper/src/tables/common/bsd.ts`,
    `packages/scraper/src/tables/common/helpers.ts`, and nearby BSD decoders.
+   Treat `common/bsd.ts` as the shared BSD helper catalog: prefer importing a
+   compatible helper from it over recreating the same parser in the table
+   module. Inspect the helper's implementation before reuse and confirm that
+   it satisfies this skill's representation and validation rules.
 5. Inspect consumers before intentionally changing names or output shape.
 6. Consult [the BSD documentation](https://bsd.marceloclp.sh/) and the installed
    package source when a primitive's cursor or validation behavior is unclear.
@@ -136,11 +140,25 @@ table.
 
 Prefer declarative BSD composition:
 
+- Keep all import declarations contiguous. Do not insert blank lines between
+  external, shared-helper, and local import groups.
+- Check `packages/scraper/src/tables/common/bsd.ts` before defining a local
+  helper or escape hatch. Prefer reusing its compatible BSD helpers instead of
+  duplicating them in an individual decoder.
 - Use `struct`, `array`, `bytes`, numeric primitives, `bool`, `literal`,
   `find`, `remaining`, and modifiers before considering `custom`.
+- Decode a count-prefixed array with the count schema owned by `array(...)`,
+  for example `rows: array(u32(), Row)`. Do not emit a separate
+  `rowCount: u32().peek()` or equivalent immediately before the array. The
+  decoded array's `.length` already represents that count, so retaining both
+  is a redundant output alias.
 - Use `.pipe()` for a value-dependent length or nested schema when ordinary
   composition cannot express it directly.
 - Use `bytes(n)` for opaque varying data that must remain in the output.
+- Validate fixed ASCII strings with the BSD string representation, for
+  example `bytes(4).ascii().is("PABR")`. Do not validate a string token with
+  `bytes(n).check(...)`. Retain validated strings in the final table output
+  when they are part of the table representation.
 - Omit only byte ranges, and only with `bytes(n).reserved()`. It does not prove
   that bytes are zero; add a justified validator when the stored value is a
   format invariant.
@@ -150,7 +168,9 @@ Prefer declarative BSD composition:
 - Retain every non-byte value in the output, including numeric, Boolean,
   string, literal, array, union, and struct values. If it should not be
   emitted, it must be modeled as a byte range and consumed with
-  `bytes(n).reserved()`.
+  `bytes(n).reserved()`. A count prefix consumed directly by `array(...)` is
+  framing represented by the resulting array length, not a separately decoded
+  value that must also be emitted.
 - Never use `.pad(n)` or `padded(...)` to skip bytes. Represent every such
   range as an explicit `bytes(n).reserved()` field.
 - Use `.is()`, `.in()`, `.check()`, and `.fixedLength()` for structural
@@ -410,6 +430,14 @@ Do not complete the migration until all of these pass:
 
 - the production decoder uses BSD primitives and contains no avoidable escape
   hatch;
+- the decoder checked `packages/scraper/src/tables/common/bsd.ts` and reuses
+  compatible shared helpers instead of duplicating them locally;
+- import declarations are contiguous, with no blank lines between import
+  groups;
+- no count-prefixed array is preceded by a redundant emitted
+  `u32().peek()`/count field; use the resulting array's `.length`;
+- fixed string tokens use `bytes(...).ascii().is(...)`, not a manual
+  `bytes(...).check(...)` validator, and may remain in the output;
 - the production decoder never uses `.transform(() => undefined)`, `.omit()`,
   `.pick()`, `.pad()`, `padded(...)`, post-decode deletion, or another omission
   mechanism;
