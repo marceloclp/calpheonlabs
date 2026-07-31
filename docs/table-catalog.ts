@@ -106,6 +106,13 @@ export const tablePages = [
         type: "bss",
     },
     {
+        decoder: "characterspawntype.dbss.ts",
+        evidenceState: "reconciled",
+        name: "characterspawntype.dbss",
+        sourceLedger: true,
+        type: "dbss",
+    },
+    {
         decoder: "completequest.bss.ts",
         evidenceState: "ported",
         name: "completequest.bss",

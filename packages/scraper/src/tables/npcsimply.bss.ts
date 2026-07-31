@@ -1,4 +1,5 @@
 import { array, bool, bytes, struct, u16, u32 } from "@marceloclp/bsd";
+
 import { mixedText } from "./common/bsd";
 import { bss } from "./common/helpers";
 
@@ -32,7 +33,10 @@ const NpcSimplyRow = struct({
 });
 
 const NpcSimplyFooter = struct({
-    /** Absolute offset to the string pool; used for initial validation of physical layout. */
+    /**
+     * Absolute offset to the string pool; used for initial validation of
+     * physical layout.
+     */
     stringPoolOffset: u32(),
     /** Footer padding. */
     reserved: bytes(4).reserved(),

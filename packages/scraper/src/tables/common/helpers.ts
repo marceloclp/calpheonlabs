@@ -1,11 +1,8 @@
 import { join } from "node:path/posix";
-import {
-    type BsdShape,
-    type BsdStruct,
-    bytes,
-    struct,
-} from "@marceloclp/bsd";
+
+import { type BsdShape, type BsdStruct, bytes, struct } from "@marceloclp/bsd";
 import { JsonStreamStringify } from "json-stream-stringify";
+
 import { PAZ } from "../../paz/archive";
 
 export function dbss(path: string) {
@@ -32,7 +29,7 @@ class Table<S extends BsdShape> {
         /** File name (with extension). */
         private readonly name: string,
         private readonly schema: BsdStruct<S>,
-    ) { }
+    ) {}
 
     async load(bdoPath = Bun.env.BDO_GAME_PATH) {
         const meta = await PAZ.readMeta(bdoPath);
