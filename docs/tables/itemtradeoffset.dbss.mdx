@@ -1,0 +1,57 @@
+---
+title: "itemtradeoffset.dbss"
+description: "Binary layout, byte coverage, field semantics, and exact snapshot evidence for the BSD itemtradeoffset decoder."
+sidebar:
+    label: "itemtradeoffset.dbss"
+    icon: database
+search:
+    tags: [tables, items-knowledge-mental, dbss]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                                                                                                                                            |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                                                                                                                                             |
+| Iteration          | 3                                                                                                                                                                                                                                                                                                                |
+| Review state       | BSD migration reconciled                                                                                                                                                                                                                                                                                         |
+| Last reviewed      | 2026-07-31                                                                                                                                                                                                                                                                                                       |
+| Captures examined  | Build 2938; installed `pad00000.meta` SHA-256 `b7eefe6059818f84c0545f10020fe93bd3bd5d0647e043120caf78726ccafe8f`; 1,254-byte primary SHA-256 `994b2d709191fcec644cdbb2011533e5739ffd5188a7893a1e890fa7784fb88f`; 125 rows; normalized SHA-256 `fb953594c066c1fa62d0081e75aca80943d35486cee0e2291b5c935893cda099` |
+| Decoder            | `packages/scraper/src/tables/itemtradeoffset.dbss.ts`                                                                                                                                                                                                                                                            |
+| Remaining blockers | None                                                                                                                                                                                                                                                                                                             |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The strict BSD decoder consumes all 1,254 bytes and exactly matches the
+125-pointer reference snapshot in stored directory order.
+:::
+
+<CardGroup cols={1}>
+    <Card title="itemtrade.dbss" href="/tables/itemtrade.dbss" icon="network">
+        Open the independently decoded compact payload table.
+    </Card>
+</CardGroup>
+
+## Field ledger
+
+| Field/path           | Offset and width                  | Representation                           | Claimed meaning                         | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                   | Status |
+| -------------------- | --------------------------------- | ---------------------------------------- | --------------------------------------- | ------------------- | ------------------------- | ------------------- | -------------------------------------------------------------------------- | ------ |
+| `rowCount`, `rows[]` | table `+0`, 4 then 125 x 10 bytes | retained `u32` peek and counted array    | Stored count and compact trade pointers | Certain             | Certain                   | Certain             | Count frames 125 rows and strict decoding ends at byte 1,254               | Closed |
+| `rows[].npcId`       | row `+0`, 2                       | retained `u16`                           | Pointed NPC identifier                  | Certain             | Certain                   | Certain             | Every pointed two-byte value equals this ID and the detailed table key set | Closed |
+| `rows[].offset`      | row `+2`, 4                       | retained `u32`                           | Compact row start                       | Certain             | Certain                   | Certain             | Every offset identifies a complete two-byte row after the four-byte count  | Closed |
+| `rows[].byteLength`  | row `+6`, 4                       | retained `u32`                           | Compact row width                       | Certain             | Certain                   | Certain             | All 125 values are two and all spans exactly partition the compact payload | Closed |
+| row framing          | each row, 10                      | `struct(...).fixedLength(10)` validation | Complete pointer grammar                | Certain             | Certain                   | Certain             | Every non-byte value is retained and all rows consume exactly ten bytes    | Closed |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID     | Finding                                                                                   | Evidence                                                                                                  | Schema/documentation impact                                        | Status |
+| ------ | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | ------ |
+| ITO-01 | NPC meaning is cross-table evidence rather than an intrinsic property of the pointer key. | The same 125 identifiers own the independently decoded detailed trade rows                                | Semantic claim is documented while the production join is deferred | Closed |
+| ITO-02 | The BSD migration exactly preserves the complete pointer directory.                       | 125 rows match with normalized SHA-256 `fb953594c066c1fa62d0081e75aca80943d35486cee0e2291b5c935893cda099` | No compatibility adapter or post-decode deletion is required       | Closed |

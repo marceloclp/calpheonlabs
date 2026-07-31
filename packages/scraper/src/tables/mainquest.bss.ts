@@ -1,5 +1,4 @@
 import { array, bytes, padded, struct, u16, u32, u8 } from "@marceloclp/bsd";
-
 import { bss } from "./common/helpers";
 
 /** One Quest-window entry containing only physical indexes and controls. */

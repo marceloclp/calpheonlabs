@@ -1,0 +1,60 @@
+---
+title: "itemtrade.dbss"
+description: "Binary layout, byte coverage, field semantics, and exact snapshot evidence for the intrinsic BSD itemtrade decoder."
+sidebar:
+    label: "itemtrade.dbss"
+    icon: database
+search:
+    tags: [tables, items-knowledge-mental, dbss]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                                                                                                                                          |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                                                                                                                                           |
+| Iteration          | 3                                                                                                                                                                                                                                                                                                              |
+| Review state       | BSD migration reconciled                                                                                                                                                                                                                                                                                       |
+| Last reviewed      | 2026-07-31                                                                                                                                                                                                                                                                                                     |
+| Captures examined  | Build 2938; installed `pad00000.meta` SHA-256 `b7eefe6059818f84c0545f10020fe93bd3bd5d0647e043120caf78726ccafe8f`; 254-byte primary SHA-256 `5e622b5fda98edde3bbfe82e51bf66e7183657e2dcf77ea8b14686d1a4df76aa`; 125 rows; normalized SHA-256 `bcaf65e1d4e6e07b3db8389fa9d59959594fe386ab9ff43205f854a201c93dc7` |
+| Decoder            | `packages/scraper/src/tables/itemtrade.dbss.ts`                                                                                                                                                                                                                                                                |
+| Remaining blockers | None                                                                                                                                                                                                                                                                                                           |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The strict BSD decoder consumes the complete primary file and exactly matches
+the 125-row reference snapshot in physical order.
+:::
+
+<CardGroup cols={1}>
+    <Card
+        title="itemtradeoffset.dbss"
+        href="/tables/itemtradeoffset.dbss"
+        icon="network"
+    >
+        Open the independently decoded pointer directory used as migration
+        evidence.
+    </Card>
+</CardGroup>
+
+## Field ledger
+
+| Field/path           | Offset and width                 | Representation                          | Claimed meaning                         | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                                          | Status |
+| -------------------- | -------------------------------- | --------------------------------------- | --------------------------------------- | ------------------- | ------------------------- | ------------------- | ------------------------------------------------------------------------------------------------- | ------ |
+| `rowCount`, `rows[]` | table `+0`, 4 then 125 x 2 bytes | retained `u32` peek and counted array   | Stored count and compact trade NPC list | Certain             | Certain                   | Certain             | Count frames all 125 rows and strict decoding ends at byte 254; exact reference snapshot equality | Closed |
+| `rows[].npcId`       | row `+0`, 2                      | retained `u16`                          | NPC identifier                          | Certain             | Certain                   | Certain             | Exact 125-key match with both detailed trade directories and their payload rows                   | Closed |
+| row framing          | each row, 2                      | `struct(...).fixedLength(2)` validation | Complete compact-row grammar            | Certain             | Certain                   | Certain             | Every row consumes two bytes and the count-derived region ends exactly at EOF                     | Closed |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID    | Finding                                                                             | Evidence                                                                                                  | Schema/documentation impact                                      | Status |
+| ----- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ------ |
+| IT-01 | NPC identity is established by companion agreement rather than the anonymous `u16`. | All 125 values equal the detailed payload and both directories without a single key mismatch              | Meaning is documented while all production joins remain deferred | Closed |
+| IT-02 | The BSD migration is exactly output-equivalent to the complete reference decoder.   | 125 normalized rows match with SHA-256 `bcaf65e1d4e6e07b3db8389fa9d59959594fe386ab9ff43205f854a201c93dc7` | No compatibility adapter or offset dependency is required        | Closed |

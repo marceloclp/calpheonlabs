@@ -1,0 +1,62 @@
+---
+title: "itemmaingroup.bss"
+description: "Binary layout, indexed condition semantics, byte coverage, and exact snapshot evidence for the itemmaingroup.bss decoder in calpheonlabs."
+sidebar:
+    label: "itemmaingroup.bss"
+    icon: database
+search:
+    tags: [tables, items-knowledge-mental, bss]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Evidence state     | Reconciled                                                                                                                           |
+| Coverage           | 100%                                                                                                                                 |
+| Iteration          | 4                                                                                                                                    |
+| Last reviewed      | 2026-07-31                                                                                                                           |
+| Captures examined  | Build 2938; `Paz/pad00000.meta` SHA-256 `b7eefe6059818f84c0545f10020fe93bd3bd5d0647e043120caf78726ccafe8f`                           |
+| Primary bytes      | 667,876; SHA-256 `32b5c35dec689cb423f34dcddd8b116d3a06cb6876db031c4d0addd5c6488e9b`                                                  |
+| Snapshot proof     | 16,227 rows / 18,633 entries / 197 conditions; normalized SHA-256 `b9527ac33f1ee7cc056b5f7a933b7190276c654a40be293743abefcdf8024fd3` |
+| Decoder            | `packages/scraper/src/tables/itemmaingroup.bss.ts`                                                                                   |
+| Remaining blockers | None                                                                                                                                 |
+
+See [Decoder methodology](/methodology). Subgroup identifiers are deferred
+joins to [itemsubgroup.dbss](/tables/itemsubgroup.dbss); no companion bytes are
+loaded by this decoder.
+
+## Field ledger
+
+| Field/path                                                    | Offset and width              | Representation                | Claimed meaning              | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                        | Status |
+| ------------------------------------------------------------- | ----------------------------- | ----------------------------- | ---------------------------- | ------------------- | ------------------------- | ------------------- | ------------------------------------------------------------------------------- | ------ |
+| PABR signature                                                | file `+0`, 4                  | checked `bytes(4).reserved()` | Table framing                | Certain             | Certain                   | Certain             | Exact `PABR` bytes; byte-only framing is intentionally omitted                  | Closed |
+| `rowCount`, `rows[]`                                          | file `+4`, 4; variable rows   | retained `u32`, counted array | Main-group count and rows    | Certain             | Certain                   | Certain             | 16,227 rows consume exactly to the condition dictionary                         | Closed |
+| `rows[].groupId`                                              | row `+0`, 4                   | `u32`                         | Main-group identifier        | Certain             | Certain                   | High                | Stable unique identity referenced by NPC, shop, drop, and worker selectors      | Closed |
+| `rows[].field04`                                              | row `+4`, 4                   | `u32`                         | Neutral row control          | Certain             | Certain                   | Unknown             | Exact position and value retained; historical names do not agree exhaustively   | Closed |
+| `rows[].reserved08`, `reserved12`, `reserved17`, `reserved21` | row `+8..+12`, `+17..+24`     | `bytes(n).reserved()`         | Byte-only empty ranges       | Certain             | Certain                   | Unknown             | Explicitly consumed and intentionally omitted                                   | Closed |
+| `rows[].marker13`                                             | row `+13`, 4                  | retained bytes                | Neutral marker               | Certain             | Certain                   | Unknown             | Varies across rows and has no proven universal gameplay label                   | Closed |
+| `rows[].entryCount`, `rows[].entries[]`                       | row `+25`, 4; then 10 each    | retained `u32`, counted array | Reference count and list     | Certain             | Certain                   | Certain             | 18,633 entries derive every variable row width exactly                          | Closed |
+| `entries[].reserved00`                                        | entry `+0`, 4                 | `bytes(4).reserved()`         | Byte-only empty prefix       | Certain             | Certain                   | Unknown             | Explicitly consumed and intentionally omitted                                   | Closed |
+| `entries[].conditionIndex`                                    | entry `+4`, 4                 | `u32`                         | Condition-array index        | Certain             | Certain                   | Certain             | Every captured value resolves inside the 197-record dictionary                  | Closed |
+| `entries[].subgroupId`                                        | entry `+8`, 2                 | `u16`                         | Item-subgroup identifier     | Certain             | Certain                   | Certain             | Exhaustive joins resolve through `itemsubgroup.dbss`                            | Closed |
+| `trailer.conditionCount`, `conditions[]`                      | dictionary start, 4; variable | retained `u32`, counted array | Indexed condition dictionary | Certain             | Certain                   | Certain             | 197 records consume exactly to the footer                                       | Closed |
+| `conditions[].marker`                                         | condition `+0`, 1             | retained `u8().is(1)`         | Condition-record marker      | Certain             | Certain                   | Unknown             | Uniform intrinsic marker and active validation                                  | Closed |
+| `conditions[].byteLength`                                     | condition `+1`, 4             | retained even `u32`           | UTF-16 byte length           | Certain             | Certain                   | Certain             | Retained independently and frames each string exactly                           | Closed |
+| `conditions[].text`                                           | condition `+5`, variable      | UTF-16 text                   | Condition expression         | Certain             | Certain                   | High                | Valid text indexed exhaustively by row entries                                  | Closed |
+| `footer.trailerOffset`                                        | final `-8`, 4                 | retained `u32`                | Condition-dictionary start   | Certain             | Certain                   | Certain             | Agrees with count-derived row-region end; retained as informational footer data | Closed |
+| `footer.reserved04`                                           | final `-4`, 4                 | `bytes(4).reserved()`         | Byte-only terminator         | Certain             | Certain                   | Unknown             | Explicitly consumed and intentionally omitted without footer validation         | Closed |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The reconciled decoder has no unresolved physical or representation assumptions.
+:::
+
+## Findings
+
+| ID     | Finding                                                                       | Evidence                                                                                        | Schema/documentation impact                                                 | Status   |
+| ------ | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | -------- |
+| IMG-01 | Main-group rows and their condition dictionary are independently self-framed. | Row/entry counts, condition counts/lengths, and strict EOF consumption agree exactly.           | Production decoding requires no offset companion or post-decode repair.     | Resolved |
+| IMG-02 | `marker13` and `field04` do not have universal gameplay names.                | Historical correlations are incomplete and the current capture preserves unexplained variation. | Neutral fields remain fully represented.                                    | Resolved |
+| IMG-03 | Footer data is informational after the layout proof.                          | The stored pointer agrees with the captured row-region end.                                     | `trailerOffset` is retained, while the footer has no runtime pointer check. | Resolved |

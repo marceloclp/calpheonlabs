@@ -1,0 +1,49 @@
+---
+title: "itemlinkprice.bss"
+description: "Binary layout, directional price-reference semantics, and exact snapshot evidence for the itemlinkprice.bss decoder in calpheonlabs."
+sidebar:
+    label: "itemlinkprice.bss"
+    icon: database
+search:
+    tags: [tables, items-knowledge-mental, bss]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                      |
+| ------------------ | ---------------------------------------------------------------------------------------------------------- |
+| Evidence state     | Reconciled                                                                                                 |
+| Coverage           | 100%                                                                                                       |
+| Iteration          | 2                                                                                                          |
+| Last reviewed      | 2026-07-31                                                                                                 |
+| Captures examined  | Build 2938; `Paz/pad00000.meta` SHA-256 `b7eefe6059818f84c0545f10020fe93bd3bd5d0647e043120caf78726ccafe8f` |
+| Primary bytes      | 29,660; SHA-256 `727129d09d9b95c8dd44976afcffbaefa0db3a57c83d8c9c6cd31d0d57ef83ee`                         |
+| Snapshot proof     | 3,705 rows; normalized SHA-256 `d7619460b98180754a430f0ba5abe5ceb92c4ec25a2b0dec37cf2c186a1e48e1`          |
+| Decoder            | `packages/scraper/src/tables/itemlinkprice.bss.ts`                                                         |
+| Remaining blockers | None                                                                                                       |
+
+See [Decoder methodology](/methodology).
+
+## Field ledger
+
+| Field/path                               | Offset and width          | Representation                      | Claimed meaning                             | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                        | Status |
+| ---------------------------------------- | ------------------------- | ----------------------------------- | ------------------------------------------- | ------------------- | ------------------------- | ------------------- | ------------------------------------------------------------------------------- | ------ |
+| PABR signature                           | file `+0`, 4              | checked `bytes(4).reserved()`       | Table framing                               | Certain             | Certain                   | Certain             | Exact `PABR` bytes; byte-only framing is intentionally omitted                  | Closed |
+| `rowCount`, `rows[]`                     | file `+4`, 4; then 8 each | retained `u32`, counted fixed array | Link count and relationships                | Certain             | Certain                   | High                | 3,705 fixed rows consume exactly to the footer                                  | Closed |
+| `rows[].itemId`                          | row `+0`, 4               | positive `u32`                      | Non-market source item family               | Certain             | Certain                   | High                | Reference lineage proves unique source items absent from market search          | Closed |
+| `rows[].marketPriceReferenceItemId`      | row `+4`, 4               | positive `u32`                      | Market-listed item supplying price identity | Certain             | Certain                   | High                | Reference lineage proves all targets are item families present in market search | Closed |
+| `footer.reserved00`, `footer.reserved08` | final outer words, 4 each | `bytes(4).reserved()`               | Byte-only PABR framing                      | Certain             | Certain                   | Unknown             | Explicitly consumed and intentionally omitted                                   | Closed |
+| `footer.footerOffset`                    | final middle word, 4      | retained `u32`                      | Footer position                             | Certain             | Certain                   | Certain             | Equals the observed footer start; footer is informational                       | Closed |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The reconciled decoder has no unresolved physical or representation assumptions.
+:::
+
+## Findings
+
+| ID     | Finding                                                                                  | Evidence                                                                                                            | Schema/documentation impact                                          | Status   |
+| ------ | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | -------- |
+| ILP-01 | The two words form a directional identity link, not an undirected pair or numeric price. | Source/target market-search correlation is exhaustive in the source ledger; the physical row contains only two ids. | Field names preserve direction and do not invent a live price value. | Resolved |
+| ILP-02 | All scalar framing remains visible.                                                      | Exact parity includes `rowCount` and `footer.footerOffset`.                                                         | Only the PABR byte ranges are omitted with `reserved()`.             | Resolved |

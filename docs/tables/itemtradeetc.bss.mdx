@@ -1,0 +1,63 @@
+---
+title: "itemtradeetc.bss"
+description: "Binary layout, byte coverage, field semantics, and exact snapshot evidence for the intrinsic BSD itemtradeetc decoder."
+sidebar:
+    label: "itemtradeetc.bss"
+    icon: database
+search:
+    tags: [tables, items-knowledge-mental, bss]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                                                                                                                                                                       |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                                                                                                                                                                        |
+| Iteration          | 3                                                                                                                                                                                                                                                                                                                                           |
+| Review state       | BSD migration reconciled                                                                                                                                                                                                                                                                                                                    |
+| Last reviewed      | 2026-07-31                                                                                                                                                                                                                                                                                                                                  |
+| Captures examined  | Build 2938; installed `pad00000.meta` SHA-256 `b7eefe6059818f84c0545f10020fe93bd3bd5d0647e043120caf78726ccafe8f`; 184-byte primary SHA-256 `2b296c7d9fbc2d3d338ccb08385a990c9caa29dad8adcb0f6108659333077f72`; 4 groups, 8 entries, and 5 thresholds; normalized SHA-256 `a69feeae0c8f073ec3b2024951668fcb3d9fd9aa152c80f92832789b1299203b` |
+| Decoder            | `packages/scraper/src/tables/itemtradeetc.bss.ts`                                                                                                                                                                                                                                                                                           |
+| Remaining blockers | None                                                                                                                                                                                                                                                                                                                                        |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The strict BSD decoder consumes all 184 primary bytes and exactly matches the
+complete transformed reference snapshot. Only the four-byte PABR framing range
+and documented reserved byte ranges are omitted.
+:::
+
+## Field ledger
+
+| Field/path                               | Offset and width                    | Representation                              | Claimed meaning                    | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                                         | Status |
+| ---------------------------------------- | ----------------------------------- | ------------------------------------------- | ---------------------------------- | ------------------- | ------------------------- | ------------------- | ------------------------------------------------------------------------------------------------ | ------ |
+| PABR signature                           | table `+0`, 4                       | validated reserved byte range               | Pearl Abyss table framing          | Certain             | Certain                   | Certain             | Exact `PABR` bytes are validated by the shared `bss` helper and intentionally omitted            | Closed |
+| `ratioGroupCount`, `ratioGroups[]`       | `+4`, 4 then groups                 | retained `u32` peek and counted array       | Source-code groups                 | Certain             | Certain                   | High                | Count frames four groups and every nested source repeats its enclosing source                    | Closed |
+| `ratioGroups[].sourceCode`               | group `+0`, 1                       | retained `u8`                               | Source namespace code              | Certain             | Certain                   | High                | Repeated by all nested entries; code set matches the trade entry namespace byte                  | Closed |
+| `ratioGroups[].entries[]`                | group `+1`, 4 then ten-byte entries | count consumed; entries retained            | Directed conversions               | Certain             | Certain                   | High                | Eight entries exhaust all group bodies; repeated-source validation rejects inconsistent branches | Closed |
+| `entries[].sourceCode`, `targetCode`     | entry `+0`, 1; `+1`, 1              | retained `u8` values                        | Source and target namespaces       | Certain             | Certain                   | High                | Reciprocal four-code conversion matrix and exact reference equality                              | Closed |
+| `entries[].reserved02`                   | entry `+2`, 1                       | zero-validated reserved byte range          | Structural padding                 | Certain             | Certain                   | Unknown             | All eight bytes are zero and the BSD check rejects nonzero input                                 | Closed |
+| `entries[].marker24`                     | entry `+3`, 3                       | retained `u24().is(0x492ae6)`               | Structural marker                  | Certain             | Certain                   | Unknown             | All eight entries store the marker and the native validator discriminates corruption             | Closed |
+| `entries[].ratioNumerator`               | entry `+6`, 4                       | retained `u32`                              | Million-based multiplier numerator | Certain             | Certain                   | High                | Values form the reciprocal conversion matrix preserved by the exact snapshot                     | Closed |
+| entry framing                            | each entry, 10                      | `struct(...).fixedLength(10)` validation    | Complete conversion-entry grammar  | Certain             | Certain                   | Certain             | Fixed-length validation covers every byte of all eight entries                                   | Closed |
+| `thresholdCount`, `thresholds[]`         | after groups, 4 then 12-byte rows   | retained `u32` peek and counted array       | Ordered threshold records          | Certain             | Certain                   | High                | Count frames five rows immediately before the footer                                             | Closed |
+| `thresholds[].thresholdValue`            | row `+0`, 4                         | retained `u32`                              | Inclusive value boundary           | Certain             | Certain                   | High                | Ordered series begins at zero and matches the complete reference output                          | Closed |
+| `thresholds[].reserved04`                | row `+4`, 4                         | zero-validated reserved byte range          | Structural padding                 | Certain             | Certain                   | Unknown             | Every word is zero and the BSD check rejects nonzero input                                       | Closed |
+| `thresholds[].ratioNumerator`            | row `+8`, 4                         | retained `u32`                              | Million-based multiplier numerator | Certain             | Certain                   | High                | Monotone multiplier series aligns with the stored boundaries                                     | Closed |
+| threshold framing                        | each row, 12                        | `struct(...).fixedLength(12)` validation    | Complete threshold-row grammar     | Certain             | Certain                   | Certain             | Fixed-length validation covers all five threshold rows                                           | Closed |
+| `footer.footerOffset`                    | final struct `+4`, 4                | retained informational `u32`                | Stored footer start                | Certain             | Certain                   | Certain             | Value 172 identifies the final twelve-byte footer; no runtime footer assertion is imposed        | Closed |
+| `footer.reserved00`, `footer.reserved08` | final struct `+0`, 4; `+8`, 4       | informational reserved byte ranges, omitted | Footer framing capacity            | Certain             | Certain                   | Unknown             | Both byte ranges are declaratively consumed without capture-specific footer validation           | Closed |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID     | Finding                                                                               | Evidence                                                                                              | Schema/documentation impact                                                     | Status |
+| ------ | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------ |
+| ITE-01 | The conversion series is evidence, not a closed production domain.                    | One installed plaintext capture contains the four groups, eight entries, and five thresholds          | Production validation is structural and relational rather than value-list based | Closed |
+| ITE-02 | The BSD migration exactly preserves all non-byte values while omitting framing bytes. | Full normalized match with SHA-256 `a69feeae0c8f073ec3b2024951668fcb3d9fd9aa152c80f92832789b1299203b` | The adapter removes only the legacy header string; the footer value remains     | Closed |

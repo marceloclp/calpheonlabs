@@ -1,0 +1,65 @@
+---
+title: "itemexchangetoclassmapkey.bss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the BSD itemexchangetoclassmapkey decoder."
+sidebar:
+    label: "itemexchangetoclassmapkey.bss"
+    icon: database
+search:
+    tags: [tables, items-knowledge-mental, bss]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                                                                                                                                             |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                                                                                                                                              |
+| Iteration          | 2                                                                                                                                                                                                                                                                                                                 |
+| Review state       | BSD migration reconciled                                                                                                                                                                                                                                                                                          |
+| Last reviewed      | 2026-07-31                                                                                                                                                                                                                                                                                                        |
+| Captures examined  | Installed build 2938; `pad00000.meta` SHA-256 `b7eefe6059818f84c0545f10020fe93bd3bd5d0647e043120caf78726ccafe8f`; 36,180-byte table SHA-256 `0792e49fa4b90b9977a6a8313a0e523b683be490144f09b78adf3107d0cf484e`; 4,520 rows; normalized SHA-256 `fca90ef4835386334e43ee5c4e52dfd7fb541d6d611b8ee0499ca578abd163dd` |
+| Decoder            | `packages/scraper/src/tables/itemexchangetoclassmapkey.bss.ts`                                                                                                                                                                                                                                                    |
+| Remaining blockers | None                                                                                                                                                                                                                                                                                                              |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The strict BSD decoder consumes the complete installed PABR table and matches all
+4,520 transformed reference rows with zero normalized mismatches.
+:::
+
+## Related table
+
+<CardGroup cols={1}>
+    <Card
+        title="itemexchangetoclass.dbss"
+        href="/tables/itemexchangetoclass.dbss"
+        icon="network"
+    >
+        Open the class-slot vectors referenced by this reverse lookup.
+    </Card>
+</CardGroup>
+
+## Field ledger
+
+| Field/path                               | Offset and width                       | Representation                                                   | Claimed meaning                    | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                                        | Status         |
+| ---------------------------------------- | -------------------------------------- | ---------------------------------------------------------------- | ---------------------------------- | ------------------- | ------------------------- | ------------------- | ----------------------------------------------------------------------------------------------- | -------------- |
+| PABR signature                           | table `+0..+3`; four bytes             | validated as `PABR` framing and omitted as a reserved byte range | Pearl Abyss record-table signature | Certain             | Certain                   | Certain             | Shared `bss` framing validates all four bytes before any row decoding                           | Closed         |
+| encoded row count                        | table `+4..+7`; `u32`                  | consumed by `array`; not emitted                                 | number of reverse-map entries      | Certain             | Certain                   | Certain             | Count selects 4,520 rows and reaches the footer at byte 36,168                                  | Closed         |
+| `rows`                                   | table `+8..+36,167`; 4,520 × 8 bytes   | retained in physical order                                       | class-exchange reverse lookup      | Certain             | Certain                   | High                | Complete transformed-reference equality                                                         | Closed         |
+| `rows[].itemId`                          | row `+0..+3`; positive `u32`           | retained                                                         | exchangeable class item            | Certain             | Certain                   | High                | All 4,520 values are unique and occur in the referenced group's class-slot vector               | Closed         |
+| `rows[].exchangeGroupId`                 | row `+4..+7`; positive `u32`           | retained                                                         | class-exchange group               | Certain             | Certain                   | High                | Every value resolves through `itemexchangetoclass.dbss`; zero missing or contradictory mappings | Closed         |
+| `footer.reserved00`, `footer.reserved08` | footer `+0..+3` and `+8..+11`; 8 bytes | two `bytes(4).reserved()` ranges omitted                         | informational footer framing       | Certain             | Certain                   | Unknown             | The explicit footer schema consumes both ranges without imposing content claims                 | Closed neutral |
+| `footer.footerOffset`                    | footer `+4..+7`; `u32`                 | retained in containing footer struct                             | absolute footer start              | Certain             | Certain                   | Certain             | Stored value is 36,168, equal to the count-derived end of the row region                        | Closed         |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                             | Evidence                                                                                                        | Schema/documentation impact                                                     | Status |
+| ---- | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------ |
+| F-01 | This is an exhaustive reverse lookup, not another exchange recipe.  | Its 4,520 unique items exactly equal the 4,520 unique nonzero items in all current class-slot vectors.          | The decoder retains only the physical item/group pairs and defers joins.        | Closed |
+| F-02 | The PABR footer is informational output rather than runtime policy. | Strict decoding consumes the 12-byte footer and retains its numeric pointer; no footer validation selects rows. | Footer byte ranges are explicit reserved fields and `footerOffset` is retained. | Closed |

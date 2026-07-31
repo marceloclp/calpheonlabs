@@ -1,0 +1,64 @@
+---
+title: "itemexchangebynpcoffset.dbss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the BSD itemexchangebynpcoffset decoder."
+sidebar:
+    label: "itemexchangebynpcoffset.dbss"
+    icon: database
+search:
+    tags: [tables, npcs-characters, dbss]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                                                                                                                                          |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                                                                                                                                           |
+| Iteration          | 2                                                                                                                                                                                                                                                                                                              |
+| Review state       | BSD migration reconciled                                                                                                                                                                                                                                                                                       |
+| Last reviewed      | 2026-07-31                                                                                                                                                                                                                                                                                                     |
+| Captures examined  | Installed build 2938; `pad00000.meta` SHA-256 `b7eefe6059818f84c0545f10020fe93bd3bd5d0647e043120caf78726ccafe8f`; 2,094-byte table SHA-256 `14f9feac7752b3b562665616c8b8131d376c3b8df6a0a18bb40acb96ccc6bfc7`; 209 rows; normalized SHA-256 `1997dc2df9a0ea0ab7526e13a04d62554f7737929b8af1320eab6c925b426e1e` |
+| Decoder            | `packages/scraper/src/tables/itemexchangebynpcoffset.dbss.ts`                                                                                                                                                                                                                                                  |
+| Remaining blockers | None                                                                                                                                                                                                                                                                                                           |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The strict BSD decoder consumes the complete installed directory and matches all
+209 reference rows with zero normalized mismatches.
+:::
+
+## Related table
+
+<CardGroup cols={1}>
+    <Card
+        title="itemexchangebynpc.dbss"
+        href="/tables/itemexchangebynpc.dbss"
+        icon="network"
+    >
+        Open the intrinsically fixed-width payload table described by this
+        directory.
+    </Card>
+</CardGroup>
+
+## Field ledger
+
+| Field/path          | Offset and width                   | Representation                      | Claimed meaning                       | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                                                        | Status |
+| ------------------- | ---------------------------------- | ----------------------------------- | ------------------------------------- | ------------------- | ------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------- | ------ |
+| encoded row count   | table `+0..+3`; `u32`              | consumed by `array`; not emitted    | number of directory entries           | Certain             | Certain                   | Certain             | Count selects exactly 209 ten-byte entries and strict decoding reaches byte 2,094                               | Closed |
+| `rows`              | table `+4..+2,093`; 209 × 10 bytes | retained in encoded directory order | item-exchange payload directory       | Certain             | Certain                   | Certain             | Complete reference equality preserves the directory order                                                       | Closed |
+| `rows[].key`        | row `+0..+1`; `u16`                | retained                            | exchange identity                     | Certain             | Certain                   | Certain             | All 209 values match both identities at their pointed-to primary rows                                           | Closed |
+| `rows[].offset`     | row `+2..+5`; `u32`                | retained                            | absolute start of the indexed payload | Certain             | Certain                   | Certain             | Sorting by offset yields `6 + index × 28` for every physical row; zero pointer mismatches                       | Closed |
+| `rows[].byteLength` | row `+6..+9`; `u32`                | retained                            | payload width excluding the outer key | Certain             | Certain                   | Certain             | Every entry stores 26 and each span ends immediately before the next row's two-byte outer key or at primary EOF | Closed |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                       | Evidence                                                                                                             | Schema/documentation impact                                                                                 | Status |
+| ---- | ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------ |
+| F-01 | The directory indexes the 26-byte payload after each two-byte outer identity. | The first offset is 6, every byte length is 26, and all 209 offsets equal their primary row start plus two.          | `offset` and `byteLength` retain their established meanings; the outer key remains part of the primary row. | Closed |
+| F-02 | Encoded directory order is not physical primary-row order.                    | Seventeen same-index identities differ, but offset sorting restores all 209 primary identities with zero mismatches. | Production preserves encoded directory order and does not sort or join rows.                                | Closed |

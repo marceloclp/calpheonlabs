@@ -1,0 +1,61 @@
+---
+title: "itemtradegrouptonpcoffset.dbss"
+description: "Binary layout, byte coverage, field semantics, and exact snapshot evidence for the BSD itemtradegrouptonpcoffset decoder."
+sidebar:
+    label: "itemtradegrouptonpcoffset.dbss"
+    icon: database
+search:
+    tags: [tables, items-knowledge-mental, dbss]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                                                                                                                                            |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                                                                                                                                             |
+| Iteration          | 3                                                                                                                                                                                                                                                                                                                |
+| Review state       | BSD migration reconciled                                                                                                                                                                                                                                                                                         |
+| Last reviewed      | 2026-07-31                                                                                                                                                                                                                                                                                                       |
+| Captures examined  | Build 2938; installed `pad00000.meta` SHA-256 `b7eefe6059818f84c0545f10020fe93bd3bd5d0647e043120caf78726ccafe8f`; 1,254-byte primary SHA-256 `eaedfa6b386da26b542bffcedfb0f38127f15e43988b1a7f034d5308b0478f3c`; 125 rows; normalized SHA-256 `86b909320d616e46ba6fbbb74eec1f73da172d792385099ff9eb72aa98ff685b` |
+| Decoder            | `packages/scraper/src/tables/itemtradegrouptonpcoffset.dbss.ts`                                                                                                                                                                                                                                                  |
+| Remaining blockers | None                                                                                                                                                                                                                                                                                                             |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The strict BSD decoder consumes all 1,254 bytes and exactly matches the
+125-pointer reference snapshot in stored directory order.
+:::
+
+<CardGroup cols={1}>
+    <Card
+        title="itemtradegrouptonpc.dbss"
+        href="/tables/itemtradegrouptonpc.dbss"
+        icon="network"
+    >
+        Open the independently decoded detailed payload table.
+    </Card>
+</CardGroup>
+
+## Field ledger
+
+| Field/path           | Offset and width                  | Representation                           | Claimed meaning                          | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                                | Status |
+| -------------------- | --------------------------------- | ---------------------------------------- | ---------------------------------------- | ------------------- | ------------------------- | ------------------- | --------------------------------------------------------------------------------------- | ------ |
+| `rowCount`, `rows[]` | table `+0`, 4 then 125 x 10 bytes | retained `u32` peek and counted array    | Stored count and detailed trade pointers | Certain             | Certain                   | Certain             | Count frames 125 rows and strict decoding ends at byte 1,254                            | Closed |
+| `rows[].npcId`       | row `+0`, 2                       | retained `u16`                           | Pointed NPC identifier                   | Certain             | Certain                   | Certain             | Equals pointed row, every nested entry, and the compact table key set                   | Closed |
+| `rows[].offset`      | row `+2`, 4                       | retained `u32`                           | Detailed row start                       | Certain             | Certain                   | Certain             | Sorting by stored offsets partitions the payload after its four-byte count without gaps | Closed |
+| `rows[].byteLength`  | row `+6`, 4                       | retained `u32`                           | Detailed row width                       | Certain             | Certain                   | Certain             | Every value equals `6 + entryCount * 127` in the independently decoded destination row  | Closed |
+| row framing          | each row, 10                      | `struct(...).fixedLength(10)` validation | Complete pointer grammar                 | Certain             | Certain                   | Certain             | All 125 rows consume exactly ten bytes and preserve every stored value                  | Closed |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID       | Finding                                                             | Evidence                                                                                                  | Schema/documentation impact                                   | Status |
+| -------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | ------ |
+| ITGTO-01 | Pointer directory order differs from physical payload order.        | The first stored pointer targets a row near EOF; sorting all spans partitions the payload                 | Decoder preserves stored order; sorting is investigation-only | Closed |
+| ITGTO-02 | The BSD migration exactly preserves the complete pointer directory. | 125 rows match with normalized SHA-256 `86b909320d616e46ba6fbbb74eec1f73da172d792385099ff9eb72aa98ff685b` | No companion join or adapter exists in production             | Closed |

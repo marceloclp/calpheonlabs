@@ -1,0 +1,62 @@
+---
+title: "itemimprovementoffset.dbss"
+description: "Physical layout, representation confidence, semantic evidence, and exact BSD snapshot parity for the item-improvement pointer directory."
+sidebar:
+    label: "itemimprovementoffset.dbss"
+    icon: database
+search:
+    tags: [tables, items-knowledge-mental, dbss]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                                                                                                                                                                      |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Coverage           | 100%                                                                                                                                                                                                                                                                                                                                       |
+| Iteration          | 2                                                                                                                                                                                                                                                                                                                                          |
+| Review state       | BSD migration reconciled                                                                                                                                                                                                                                                                                                                   |
+| Last reviewed      | 2026-07-31                                                                                                                                                                                                                                                                                                                                 |
+| Captures examined  | Build 2938; `pad00000.meta` SHA-256 `b7eefe6059818f84c0545f10020fe93bd3bd5d0647e043120caf78726ccafe8f`; archive entry hash `2971076656`; 46,756-byte primary SHA-256 `ed179c694def719e25f779a9dd0df1bdad12fe73678daec22930c576d8a8bdcf`; 3,896 rows; normalized SHA-256 `4b66a173b55827f3ff99d77f72954957a04e9d5f62f6700b043d19cba4ca5114` |
+| Decoder            | `packages/scraper/src/tables/itemimprovementoffset.dbss.ts`                                                                                                                                                                                                                                                                                |
+| Remaining blockers | None                                                                                                                                                                                                                                                                                                                                       |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The strict BSD decoder consumes the complete pointer file and exactly matches all
+3,896 reference rows in directory order.
+:::
+
+<CardGroup cols={1}>
+    <Card
+        title="itemimprovement.dbss"
+        href="/tables/itemimprovement.dbss"
+        icon="network"
+    >
+        Open the intrinsically framed payload table whose layout these pointers
+        corroborate.
+    </Card>
+</CardGroup>
+
+## Field ledger
+
+| Field/path                   | Offset and width | Representation                                                    | Claimed meaning                            | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                     | Status |
+| ---------------------------- | ---------------- | ----------------------------------------------------------------- | ------------------------------------------ | ------------------- | ------------------------- | ------------------- | ------------------------------------------------------------ | ------ |
+| Table row count              | file `+0`, 4     | `u32` count consumed by `array`; rows retained in directory order | pointer-row framing                        | Certain             | Certain                   | Certain             | Count 3,896 and fixed 12-byte rows close byte 46,756         | Closed |
+| `rows[].improvementResultId` | row `+0`, 4      | positive `u32` retained                                           | pointed result-group identifier            | Certain             | Certain                   | High                | Exhaustively matches the key immediately before each payload | Closed |
+| `rows[].offset`              | row `+4`, 4      | `u32` retained                                                    | absolute payload start after the outer key | Certain             | Certain                   | Certain             | Every value equals the physical row start plus four          | Closed |
+| `rows[].byteLength`          | row `+8`, 4      | `u32` retained                                                    | payload width excluding outer key          | Certain             | Certain                   | Certain             | Values are 25 or 41 and equal `21 + resultItemCount × 4`     | Closed |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID      | Finding                                                               | Evidence                                                                                                                           | Schema/documentation impact                                                               | Status |
+| ------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ------ |
+| IIRO-01 | Directory spans exclude exactly the four-byte outer result-group key. | All 3,896 sorted spans align with the corresponding primary row and close byte 173,916.                                            | Pointer semantics remain explicit, but the payload decoder does not depend on this table. | Closed |
+| IIRO-02 | The migrated BSD output is exactly reference-equivalent.              | Full directory-order comparison matched 3,896 rows with digest `4b66a173b55827f3ff99d77f72954957a04e9d5f62f6700b043d19cba4ca5114`. | Physical and representation confidence are Certain.                                       | Closed |
+| IIRO-03 | The checked-in 3,823-row legacy JSON predates build 2938.             | The unchanged reference schema decodes 3,896 current rows from the hashed primary.                                                 | Current-byte reference output is the parity oracle.                                       | Closed |

@@ -129,7 +129,10 @@ export namespace PAZ {
 
         if (hasHeader(entry, candidate)) {
             console.log("has header");
-            return candidate;
+            // ICE works in eight-byte blocks, so an encrypted but otherwise
+            // uncompressed file can include cipher alignment after its
+            // metadata-declared logical end.
+            return candidate.subarray(0, entry.originalSize);
         }
 
         if (isCompressed(entry, candidate)) {

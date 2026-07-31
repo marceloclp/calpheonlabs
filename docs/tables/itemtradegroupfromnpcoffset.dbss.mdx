@@ -1,0 +1,57 @@
+---
+title: "itemtradegroupfromnpcoffset.dbss"
+description: "Binary layout, byte coverage, and exact snapshot evidence for the empty BSD itemtradegroupfromnpcoffset decoder."
+sidebar:
+    label: "itemtradegroupfromnpcoffset.dbss"
+    icon: database
+search:
+    tags: [tables, items-knowledge-mental, dbss]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                                                                                                                                         |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                                                                                                                                          |
+| Iteration          | 3                                                                                                                                                                                                                                                                                                             |
+| Review state       | BSD migration reconciled                                                                                                                                                                                                                                                                                      |
+| Last reviewed      | 2026-07-31                                                                                                                                                                                                                                                                                                    |
+| Captures examined  | Build 2938; installed `pad00000.meta` SHA-256 `b7eefe6059818f84c0545f10020fe93bd3bd5d0647e043120caf78726ccafe8f`; 4-byte primary SHA-256 `df3f619804a92fdb4057192dc43dd748ea778adc52bc498ce80524c014b81119`; zero rows; normalized SHA-256 `11bb2244d3693b19ebad11e18bc0fa9fe58b818cd6e21c9e5b19eccc9dbefda2` |
+| Decoder            | `packages/scraper/src/tables/itemtradegroupfromnpcoffset.dbss.ts`                                                                                                                                                                                                                                             |
+| Remaining blockers | None                                                                                                                                                                                                                                                                                                          |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The strict BSD decoder consumes the complete four-byte empty representation and
+exactly matches the reference snapshot.
+:::
+
+<CardGroup cols={1}>
+    <Card
+        title="itemtradegroupfromnpc.dbss"
+        href="/tables/itemtradegroupfromnpc.dbss"
+        icon="network"
+    >
+        Open the independently decoded empty payload table.
+    </Card>
+</CardGroup>
+
+## Field ledger
+
+| Field/path    | Offset and width      | Representation         | Claimed meaning             | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                                      | Status |
+| ------------- | --------------------- | ---------------------- | --------------------------- | ------------------- | ------------------------- | ------------------- | --------------------------------------------------------------------------------------------- | ------ |
+| `recordCount` | `+0`, 4 (entire file) | retained `u32().is(0)` | Empty captured offset count | Certain             | Certain                   | Certain             | Installed file is exactly four zero bytes; its payload companion is also empty; EOF is strict | Closed |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID       | Finding                                                       | Evidence                                                                              | Schema/documentation impact                              | Status |
+| -------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------- | ------ |
+| ITGFO-01 | No pointer-row grammar can be inferred from this capture.     | Zero pointers and zero bytes after the required count                                 | No speculative future row schema is encoded              | Closed |
+| ITGFO-02 | The BSD output exactly matches the complete reference output. | Normalized SHA-256 `11bb2244d3693b19ebad11e18bc0fa9fe58b818cd6e21c9e5b19eccc9dbefda2` | The companion remains independently decoded and unjoined | Closed |
