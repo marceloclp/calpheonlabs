@@ -1,4 +1,5 @@
 import { array, struct, u32 } from "@marceloclp/bsd";
+
 import { dbss } from "./common/helpers";
 
 export const WorldQuestDbss = dbss("gamecommondata/binary/worldquest.dbss")({
