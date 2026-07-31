@@ -1,17 +1,10 @@
 import { join } from "node:path/posix";
 
-import {
-    array,
-    bytes,
-    repeat,
-    struct,
-    u32,
-    type BsdInfer,
-} from "@marceloclp/bsd";
+import { array, bytes, repeat, struct, u32 } from "@marceloclp/bsd";
 
+import { Cstring } from "../tables/common/bsd";
 import { decompress, readUInt32LE } from "./decompress";
 import { IceKey } from "./ice";
-import { Cstring } from "../tables/common/bsd";
 
 const BDO_ICE_KEY = new Uint8Array([
     0x51, 0xf3, 0x0f, 0x11, 0x04, 0x24, 0x6a, 0x00,
@@ -72,7 +65,7 @@ const MetaFileBSD = struct({
     folderNames: bytes(u32().transform((x) => x - 8))
         .transform(decrypt)
         .transform((x) => x.slice(8))
-        .frame(repeat(Cstring.pad((_, r) => r.remaining === 0 ? 0 : 8)))
+        .frame(repeat(Cstring.pad((_, r) => (r.remaining === 0 ? 0 : 8))))
         .pad(8),
     fileNames: bytes(u32()).transform(decrypt).frame(repeat(Cstring)),
 });
@@ -96,19 +89,18 @@ export namespace PAZ {
     /**
      * Loads one resolved archive entry directly into memory.
      *
-     * Only the entry's byte range is streamed from its containing PAZ file.
-     * The complete archive is never loaded. The stored bytes are then
-     * decrypted and decompressed exactly as they are during disk extraction.
+     * Only the entry's byte range is streamed from its containing PAZ file. The
+     * complete archive is never loaded. The stored bytes are then decrypted and
+     * decompressed exactly as they are during disk extraction.
      *
+     * @param entry
+     * @param bdoPath
+     * @returns
      * @note
      * When the compressed size is equal to the original size, this usually
      * means that the payload is unencrypted. The decrypted candidate is
      * accepted only when its signature agrees with the archive path: an XML
      * declaration for `.xml`, or `PABR` for binary tables.
-     *
-     * @param entry
-     * @param bdoPath
-     * @returns
      */
     export async function extract(
         entry: FileEntry,
@@ -164,7 +156,7 @@ function isDbss(entry: FileEntry) {
 /**
  * @param entry The file entry to check.
  * @param data The compressed data bytes.
- * @returns whether the data is already decrypted.
+ * @returns Whether the data is already decrypted.
  */
 function isDecrypted(entry: FileEntry, data: Uint8Array) {
     if (entry.compressedSize !== entry.originalSize) {
@@ -187,7 +179,9 @@ function isDecrypted(entry: FileEntry, data: Uint8Array) {
     }
 
     if (isBss(entry) || isDbss(entry)) {
-        console.log(`isDecrypted(${hasPabrHeader(data)}): pabr file ${hasPabrHeader(data) ? "has" : "has no"} header`);
+        console.log(
+            `isDecrypted(${hasPabrHeader(data)}): pabr file ${hasPabrHeader(data) ? "has" : "has no"} header`,
+        );
         return hasPabrHeader(data);
     }
 
@@ -209,8 +203,8 @@ function hasHeader(entry: FileEntry, data: Uint8Array) {
 }
 
 /**
- * Returns whether a file data is a a PABR (Pearl Abyss Binary Record).
- * PABR files may require decryption.
+ * Returns whether a file data is a a PABR (Pearl Abyss Binary Record). PABR
+ * files may require decryption.
  */
 function hasPabrHeader(data: Uint8Array) {
     return (

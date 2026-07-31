@@ -5,4 +5,5 @@ export default defineConfig({
         typeAware: true,
         typeCheck: true,
     },
+    ignorePatterns: [".agents/skills"],
 });

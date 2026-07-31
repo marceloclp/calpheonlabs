@@ -1,11 +1,4 @@
-import {
-    array,
-    bytes,
-    find,
-    struct,
-    u16,
-    u32,
-} from "@marceloclp/bsd";
+import { array, bytes, find, struct, u16, u32 } from "@marceloclp/bsd";
 
 import { dbss } from "./common/helpers";
 
@@ -27,7 +20,7 @@ const QuestGroupRow = struct({
         .pipe((x, r) => bytes(x - r.byteOffset).utf16())
         .pad((_, r) => (r.uint(16, false) === 0 ? 2 : 0)),
     /** Quest identifiers without their decoder-only count or zero trailer. */
-    members: array(u32(), QuestId).pad((v) => v.length ? 4 : 2),
+    members: array(u32(), QuestId).pad((v) => (v.length ? 4 : 2)),
 });
 
 const QuestGroupDbss = dbss("gamecommondata/binary/questgroup.dbss")({
