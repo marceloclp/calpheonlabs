@@ -14,10 +14,8 @@ Perform every table migration in `/goal` mode:
 
 1. Inspect the current goal before investigating or editing.
 2. Continue only when the active goal names the exact table and requires exact
-   snapshot parity. If no matching goal is active, stop and ask the user to
-   start `/goal` or explicitly authorize creating that goal. Do not infer goal
-   authorization from an ordinary migration request or an implicit skill
-   trigger.
+   snapshot parity. If no matching goal is active, create one. Do not ask for
+   authorization; the skill should handle it automatically.
 3. Keep the goal active through every decoder change, mismatch investigation,
    full-table comparison, temporary-artifact cleanup, and pull-request
    creation.
