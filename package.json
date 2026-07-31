@@ -15,8 +15,7 @@
         "docs:check": "bun test docs/documentation.test.ts && bunx --bun blume check --strict && bunx --bun blume validate --strict",
         "docs:dev": "bunx --bun blume dev --port 4321",
         "docs:preview": "bunx --bun blume preview",
-        "format": "bun --bun oxfmt",
-        "lint": "bun --bun oxlint"
+        "format": "bun --bun oxfmt"
     },
     "dependencies": {
         "json-stream-stringify": "^3.1.7"
