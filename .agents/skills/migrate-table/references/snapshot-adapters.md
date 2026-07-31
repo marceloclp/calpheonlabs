@@ -29,6 +29,12 @@ The comparator JSON-normalizes both values after the adapter runs. This makes
 way as ordinary JSON serialization. It cannot infer that an array in an
 already serialized legacy file used to be a `Uint8Array`.
 
+JSON normalization does not permit production schemas to hide fields with
+`.transform(() => undefined)` or any other omission mechanism. The expected
+snapshot must retain every non-byte value emitted by the BSD schema. Only byte
+ranges consumed with `bytes(n).reserved()` may be absent from production
+output.
+
 Convert retained legacy byte arrays explicitly:
 
 ```ts

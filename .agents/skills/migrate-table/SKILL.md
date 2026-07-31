@@ -102,7 +102,8 @@ schema:
 1. Load the complete reference JSON.
 2. Transform it into the exact JSON shape the new decoder is intended to emit.
    Remove joins, aliases, diagnostic raw fields, and decoder-only controls only
-   when that is an intentional destination-shape change.
+   when that is an intentional destination-shape change. Never remove a value
+   emitted by the destination BSD schema from the expected snapshot.
 3. Reconstruct physical row order when the reference JSON is directory- or
    offset-sorted:
     - pair reference rows with their corresponding offset entries;
@@ -136,14 +137,22 @@ table.
 Prefer declarative BSD composition:
 
 - Use `struct`, `array`, `bytes`, numeric primitives, `bool`, `literal`,
-  `padded`, `find`, `remaining`, and modifiers before considering `custom`.
+  `find`, `remaining`, and modifiers before considering `custom`.
 - Use `.pipe()` for a value-dependent length or nested schema when ordinary
   composition cannot express it directly.
 - Use `bytes(n)` for opaque varying data that must remain in the output.
-- Use `.reserved()` to consume and omit a field. It does not prove that bytes
-  are zero; add a justified validator when the stored value is a format
-  invariant.
-- Use `.pad(n)` only for bytes that should be skipped after a decoded value.
+- Omit only byte ranges, and only with `bytes(n).reserved()`. It does not prove
+  that bytes are zero; add a justified validator when the stored value is a
+  format invariant.
+- Never use `.transform(() => undefined)` or any transform that returns
+  `undefined`. Never use `.omit()`, `.pick()`, post-decode deletion, or another
+  mechanism to hide a decoded field.
+- Retain every non-byte value in the output, including numeric, Boolean,
+  string, literal, array, union, and struct values. If it should not be
+  emitted, it must be modeled as a byte range and consumed with
+  `bytes(n).reserved()`.
+- Never use `.pad(n)` or `padded(...)` to skip bytes. Represent every such
+  range as an explicit `bytes(n).reserved()` field.
 - Use `.is()`, `.in()`, `.check()`, and `.fixedLength()` for structural
   invariants, union discrimination, and exact consumption—not captured-value
   trivia.
@@ -151,6 +160,11 @@ Prefer declarative BSD composition:
   whenever the schema seam permits it.
 - Keep the existing `dbss(...)` or `bss(...)` table framing unless byte evidence
   proves it wrong.
+- Audit shared table helpers for hidden omissions. Do not rely on a helper that
+  uses `.transform(() => undefined)`, `.omit()`, `.pick()`, `.pad()`,
+  `padded(...)`, post-decode deletion, or another forbidden omission mechanism;
+  retain the value or model an omitted byte range with
+  `bytes(n).reserved()`.
 
 Avoid `custom`, manual `DataView` parsing, cursor mutation, schema factories,
 and post-decode reparsing unless BSD primitives genuinely cannot express the
@@ -166,11 +180,12 @@ roles.
 
 Footers are valuable while first decoding a table because their stored offsets
 can help falsify layout assumptions. Once the physical layout is proven, treat
-the footer as documentation-only framing: consume it declaratively, omit it
-from the destination output, and do not add `.check()`, `.is()`, `.in()`,
-custom validation, or cross-field pointer validation to the footer or its
-fields. Keep footer assumptions in `out-migration/` investigation harnesses,
-not in the production schema.
+the footer as documentation-only framing: consume it declaratively, retain its
+non-byte values and containing struct in the destination output, and omit only
+byte ranges represented by `bytes(n).reserved()`. Do not add `.check()`,
+`.is()`, `.in()`, custom validation, or cross-field pointer validation to the
+footer or its fields. Keep footer assumptions in `out-migration/`
+investigation harnesses, not in the production schema.
 
 For example:
 
@@ -179,14 +194,15 @@ For example:
 const CharacterSimplyFooter = struct({
     /** Absolute byte offset of the string-pool count. */
     stringPoolOffset: u32(),
-    /** Required zero four-byte footer trailer. */
+    /** Observed-zero four-byte footer trailer. */
     reserved: bytes(4).reserved(),
 });
 ```
 
-`reserved()` consumes and omits the trailer without validating that it is
-zero. An evidence-backed footer comment may document a known zero role, but
-must not turn that observation into a runtime footer check.
+`stringPoolOffset` remains in the output. `reserved()` consumes and omits only
+the byte trailer without validating that it is zero. An evidence-backed footer
+comment may document a known zero role, but must not turn that observation
+into a runtime footer check.
 
 ### Compose variants with unions
 
@@ -273,8 +289,7 @@ Add succinct TSDoc for every schema constant and meaningful property:
   semantic meaning.
 
 Outside the informational table-footer exception above, do not claim that
-skipped or reserved bytes are zero unless the schema actually validates that
-invariant.
+reserved bytes are zero unless the schema actually validates that invariant.
 
 ## Port the confidence ledger to Blume
 
@@ -316,8 +331,8 @@ into the destination page before reconciling it. Never edit the reference page.
 2. Change the title, sidebar label, route links, and decoder path to the
    type-qualified destination page and decoder.
 3. Reconcile every field path and representation with the final BSD output.
-   Remove claims about raw fields, aliases, joins, omitted controls, or branch
-   behavior that the destination no longer emits.
+   Remove claims about raw fields, aliases, joins, omitted byte controls, or
+   branch behavior that the destination no longer emits.
 4. Recast an offset table as migration or falsification evidence when
    appropriate. Never describe it as a production framing dependency after
    the new decoder becomes intrinsic.
@@ -374,9 +389,13 @@ ledger rows:
 
 - every serialized and derived output field;
 - every header, count, nested member, trailer, and union branch;
-- every skipped, padded, reserved, opaque, or raw byte range;
+- every reserved, opaque, or raw byte range;
 - every validation, discriminator, omission, alias, transform, and deferred
   join.
+
+Confirm that every omission is a `bytes(n).reserved()` field, every transform
+returns a defined value, every non-byte field remains in the output, and no
+`.pad(n)` or `padded(...)` schema skips bytes implicitly.
 
 Compare the page's row count, digest, capture identity, and variant counts with
 the current verification artifacts. Search the destination page and related
@@ -391,6 +410,11 @@ Do not complete the migration until all of these pass:
 
 - the production decoder uses BSD primitives and contains no avoidable escape
   hatch;
+- the production decoder never uses `.transform(() => undefined)`, `.omit()`,
+  `.pick()`, `.pad()`, `padded(...)`, post-decode deletion, or another omission
+  mechanism;
+- every omitted field is a byte range consumed with `bytes(n).reserved()`, and
+  every non-byte value remains in the output;
 - variants are composed with unions rather than type-code schema branching;
 - the production decoder has no offset-table dependency;
 - the new schema consumes the complete primary table;
