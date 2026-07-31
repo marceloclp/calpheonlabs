@@ -1,0 +1,69 @@
+---
+title: "characterspawntypeoffset.dbss"
+description: "Binary layout, byte coverage, field semantics, and exact snapshot evidence for the BSD characterspawntypeoffset decoder."
+sidebar:
+    label: "characterspawntypeoffset.dbss"
+    icon: database
+search:
+    tags: [tables, npcs-characters, dbss]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Iteration          | 2                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Review state       | BSD migration reconciled                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Last reviewed      | 2026-07-31                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Captures examined  | Installed `pad00000.meta` SHA-256 `b7eefe6059818f84c0545f10020fe93bd3bd5d0647e043120caf78726ccafe8f`; offset archive entry hash `384609792`; 240,180-byte offset table SHA-256 `6459d050d6b150565c371c65f48cf912986412d6f8da6d7a36911a4dc197dc15`; payload archive entry hash `3028658867`; 1,152,772-byte payload SHA-256 `b9847c93ce950d823ca7c3177bab4649da7ee0b738bc087aac185cde0b2a787f`; 24,016 rows; normalized SHA-256 `3a917c6e2b53a898a099e90bbb322a381b1a21e3d693fe34a8380208dd537b1a` |
+| Decoder            | `packages/scraper/src/tables/characterspawntypeoffset.dbss.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Remaining blockers | None                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The strict BSD decoder consumes the complete installed table and matches all 24,016 reference
+pointers in physical directory order with zero normalized mismatches.
+:::
+
+## Related table
+
+<CardGroup cols={1}>
+    <Card
+        title="characterspawntype.dbss"
+        href="/tables/characterspawntype.dbss"
+        icon="network"
+    >
+        Open the intrinsically framed capability table whose rows these pointers
+        describe.
+    </Card>
+</CardGroup>
+
+## Field ledger
+
+| Field/path                        | Offset and width                                 | Representation                                                          | Claimed meaning                        | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                                                                                                                               | Status         |
+| --------------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------- | -------------------------------------- | ------------------- | ------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| `magic`, encoded row count        | table `+0..+7`                                   | `"PABR"` validated and omitted; `u32` count consumed by `rows`          | PABR directory framing and row count   | Certain             | Certain                   | Certain             | Strict decoding validates the signature, consumes exactly 24,016 count-derived rows, reaches the footer at byte 240,168, and rejects trailing bytes                                    | Closed         |
+| `rows`                            | table `+8..+240,167`; 24,016 × 10 bytes          | array retained in physical directory order                              | character-capability pointer directory | Certain             | Certain                   | Certain             | Complete transformed-reference equality preserves every pointer in encoded order; normalized SHA-256 is `3a917c6e2b53a898a099e90bbb322a381b1a21e3d693fe34a8380208dd537b1a`             | Closed         |
+| `rows[].key`                      | row `+0..+1`; `u16`                              | retained                                                                | character identity                     | Certain             | Certain                   | Certain             | All 24,016 keys are unique and equal the `u16` identity at the corresponding pointed-to capability row; zero mismatches, observed range 1–65,302                                       | Closed         |
+| `rows[].offset`                   | row `+2..+5`; `u32`                              | retained                                                                | absolute primary-row start             | Certain             | Certain                   | Certain             | Directory order is payload order; starts advance contiguously from primary byte 4 to byte 1,152,724 with zero gaps or overlaps                                                         | Closed         |
+| `rows[].byteLength`               | row `+6..+9`; `u32`                              | retained                                                                | exact primary-row extent               | Certain             | Certain                   | Certain             | All 24,016 values are 48; spans end exactly at the 1,152,772-byte primary EOF, whose SHA-256 is `b9847c93ce950d823ca7c3177bab4649da7ee0b738bc087aac185cde0b2a787f`                     | Closed         |
+| footer leading and trailing words | footer `+0..+3` and `+8..+11`; two 4-byte ranges | consumed and omitted without validation                                 | informational PABR footer framing      | Certain             | Certain                   | Neutral             | Both words are zero in the verified capture; the informational footer schema deliberately does not make that capture observation a runtime invariant                                   | Closed neutral |
+| footer middle word                | footer `+4..+7`; `u32`                           | decoded, transformed to `undefined`, and omitted without validation     | absolute footer start                  | Certain             | Certain                   | Certain             | Stored value 240,168 equals the footer's absolute start in the verified capture; the value documents framing but is not runtime-validated                                              | Closed         |
+| framing omissions and transforms  | table header and footer                          | only `rows` and its three pointer properties survive JSON normalization | decoder-only controls                  | Certain             | Certain                   | Certain             | The signature transform, count-owned array, reserved footer ranges, and footer transform account for every intentionally omitted value; strict decoding accounts for all 240,180 bytes | Closed         |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                                  | Evidence                                                                                                                                                                                                  | Schema/documentation impact                                                                                                                               | Status |
+| ---- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| F-01 | The destination output exactly preserves the reference decoder's complete pointer array. | Strict full-table comparison matches all 24,016 rows in physical order with zero mismatches and normalized SHA-256 `3a917c6e2b53a898a099e90bbb322a381b1a21e3d693fe34a8380208dd537b1a`.                    | `rows[].key`, `offset`, and `byteLength` retain their established representations and names.                                                              | Closed |
+| F-02 | Every pointer describes one fixed-width row in the same-capture primary table.           | The 24,016 keys match the corresponding primary identities; every 48-byte span is contiguous from primary byte 4 through the 1,152,772-byte EOF with zero key, gap, overlap, count, or extent mismatches. | Pointer semantics are Certain; no join or offset-table dependency is added to the payload decoder.                                                        | Closed |
+| F-03 | Directory order already equals physical payload order.                                   | The first pointer begins at primary byte 4, each following offset advances by 48, and the final pointer ends at EOF.                                                                                      | Production output preserves encoded directory order; no snapshot adapter or sort is needed.                                                               | Closed |
+| F-04 | The footer is useful structural documentation but not a runtime validation boundary.     | The middle word equals footer start 240,168 and both surrounding words are zero in the verified capture.                                                                                                  | A separate informational footer schema consumes and omits all twelve bytes without `.is()`, `.in()`, `.check()`, custom logic, or cross-field validation. | Closed |
