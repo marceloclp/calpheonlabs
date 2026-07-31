@@ -25,14 +25,11 @@ const CharacterStaticOffsetFooter = struct({
 /** Complete PABR pointer directory for `characterstatic.dbss` payload bodies. */
 export const CharacterStaticOffsetDbss = dbss("characterstaticoffset.dbss")({
     /** Four-byte Pearl Abyss record-table signature at file offset zero. */
-    magic: bytes(4)
-        .ascii()
-        .is("PABR")
-        .transform(() => undefined),
+    magic: bytes(4).ascii().is("PABR"),
     /** Character-static pointers retained in encoded directory order. */
     rows: array(u32(), CharacterStaticOffsetRow),
     /** Informational footer consumed and omitted from the decoded output. */
-    footer: CharacterStaticOffsetFooter.transform(() => undefined),
+    footer: CharacterStaticOffsetFooter,
 });
 
 if (import.meta.main) {
