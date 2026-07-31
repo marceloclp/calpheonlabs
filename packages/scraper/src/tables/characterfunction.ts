@@ -1,21 +1,7 @@
-import {
-    array,
-    bool,
-    bytes,
-    offset,
-    padded,
-    struct,
-    u16,
-    u32,
-    u8,
-} from "@marceloclp/bsd";
-
+import { array, bool, bytes, offset, padded, struct, u16, u32, u8 } from "@marceloclp/bsd";
 import { dbss } from "./common/helpers";
 
-const Utf16Text = u32()
-    .pad(4)
-    .pipe((n) => bytes(n * 2))
-    .utf16();
+const Utf16Text = u32().pad(4).pipe((n) => bytes(n * 2)).utf16();
 
 /** Ordinary label/condition service slot. */
 const CharacterFunctionSlot = struct({
@@ -129,14 +115,14 @@ const CharacterFunctionConversationSlot = struct({
     importantTalk: bool(),
 });
 
+
 /** Fully sequential service block that follows the governed-territory list. */
 export const CharacterFunctionAdditionalServices = struct({
     /** Lord-information menu and its explicit enable switch. */
     lordInformation: CharacterFunctionEnabledSlot,
     /**
-     * Historical minor-lord slot; inactive here, with its physical control
-     * retained neutrally. See
-     * {@link https://github.com/freedDog/bdoemu/blob/master/game-logic/src/main/data/sqlite3/bdo.sqlite3 CharacterFunction_Table}.
+     * Historical minor-lord slot; inactive here, with its physical control retained neutrally.
+     * See {@link https://github.com/freedDog/bdoemu/blob/master/game-logic/src/main/data/sqlite3/bdo.sqlite3 CharacterFunction_Table}.
      */
     minorLordInformation: struct({
         service: CharacterFunctionSlot,
@@ -150,8 +136,8 @@ export const CharacterFunctionAdditionalServices = struct({
         territoryKey: u16(),
     }),
     /**
-     * Historical territory-supply slot and its inactive territory selector. See
-     * {@link https://github.com/freedDog/bdoemu/blob/master/game-logic/src/main/data/sqlite3/bdo.sqlite3 CharacterFunction_Table}.
+     * Historical territory-supply slot and its inactive territory selector.
+     * See {@link https://github.com/freedDog/bdoemu/blob/master/game-logic/src/main/data/sqlite3/bdo.sqlite3 CharacterFunction_Table}.
      */
     territorySupply: struct({
         service: CharacterFunctionSlot,
@@ -170,16 +156,15 @@ export const CharacterFunctionAdditionalServices = struct({
         selectorCode: u16(),
     }),
     /**
-     * Historical guild-supply label/condition capacity; selectors live in the
-     * earlier group block. See
-     * {@link https://github.com/freedDog/bdoemu/blob/master/game-logic/src/main/data/sqlite3/bdo.sqlite3 CharacterFunction_Table}.
+     * Historical guild-supply label/condition capacity; selectors live in the earlier group block.
+     * See {@link https://github.com/freedDog/bdoemu/blob/master/game-logic/src/main/data/sqlite3/bdo.sqlite3 CharacterFunction_Table}.
      */
     legacyGuildSupply: struct({ service: CharacterFunctionSlot }),
     /** Skill-addon menu and its explicit enable switch. */
     skillAddon: CharacterFunctionEnabledSlot,
     /**
-     * Stable-specific stallion skill-experience training switch. See
-     * {@link https://github.com/freedDog/bdoemu/blob/master/game-logic/src/main/data/sqlite3/bdo.sqlite3 CharacterFunction_Table}.
+     * Stable-specific stallion skill-experience training switch.
+     * See {@link https://github.com/freedDog/bdoemu/blob/master/game-logic/src/main/data/sqlite3/bdo.sqlite3 CharacterFunction_Table}.
      */
     stallionSkillExperienceTraining: bool(),
     /** Gift interaction, whose condition is serialized before its label. */
@@ -188,10 +173,7 @@ export const CharacterFunctionAdditionalServices = struct({
     equipmentPurification: CharacterFunctionReversedEnabledSlot,
     /** Black Spirit's Adventure, whose condition is serialized before its label. */
     blackSpiritsAdventure: CharacterFunctionReversedEnabledSlot,
-    /**
-     * Central Market menu and historical territory selector (`0xffff` when
-     * absent).
-     */
+    /** Central Market menu and historical territory selector (`0xffff` when absent). */
     centralMarket: struct({
         service: CharacterFunctionSlot,
         territoryKey: u16(),
@@ -214,10 +196,7 @@ export const CharacterFunctionAdditionalServices = struct({
     seasonSpecialGift: CharacterFunctionEnabledSlot,
     /** Arena of Glory menu and its explicit enable switch. */
     arenaOfGlory: CharacterFunctionEnabledSlot,
-    /**
-     * Yar menu plus a neighboring Boolean whose one extra positive remains
-     * unresolved.
-     */
+    /** Yar menu plus a neighboring Boolean whose one extra positive remains unresolved. */
     yarr: struct({
         service: CharacterFunctionSlot,
         control: bool(),
@@ -228,10 +207,7 @@ export const CharacterFunctionAdditionalServices = struct({
         enabled: bool(),
         stableControl: bool(),
     }),
-    /**
-     * Lightstone exchange/purification menu and a broader unresolved Boolean
-     * control.
-     */
+    /** Lightstone exchange/purification menu and a broader unresolved Boolean control. */
     lightstoneExchangePurification: struct({
         service: CharacterFunctionSlot,
         control: bool(),
@@ -248,10 +224,7 @@ export const CharacterFunctionAdditionalServices = struct({
 
 /** Complete companion-bounded character-function payload. */
 const CharacterFunctionRow = struct({
-    /**
-     * We need the offset so we can cross-reference with offset table to find
-     * the character key.
-     */
+    /** We need the offset so we can cross-reference with offset table to find the character key. */
     offset: offset(),
     /** Leading shop descriptor. */
     shop: CharacterFunctionShop,
@@ -288,7 +261,7 @@ const CharacterFunctionRow = struct({
 });
 
 export const CharacterFunctionDbss = dbss("characterfunction.dbss")({
-    rows: array(u32(), padded(2, CharacterFunctionRow)),
+    rows: array(u32(), padded(2, CharacterFunctionRow))
 });
 
 if (import.meta.main) {

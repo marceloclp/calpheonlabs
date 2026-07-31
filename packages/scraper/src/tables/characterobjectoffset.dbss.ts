@@ -1,5 +1,4 @@
 import { array, bytes, struct, u16, u32 } from "@marceloclp/bsd";
-
 import { dbss } from "./common/helpers";
 
 /** One ten-byte pointer into `characterobject.dbss`. */

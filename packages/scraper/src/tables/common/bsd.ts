@@ -1,4 +1,4 @@
-import { bool, bytes, custom, u32 } from "@marceloclp/bsd";
+import { bool, bytes, custom, u32, type BsdNumber } from "@marceloclp/bsd";
 
 export const Cstring = custom((reader) => {
     const buffer = reader.buffer;
@@ -22,19 +22,13 @@ export const Cstring = custom((reader) => {
  * The next 4 bytes represent the string length.
  */
 export function mixedText() {
-    return bool().pipe((f) => (f ? bytes(u32()).utf16() : bytes(u32()).utf8()));
+    return bool().pipe((f) => f ? bytes(u32()).utf16() : bytes(u32()).utf8());
 }
 
 export function asciiText(n = u32(), pad = 4) {
-    return n
-        .pad(pad)
-        .pipe((x) => bytes(x))
-        .ascii();
+    return n.pad(pad).pipe((x) => bytes(x)).ascii();
 }
 
 export function utf16Text(n = u32(), pad = 4) {
-    return n
-        .pad(pad)
-        .pipe((x) => bytes(x * 2))
-        .utf16();
+    return n.pad(pad).pipe((x) => bytes(x * 2)).utf16();
 }

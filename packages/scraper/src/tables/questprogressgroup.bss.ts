@@ -1,5 +1,4 @@
 import { array, struct, u16, u32 } from "@marceloclp/bsd";
-
 import { bss } from "./common/helpers";
 
 const QuestProgressGroupEntry = struct({
@@ -15,14 +14,12 @@ const QuestProgressGroupEntry = struct({
 
 const QuestProgressGroupRow = struct({
     /** Parent progress-group identifier. */
-    progressGroupId: u32(),
-    /** Count-prefixed ranges that repeat `progressGroupId`. */
-    entries: array(u32(), QuestProgressGroupEntry),
+	progressGroupId: u32(),
+	/** Count-prefixed ranges that repeat `progressGroupId`. */
+	entries: array(u32(), QuestProgressGroupEntry),
 });
 
-export const QuestProgressGroupBss = bss(
-    "gamecommondata/binary/questprogressgroup.bss",
-)({
+export const QuestProgressGroupBss = bss("gamecommondata/binary/questprogressgroup.bss")({
     rows: array(u32(), QuestProgressGroupRow),
 });
 

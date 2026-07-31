@@ -11,7 +11,6 @@ import {
     u64,
     u8,
 } from "@marceloclp/bsd";
-
 import { mixedText } from "./common/bsd";
 import { bss } from "./common/helpers";
 

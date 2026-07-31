@@ -1,5 +1,4 @@
 import { array, bytes, struct, u16, u32 } from "@marceloclp/bsd";
-
 import { dbss } from "./common/helpers";
 
 const CharacterAudioRadiusOffsetRow = struct({
@@ -11,9 +10,7 @@ const CharacterAudioRadiusOffsetRow = struct({
     byteLength: u32(),
 });
 
-export const CharacterAudioRadiusOffsetDbss = dbss(
-    "characteraudioradiusoffset.dbss",
-)({
+export const CharacterAudioRadiusOffsetDbss = dbss("characteraudioradiusoffset.dbss")({
     /** Four-byte Pearl Abyss record-table signature at file offset zero. */
     magic: bytes(4).ascii().is("PABR"),
     /** Rows in physical order. */

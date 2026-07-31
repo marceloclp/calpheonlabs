@@ -1,5 +1,4 @@
 import { array, bool, struct, u16, u32 } from "@marceloclp/bsd";
-
 import { dbss } from "./common/helpers";
 
 /** One fixed 48-byte character capability row. */
