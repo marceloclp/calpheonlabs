@@ -1,9 +1,10 @@
 import { array, bool, struct, u16, u32 } from "@marceloclp/bsd";
-
 import { dbss } from "./common/helpers";
 
-/** Named service-capability bytes in their exact physical order. */
-const CharacterSpawnCapabilities = struct({
+/** One fixed 48-byte character capability row. */
+const CharacterSpawnTypeRow = struct({
+    /** Character key repeated by the investigation-only offset directory. */
+    characterKey: u16(),
     /** Row belongs to the broad character category. */
     genericCharacter: bool(),
     /** NPC teaches character skills. */
@@ -96,14 +97,6 @@ const CharacterSpawnCapabilities = struct({
     marniStoneVendor: bool(),
     /** NPC provides church buffs. */
     churchBuff: bool(),
-});
-
-/** One fixed 48-byte character capability row. */
-const CharacterSpawnTypeRow = struct({
-    /** Character key repeated by the investigation-only offset directory. */
-    characterKey: u16(),
-    /** Forty-six independently stored service flags. */
-    capabilities: CharacterSpawnCapabilities,
 }).fixedLength(48);
 
 /** Count-prefixed character capability table in physical row order. */
