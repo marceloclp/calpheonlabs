@@ -1,6 +1,6 @@
-import { array, bool, bytes, struct, u16, u32 } from "@marceloclp/bsd";
-
+import { array, bool, struct, u16, u32 } from "@marceloclp/bsd";
 import { dbss } from "./common/helpers";
+import { asciiText, utf16Text } from "./common/bsd";
 
 const QuestId = struct({
     /** Quest family/group identifier stored in the low two bytes. */
@@ -18,33 +18,17 @@ const JournalQuestRow = struct({
     /** Byte-sized layout variant. */
     layoutVariantCode: bool(),
     /** Journal-level title physically stored in the row. */
-    journalTitle: bytes(
-        u32()
-            .pad(4)
-            .transform((x) => x * 2),
-    ).utf16(),
+    journalTitle: utf16Text(),
     /** Journal-level description physically stored in the row. */
-    journalDescription: bytes(
-        u32()
-            .pad(4)
-            .transform((x) => x * 2),
-    ).utf16(),
+    journalDescription: utf16Text(),
     /** Volume title physically stored in the row. */
-    volumeTitle: bytes(
-        u32()
-            .pad(4)
-            .transform((x) => x * 2),
-    ).utf16(),
+    volumeTitle: utf16Text(),
     /** Unlock-condition text physically stored in the row. */
-    unlockConditionText: bytes(
-        u32()
-            .pad(4)
-            .transform((x) => x * 2),
-    ).utf16(),
+    unlockConditionText: utf16Text(),
     /** Bookshelf UI resource key. */
-    bookshelfUiKey: bytes(u32().pad(4)).ascii(),
+    bookshelfUiKey: asciiText(),
     /** Bookshelf object resource key. */
-    bookshelfObjectKey: bytes(u32().pad(4)).ascii(),
+    bookshelfObjectKey: asciiText(),
     /** Count-prefixed quests belonging to the volume. */
     quests: array(u32(), QuestId),
 }).pad(4);

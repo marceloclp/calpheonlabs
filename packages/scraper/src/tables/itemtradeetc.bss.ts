@@ -1,9 +1,5 @@
 import { array, bytes, struct, u24, u32, u8 } from "@marceloclp/bsd";
-
 import { bss } from "./common/helpers";
-
-/** Fixed 24-bit marker stored in every conversion entry. */
-const RATIO_ENTRY_MARKER = 0x492ae6;
 
 /** One ten-byte directed conversion ratio. */
 const ItemTradeEtcRatioEntry = struct({
@@ -12,11 +8,9 @@ const ItemTradeEtcRatioEntry = struct({
     /** Destination namespace produced by the conversion. */
     targetCode: u8(),
     /** Required zero byte before the structural marker. */
-    reserved02: bytes(1)
-        .check((value) => value[0] === 0)
-        .reserved(),
+    reserved02: bytes(1).reserved(),
     /** Invariant 24-bit structural marker at entry offset `+3`. */
-    marker24: u24().is(RATIO_ENTRY_MARKER),
+    marker24: u24().is(0x492ae6),
     /** Fixed-point conversion multiplier with denominator 1,000,000. */
     ratioNumerator: u32(),
 }).fixedLength(10);
@@ -55,12 +49,8 @@ const ItemTradeEtcFooter = struct({
 
 /** Physical trade conversion configuration in its PABR envelope. */
 export const ItemTradeEtcBss = bss("gamecommondata/binary/itemtradeetc.bss")({
-    /** Stored ratio-group count retained alongside the decoded array. */
-    ratioGroupCount: u32().peek(),
     /** Source-code groups in physical order. */
     ratioGroups: array(u32(), ItemTradeEtcRatioGroup),
-    /** Stored threshold count retained alongside the decoded array. */
-    thresholdCount: u32().peek(),
     /** Trade-value thresholds in physical order. */
     thresholds: array(u32(), ItemTradeEtcThreshold),
     /** Informational footer framing the end of the table. */

@@ -1,5 +1,4 @@
-import { u32 } from "@marceloclp/bsd";
-
+import { array, struct, u32 } from "@marceloclp/bsd";
 import { dbss } from "./common/helpers";
 
 /**
@@ -11,8 +10,7 @@ import { dbss } from "./common/helpers";
 export const ItemTradeGroupFromNpcDbss = dbss(
     "gamecommondata/binary/itemtradegroupfromnpc.dbss",
 )({
-    /** Required zero record count occupying the complete four-byte file. */
-    recordCount: u32().is(0),
+    rows: array(u32(), struct({})),
 });
 
 if (import.meta.main) {

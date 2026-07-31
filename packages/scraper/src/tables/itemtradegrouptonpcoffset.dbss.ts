@@ -1,5 +1,4 @@
 import { array, struct, u16, u32 } from "@marceloclp/bsd";
-
 import { dbss } from "./common/helpers";
 
 /** One ten-byte pointer into `itemtradegrouptonpc.dbss`. */
@@ -16,8 +15,6 @@ const ItemTradeGroupToNpcOffsetRow = struct({
 export const ItemTradeGroupToNpcOffsetDbss = dbss(
     "gamecommondata/binary/itemtradegrouptonpcoffset.dbss",
 )({
-    /** Stored pointer count retained while `rows` rereads the prefix. */
-    rowCount: u32().peek(),
     /** Detailed-row pointers in physical directory order. */
     rows: array(u32(), ItemTradeGroupToNpcOffsetRow),
 });

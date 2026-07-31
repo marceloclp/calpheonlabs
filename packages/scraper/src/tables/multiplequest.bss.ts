@@ -1,5 +1,4 @@
 import { array, struct, u16, u32 } from "@marceloclp/bsd";
-
 import { bss } from "./common/helpers";
 
 /** One inclusive range treated as a multiple-quest family. */

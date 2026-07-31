@@ -1,5 +1,4 @@
 import { array, struct, u32 } from "@marceloclp/bsd";
-
 import { bss } from "./common/helpers";
 
 export const NormalGroupQuestBss = bss(

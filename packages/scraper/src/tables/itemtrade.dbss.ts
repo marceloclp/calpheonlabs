@@ -15,8 +15,6 @@ const ItemTradeRow = struct({
 
 /** Count-prefixed NPC identifiers retained in physical file order. */
 export const ItemTradeDbss = dbss("gamecommondata/binary/itemtrade.dbss")({
-    /** Stored row count, retained while `rows` rereads the same prefix. */
-    rowCount: u32().peek(),
     /** Compact trade-NPC rows in physical order. */
     rows: array(u32(), ItemTradeRow),
 });
