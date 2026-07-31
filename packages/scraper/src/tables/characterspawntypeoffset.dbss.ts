@@ -26,19 +26,14 @@ const CharacterSpawnTypeOffsetFooter = struct({
     footerOffset: u32(),
     /** Four-byte trailing footer word; zero in the verified capture. */
     reserved08: bytes(4).reserved(),
-})
-    .fixedLength(12)
-    .transform(() => undefined);
+}).fixedLength(12);
 
 /** Complete PABR pointer directory for `characterspawntype.dbss` rows. */
 export const CharacterSpawnTypeOffsetDbss = dbss(
     "characterspawntypeoffset.dbss",
 )({
     /** Validated four-byte Pearl Abyss signature, omitted from output. */
-    magic: bytes(4)
-        .ascii()
-        .is("PABR")
-        .transform(() => undefined),
+    magic: bytes(4).ascii().is("PABR"),
     /** Count-prefixed pointers retained in physical directory order. */
     rows: array(u32(), CharacterSpawnTypeOffsetRow),
     /** Informational PABR footer consumed and omitted from output. */
