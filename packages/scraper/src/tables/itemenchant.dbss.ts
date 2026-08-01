@@ -1,22 +1,19 @@
 import {
     array,
     bytes,
-    find,
     literal,
-    offset,
     struct,
     u16,
     u24,
     u32,
+    u64,
     u8,
     union,
     type BsdShape,
 } from "@marceloclp/bsd";
-import { reserved } from "./common/bsd";
+import { asciiText64, reserved, utf16Text64 } from "./common/bsd";
 import { dbss } from "./common/helpers";
 
-/** Number of bytes from the repeated key through the row end. */
-const ITEM_ENCHANT_TRAILER_SIZE = 8;
 /** Boolean byte that rejects non-canonical values instead of coercing them. */
 const ItemEnchantBoolean = u8()
     .in(new Set([0, 1]))
@@ -99,7 +96,7 @@ function ItemEnchantType<const K extends string, S extends BsdShape>(
     });
 }
 
-/** Fixed 216-byte prefix of the installed expanded row layout. */
+/** Fixed 212-byte prefix of the installed expanded row layout. */
 const ItemEnchantModernFixed = ItemEnchantType("modern", {
     /** Opaque bytes at modern row-relative offsets `+130..+148`. */
     unknown130Prefix: bytes(19),
@@ -121,11 +118,11 @@ const ItemEnchantModernFixed = ItemEnchantType("modern", {
     unknown197: bytes(8),
     /** Neutral word at modern row-relative offset `+205`. */
     field205: u16(),
-    /** Opaque bytes at modern row-relative offsets `+207..+215`. */
-    unknown207: bytes(9),
-}).fixedLength(216);
+    /** Opaque bytes at modern row-relative offsets `+207..+211`. */
+    unknown207: bytes(5),
+}).fixedLength(212);
 
-/** Fixed 204-byte prefix of the pre-expansion row layout. */
+/** Fixed 200-byte prefix of the pre-expansion row layout. */
 const ItemEnchantLegacyFixed = ItemEnchantType("legacy", {
     /** Opaque bytes at legacy row-relative offsets `+130..+148`. */
     unknown130Prefix: bytes(19),
@@ -141,148 +138,180 @@ const ItemEnchantLegacyFixed = ItemEnchantType("legacy", {
     unknown185: bytes(8),
     /** Neutral word at legacy row-relative offset `+193`. */
     field193: u16(),
-    /** Opaque bytes at legacy row-relative offsets `+195..+203`. */
-    unknown195: bytes(9),
-}).fixedLength(204);
+    /** Opaque bytes at legacy row-relative offsets `+195..+199`. */
+    unknown195: bytes(5),
+}).fixedLength(200);
 
-/** The only two viable fixed-prefix layouts, selected from their own bytes. */
-const ItemEnchantFixed = union(ItemEnchantModernFixed, ItemEnchantLegacyFixed);
+/** Four-byte count framing shared by each variable list. */
+const ItemEnchantArrayCount = u32();
+/** Length-prefixed ASCII field used for icon, sound, and expression text. */
+const ItemEnchantAsciiText = asciiText64();
+/** Length-prefixed UTF-16LE field used for client-facing and expression text. */
+const ItemEnchantUtf16Text = utf16Text64();
 
-/** One unsuccessful candidate consumed by the intrinsic boundary search. */
-const ItemEnchantBoundaryMiss = struct({
-    kind: literal("miss"),
-    candidateByte: u8(),
-});
-
-/** Creates the intrinsically bounded tail of a non-final item-enchant row. */
-function itemEnchantNonFinalTail(
-    packedKey: number,
-    layout: "legacy" | "modern",
-) {
-    const BoundaryCandidate = struct({
-        kind: literal("boundary"),
+/**
+ * Creates the common suffix after one of the four pre-name list layouts.
+ *
+ * After the name/icon region, six counted arrays and three final strings
+ * consume the former opaque tail linearly. The repeated packed key then proves
+ * the row boundary.
+ */
+function itemEnchantVariableSuffix(packedKey: number) {
+    return {
+        /** Neutral scalar immediately before the item name. */
+        fieldBeforeName: u32(),
+        /** Client item name framed by a 64-bit UTF-16 character count. */
+        name: ItemEnchantUtf16Text,
+        /** Client icon resource path framed by a 64-bit ASCII byte count. */
+        iconPath: ItemEnchantAsciiText,
+        /** Fixed controls immediately following the icon path. */
+        postIcon: bytes(18),
+        /** First post-icon UTF-16 expression or client text. */
+        postIconTextA: ItemEnchantUtf16Text,
+        /** Second post-icon UTF-16 expression or client text. */
+        postIconTextB: ItemEnchantUtf16Text,
+        /** Third post-icon UTF-16 expression or client text. */
+        postIconTextC: ItemEnchantUtf16Text,
+        /** Unsigned market-registration limit retained as a decimal string. */
+        marketLimit: u64().transform((value) => value.toString()),
+        /** Fixed post-market region whose individual meanings remain unknown. */
+        fixed84: bytes(84),
+        /** Fixed prefix of the formerly opaque type-dependent tail. */
+        tailPrefix82: bytes(82),
+        /** First tail list; each entry is sixteen opaque bytes. */
+        tailEntries16: array(ItemEnchantArrayCount, bytes(16)),
+        /** Fixed region between the first and second tail lists. */
+        tailMiddle40: bytes(40),
+        /** Second tail list; each entry is twelve opaque bytes. */
+        tailEntries12: array(ItemEnchantArrayCount, bytes(12)),
+        /** Fixed region before the first scalar tail list. */
+        tailMiddle8: bytes(8),
+        /** First counted list of neutral 32-bit tail values. */
+        tailValuesA: array(ItemEnchantArrayCount, u32()),
+        /** Fixed region before the second scalar tail list. */
+        tailMiddle45: bytes(45),
+        /** Second counted list of neutral 32-bit tail values. */
+        tailValuesB: array(ItemEnchantArrayCount, u32()),
+        /** Fixed region before the final three tail strings. */
+        tailMiddle15: bytes(15),
+        /** First final-tail UTF-16 expression or client text. */
+        tailTextA: ItemEnchantUtf16Text,
+        /** Final-tail ASCII expression, sound key, or client text. */
+        tailAsciiText: ItemEnchantAsciiText,
+        /** Second final-tail UTF-16 expression or client text. */
+        tailTextB: ItemEnchantUtf16Text,
+        /** Third counted list of neutral 32-bit tail values. */
+        tailValuesC: array(ItemEnchantArrayCount, u32()),
+        /** Five opaque bytes before the final counted list. */
+        tailMiddle5: bytes(5),
+        /**
+         * Final counted list of neutral 16-bit tail values. Current captures
+         * store three zero upper count bytes, so their conceptual ownership as
+         * count bits versus reserved bytes remains unresolved.
+         */
+        tailValues16: array(ItemEnchantArrayCount, u16()),
+        /** Twelve opaque bytes immediately before the row trailer. */
+        tailSuffix12: bytes(12),
         /** Full packed row identity repeated eight bytes before row end. */
         repeatedRowKey: u32().is(packedKey),
         /** Neutral final row word retained without captured-domain checks. */
         trailerValue: u32(),
-        /** The next row must begin with the same complete fixed-prefix schema. */
-        nextFixed:
-            layout === "modern"
-                ? ItemEnchantModernFixed
-                : ItemEnchantLegacyFixed,
-    });
-    const BoundarySearchStep = find(
-        u8(),
-        (value) => value === (packedKey & 0xff),
-    ).pipe((candidateOffset, reader) =>
+    };
+}
+
+/** Creates the four intrinsic pre-name layouts and their common linear suffix. */
+function itemEnchantVariable(packedKey: number) {
+    return union(
         struct({
-            /** Opaque bytes before the next possible repeated-key candidate. */
-            skipped: bytes(candidateOffset - reader.byteOffset).reserved(),
-            /** Absolute candidate offset retained only during schema preview. */
-            candidateOffset: offset(),
-            /** A valid trailer plus next-row schema, or one byte of progress. */
-            match: union(BoundaryCandidate, ItemEnchantBoundaryMiss),
+            /** Layout with five-byte entries followed by 32-bit values. */
+            payloadLayout: literal("standard"),
+            /** First counted sequence of opaque five-byte entries. */
+            firstEntries: array(ItemEnchantArrayCount, bytes(5)),
+            /** Fixed bytes between the two pre-name lists. */
+            betweenLists: bytes(8),
+            /** Counted sequence of neutral 32-bit values. */
+            secondValues: array(ItemEnchantArrayCount, u32()),
+            ...itemEnchantVariableSuffix(packedKey),
+        }),
+        struct({
+            /** Layout containing two adjacent five-byte entry lists. */
+            payloadLayout: literal("five"),
+            /** First counted sequence of opaque five-byte entries. */
+            firstEntries: array(ItemEnchantArrayCount, bytes(5)),
+            /** Second counted sequence of opaque five-byte entries. */
+            secondEntries: array(ItemEnchantArrayCount, bytes(5)),
+            /** Fixed bytes after the two pre-name lists. */
+            afterLists: bytes(8),
+            ...itemEnchantVariableSuffix(packedKey),
+        }),
+        struct({
+            /** Two-list layout with a one-byte control between the lists. */
+            payloadLayout: literal("byte-five"),
+            /** First counted sequence of opaque five-byte entries. */
+            firstEntries: array(ItemEnchantArrayCount, bytes(5)),
+            /** Neutral one-byte control between the two lists. */
+            betweenLists: u8(),
+            /** Second counted sequence of opaque five-byte entries. */
+            secondEntries: array(ItemEnchantArrayCount, bytes(5)),
+            /** Fixed bytes after the two pre-name lists. */
+            afterLists: bytes(8),
+            ...itemEnchantVariableSuffix(packedKey),
+        }),
+        struct({
+            /** Two-list layout with a four-byte control between the lists. */
+            payloadLayout: literal("word-five"),
+            /** First counted sequence of opaque five-byte entries. */
+            firstEntries: array(ItemEnchantArrayCount, bytes(5)),
+            /** Neutral four-byte control between the two lists. */
+            betweenLists: u32(),
+            /** Second counted sequence of opaque five-byte entries. */
+            secondEntries: array(ItemEnchantArrayCount, bytes(5)),
+            /** Fixed bytes after the two pre-name lists. */
+            afterLists: bytes(8),
+            ...itemEnchantVariableSuffix(packedKey),
         }),
     );
-
-    return find(BoundarySearchStep, ({ match }) => match.kind === "boundary")
-        .pipe((searchOffset, reader) =>
-            struct({
-                /** Failed search steps replayed only to reach the match. */
-                skipped: bytes(searchOffset - reader.byteOffset).reserved(),
-                /** Successful step previewed without consuming the payload. */
-                boundary: BoundarySearchStep,
-            }).peek(),
-        )
-        .pipe(({ boundary }, reader) =>
-            struct({
-                /** Opaque payload ending immediately before the repeated key. */
-                payload: bytes(boundary.candidateOffset - reader.byteOffset),
-                /** Full packed row identity repeated eight bytes before row end. */
-                repeatedRowKey: u32().is(packedKey),
-                /**
-                 * Neutral final row word retained without captured-domain
-                 * checks.
-                 */
-                trailerValue: u32(),
-            }),
-        );
 }
 
-/** Creates the EOF-bounded tail of the final item-enchant row. */
-function itemEnchantFinalTail(packedKey: number) {
-    return struct({
-        /** Opaque final-row payload consuming all bytes before the trailer. */
-        payload: offset()
-            .transform((_value, reader) => {
-                const byteLength = reader.remaining - ITEM_ENCHANT_TRAILER_SIZE;
-                if (byteLength < 0) {
-                    throw reader.fail(
-                        "item-enchant final row is shorter than its trailer",
-                    );
-                }
-                return byteLength;
-            })
-            .pipe((byteLength) => bytes(byteLength)),
-        /** Full packed row identity repeated eight bytes before EOF. */
-        repeatedRowKey: u32().is(packedKey),
-        /** Neutral final row word retained without captured-domain checks. */
-        trailerValue: u32(),
-    });
-}
-
-/** Flattens a fixed row prefix and its lossless variable tail. */
+/** Flattens a fixed row prefix and its linearly decoded variable payload. */
 function flattenItemEnchantRow<
     Fixed extends Record<string, unknown>,
-    Tail extends Record<string, unknown>,
->({ fixed, tail }: { fixed: Fixed; tail: Tail }) {
-    return { ...fixed, ...tail };
+    Variable extends Record<string, unknown>,
+>({ fixed, variable }: { fixed: Fixed; variable: Variable }) {
+    return { ...fixed, ...variable };
 }
 
-/** Creates one row whose layout and repeated-key boundary come from its bytes. */
-function itemEnchantRow(isFinal: boolean) {
-    return u32()
-        .peek()
-        .pipe((packedKey) =>
-            ItemEnchantFixed.pipe((fixed) =>
-                struct({
-                    /** Fixed prefix already consumed by the layout union. */
-                    fixed: literal(fixed),
-                    /** Repeated-key-bounded opaque payload and trailer. */
-                    tail: isFinal
-                        ? itemEnchantFinalTail(packedKey)
-                        : itemEnchantNonFinalTail(packedKey, fixed.layout),
-                }).transform(flattenItemEnchantRow),
-            ),
-        );
-}
+/** Installed expanded row, including its complete variable grammar and trailer. */
+const ItemEnchantModernRow = ItemEnchantModernFixed.pipe((fixed) =>
+    struct({
+        /** Fixed expanded-layout prefix already consumed by this schema. */
+        fixed: literal(fixed),
+        /** Counted lists and strings that intrinsically delimit the row. */
+        variable: itemEnchantVariable(
+            ((fixed.enhancementLevel << 24) | fixed.itemId) >>> 0,
+        ),
+    }).transform(flattenItemEnchantRow),
+);
 
-/** Non-final row whose boundary is proven by its trailer and the next row. */
-const ItemEnchantNonFinalRow = itemEnchantRow(false);
-/** Final row whose variable payload is bounded by the table EOF. */
-const ItemEnchantFinalRow = itemEnchantRow(true);
+/** Historical pre-expansion row with the same complete variable grammar. */
+const ItemEnchantLegacyRow = ItemEnchantLegacyFixed.pipe((fixed) =>
+    struct({
+        /** Fixed pre-expansion prefix already consumed by this schema. */
+        fixed: literal(fixed),
+        /** Counted lists and strings that intrinsically delimit the row. */
+        variable: itemEnchantVariable(
+            ((fixed.enhancementLevel << 24) | fixed.itemId) >>> 0,
+        ),
+    }).transform(flattenItemEnchantRow),
+);
+
+/** The two viable complete row layouts, distinguished by their own bytes. */
+const ItemEnchantRow = union(ItemEnchantModernRow, ItemEnchantLegacyRow);
 
 /** Complete item-enchant table with intrinsic row framing. */
 export const ItemEnchantDbss = dbss("gamecommondata/binary/itemenchant.dbss")({
-    /**
-     * Physical rows. All but the final row use the repeated-key trailer plus
-     * the next row's complete same-layout fixed schema; the final row is
-     * bounded by EOF.
-     */
-    rows: u32()
-        .positive()
-        .pipe((rowCount) =>
-            struct({
-                /** Repeated-key-bounded rows before the final EOF-bounded row. */
-                initialRows: array(rowCount - 1, ItemEnchantNonFinalRow),
-                /** Sole row whose payload terminates at the table trailer. */
-                finalRow: ItemEnchantFinalRow,
-            }).transform(({ initialRows, finalRow }) => [
-                ...initialRows,
-                finalRow,
-            ]),
-        )
-        .check((rows) => new Set(rows.map((row) => row.layout)).size === 1),
+    /** Count-framed physical rows, each intrinsically delimited by its schema. */
+    rows: array(u32(), ItemEnchantRow),
 });
 
 if (import.meta.main) {

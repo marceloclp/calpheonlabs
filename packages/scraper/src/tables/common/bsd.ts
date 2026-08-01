@@ -1,4 +1,4 @@
-import { bool, bytes, custom, u32, type BsdNumber } from "@marceloclp/bsd";
+import { bool, bytes, custom, u32, u64, type BsdNumber } from "@marceloclp/bsd";
 
 export const Cstring = custom((reader) => {
     const buffer = reader.buffer;
@@ -37,6 +37,27 @@ export function utf16Text(n = u32(), pad = 4) {
         .pad(pad)
         .pipe((x) => bytes(x * 2))
         .utf16();
+}
+
+/** Converts a stored unsigned 64-bit element count into a safe byte length. */
+function byteLength64(multiplier: 1 | 2) {
+    return u64()
+        .lte(BigInt(Math.floor(Number.MAX_SAFE_INTEGER / multiplier)))
+        .transform((count) => Number(count) * multiplier);
+}
+
+/** A validated seven-bit ASCII string framed by an unsigned 64-bit byte count. */
+export function asciiText64() {
+    return byteLength64(1).pipe((byteLength) =>
+        bytes(byteLength)
+            .check((value) => value.every((byte) => byte <= 0x7f))
+            .ascii(),
+    );
+}
+
+/** A UTF-16LE string framed by an unsigned 64-bit character count. */
+export function utf16Text64() {
+    return byteLength64(2).pipe((byteLength) => bytes(byteLength).utf16());
 }
 
 /**
