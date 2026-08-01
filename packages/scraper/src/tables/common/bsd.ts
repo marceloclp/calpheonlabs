@@ -1,4 +1,4 @@
-import { bool, bytes, custom, u32 } from "@marceloclp/bsd";
+import { bool, bytes, custom, u32, type BsdNumber } from "@marceloclp/bsd";
 
 export const Cstring = custom((reader) => {
     const buffer = reader.buffer;
@@ -37,4 +37,17 @@ export function utf16Text(n = u32(), pad = 4) {
         .pad(pad)
         .pipe((x) => bytes(x * 2))
         .utf16();
+}
+
+/**
+ * Represents a reserved byte sequence, with a check to ensure that every byte
+ * matches the expected value.
+ */
+export function reserved(
+    byteLength: number | BsdNumber<number>,
+    expected: number = 0,
+) {
+    return bytes(byteLength)
+        .check((buf) => buf.every((x) => x === expected))
+        .reserved();
 }
