@@ -1,7 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { readdir, readFile } from "node:fs/promises";
 import { basename, join } from "node:path";
-
 import { tablePages } from "./table-catalog";
 
 const repositoryRoot = join(import.meta.dir, "..");
@@ -34,7 +33,9 @@ const section = (source: string, heading: string): string => {
 
 const tableNameFromDecoder = async (decoder: string): Promise<string> => {
     const source = await readFile(join(decoderDirectory, decoder), "utf8");
-    const match = source.match(/\b(?:dbss|bss)\(\s*"([^"]+\.(?:bss|dbss))"/s);
+    const match = source.match(
+        /\b(?:dbssRows|dbss|bss)\(\s*"([^"]+\.(?:bss|dbss))"/s,
+    );
     if (!match) throw new Error(`No BSS/DBSS declaration in ${decoder}`);
     return basename(match[1]!);
 };

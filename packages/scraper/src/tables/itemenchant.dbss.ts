@@ -1,5 +1,6 @@
 import {
     array,
+    bool,
     bytes,
     literal,
     struct,
@@ -12,12 +13,7 @@ import {
     type BsdShape,
 } from "@marceloclp/bsd";
 import { asciiText64, reserved, utf16Text64 } from "./common/bsd";
-import { dbss } from "./common/helpers";
-
-/** Boolean byte that rejects non-canonical values instead of coercing them. */
-const ItemEnchantBoolean = u8()
-    .in(new Set([0, 1]))
-    .transform((value) => value === 1);
+import { dbssRows } from "./common/dbss-rows";
 
 /** Builds one discriminated fixed-prefix schema. */
 function ItemEnchantType<const K extends string, S extends BsdShape>(
@@ -67,17 +63,17 @@ function ItemEnchantType<const K extends string, S extends BsdShape>(
         /** Item weight numerator in ten-thousandths of one LT. */
         weightValue: u32(),
         /** Whether multiple copies share one inventory slot. */
-        isStackable: ItemEnchantBoolean,
+        isStackable: bool(),
         /** Whether item use applies immediately. */
-        appliesDirectly: ItemEnchantBoolean,
+        appliesDirectly: bool(),
         /** Four opaque bytes at row-relative offsets `+69..+72`. */
         unknown69: bytes(4),
         /** Numeric vesting/binding mode. */
         vestingTypeCode: u8(),
         /** Whether a vested item belongs to the user rather than the family. */
-        isUserVested: ItemEnchantBoolean,
+        isUserVested: bool(),
         /** Whether the client exposes the item as tradeable. */
-        isTradeable: ItemEnchantBoolean,
+        isTradeable: bool(),
         /** Numeric trade-mode discriminator. */
         tradeTypeCode: u8(),
         /** Opaque bytes at row-relative offsets `+77..+109`. */
@@ -109,11 +105,11 @@ const ItemEnchantModernFixed = ItemEnchantType("modern", {
     /** Opaque bytes at modern row-relative offsets `+161..+163`. */
     unknown161: bytes(3),
     /** Whether this is a cash-shop item. */
-    isCash: ItemEnchantBoolean,
+    isCash: bool(),
     /** Opaque bytes at modern row-relative offsets `+165..+195`. */
     unknown165: bytes(31),
     /** Whether direct player-to-player trade is permitted. */
-    isPersonalTrade: ItemEnchantBoolean,
+    isPersonalTrade: bool(),
     /** Opaque bytes at modern row-relative offsets `+197..+204`. */
     unknown197: bytes(8),
     /** Neutral word at modern row-relative offset `+205`. */
@@ -129,11 +125,11 @@ const ItemEnchantLegacyFixed = ItemEnchantType("legacy", {
     /** Opaque bytes at legacy row-relative offsets `+149..+151`. */
     unknown149: bytes(3),
     /** Whether this is a cash-shop item. */
-    isCash: ItemEnchantBoolean,
+    isCash: bool(),
     /** Opaque bytes at legacy row-relative offsets `+153..+183`. */
     unknown153: bytes(31),
     /** Whether direct player-to-player trade is permitted. */
-    isPersonalTrade: ItemEnchantBoolean,
+    isPersonalTrade: bool(),
     /** Opaque bytes at legacy row-relative offsets `+185..+192`. */
     unknown185: bytes(8),
     /** Neutral word at legacy row-relative offset `+193`. */
@@ -142,36 +138,29 @@ const ItemEnchantLegacyFixed = ItemEnchantType("legacy", {
     unknown195: bytes(5),
 }).fixedLength(200);
 
-/** Four-byte count framing shared by each variable list. */
-const ItemEnchantArrayCount = u32();
-/** Length-prefixed ASCII field used for icon, sound, and expression text. */
-const ItemEnchantAsciiText = asciiText64();
-/** Length-prefixed UTF-16LE field used for client-facing and expression text. */
-const ItemEnchantUtf16Text = utf16Text64();
-
 /**
- * Creates the common suffix after one of the four pre-name list layouts.
+ * Creates one static copy of the common variable suffix schema.
  *
  * After the name/icon region, six counted arrays and three final strings
  * consume the former opaque tail linearly. The repeated packed key then proves
- * the row boundary.
+ * the row boundary at the complete-row schema.
  */
-function itemEnchantVariableSuffix(packedKey: number) {
+function itemEnchantVariableSuffix() {
     return {
         /** Neutral scalar immediately before the item name. */
         fieldBeforeName: u32(),
         /** Client item name framed by a 64-bit UTF-16 character count. */
-        name: ItemEnchantUtf16Text,
+        name: utf16Text64(),
         /** Client icon resource path framed by a 64-bit ASCII byte count. */
-        iconPath: ItemEnchantAsciiText,
+        iconPath: asciiText64(),
         /** Fixed controls immediately following the icon path. */
         postIcon: bytes(18),
         /** First post-icon UTF-16 expression or client text. */
-        postIconTextA: ItemEnchantUtf16Text,
+        postIconTextA: utf16Text64(),
         /** Second post-icon UTF-16 expression or client text. */
-        postIconTextB: ItemEnchantUtf16Text,
+        postIconTextB: utf16Text64(),
         /** Third post-icon UTF-16 expression or client text. */
-        postIconTextC: ItemEnchantUtf16Text,
+        postIconTextC: utf16Text64(),
         /** Unsigned market-registration limit retained as a decimal string. */
         marketLimit: u64().transform((value) => value.toString()),
         /** Fixed post-market region whose individual meanings remain unknown. */
@@ -179,29 +168,29 @@ function itemEnchantVariableSuffix(packedKey: number) {
         /** Fixed prefix of the formerly opaque type-dependent tail. */
         tailPrefix82: bytes(82),
         /** First tail list; each entry is sixteen opaque bytes. */
-        tailEntries16: array(ItemEnchantArrayCount, bytes(16)),
+        tailEntries16: array(u32(), bytes(16)),
         /** Fixed region between the first and second tail lists. */
         tailMiddle40: bytes(40),
         /** Second tail list; each entry is twelve opaque bytes. */
-        tailEntries12: array(ItemEnchantArrayCount, bytes(12)),
+        tailEntries12: array(u32(), bytes(12)),
         /** Fixed region before the first scalar tail list. */
         tailMiddle8: bytes(8),
         /** First counted list of neutral 32-bit tail values. */
-        tailValuesA: array(ItemEnchantArrayCount, u32()),
+        tailValuesA: array(u32(), u32()),
         /** Fixed region before the second scalar tail list. */
         tailMiddle45: bytes(45),
         /** Second counted list of neutral 32-bit tail values. */
-        tailValuesB: array(ItemEnchantArrayCount, u32()),
+        tailValuesB: array(u32(), u32()),
         /** Fixed region before the final three tail strings. */
         tailMiddle15: bytes(15),
         /** First final-tail UTF-16 expression or client text. */
-        tailTextA: ItemEnchantUtf16Text,
+        tailTextA: utf16Text64(),
         /** Final-tail ASCII expression, sound key, or client text. */
-        tailAsciiText: ItemEnchantAsciiText,
+        tailAsciiText: asciiText64(),
         /** Second final-tail UTF-16 expression or client text. */
-        tailTextB: ItemEnchantUtf16Text,
+        tailTextB: utf16Text64(),
         /** Third counted list of neutral 32-bit tail values. */
-        tailValuesC: array(ItemEnchantArrayCount, u32()),
+        tailValuesC: array(u32(), u32()),
         /** Five opaque bytes before the final counted list. */
         tailMiddle5: bytes(5),
         /**
@@ -209,69 +198,67 @@ function itemEnchantVariableSuffix(packedKey: number) {
          * store three zero upper count bytes, so their conceptual ownership as
          * count bits versus reserved bytes remains unresolved.
          */
-        tailValues16: array(ItemEnchantArrayCount, u16()),
+        tailValues16: array(u32(), u16()),
         /** Twelve opaque bytes immediately before the row trailer. */
         tailSuffix12: bytes(12),
         /** Full packed row identity repeated eight bytes before row end. */
-        repeatedRowKey: u32().is(packedKey),
+        repeatedRowKey: u32(),
         /** Neutral final row word retained without captured-domain checks. */
         trailerValue: u32(),
     };
 }
 
-/** Creates the four intrinsic pre-name layouts and their common linear suffix. */
-function itemEnchantVariable(packedKey: number) {
-    return union(
-        struct({
-            /** Layout with five-byte entries followed by 32-bit values. */
-            payloadLayout: literal("standard"),
-            /** First counted sequence of opaque five-byte entries. */
-            firstEntries: array(ItemEnchantArrayCount, bytes(5)),
-            /** Fixed bytes between the two pre-name lists. */
-            betweenLists: bytes(8),
-            /** Counted sequence of neutral 32-bit values. */
-            secondValues: array(ItemEnchantArrayCount, u32()),
-            ...itemEnchantVariableSuffix(packedKey),
-        }),
-        struct({
-            /** Layout containing two adjacent five-byte entry lists. */
-            payloadLayout: literal("five"),
-            /** First counted sequence of opaque five-byte entries. */
-            firstEntries: array(ItemEnchantArrayCount, bytes(5)),
-            /** Second counted sequence of opaque five-byte entries. */
-            secondEntries: array(ItemEnchantArrayCount, bytes(5)),
-            /** Fixed bytes after the two pre-name lists. */
-            afterLists: bytes(8),
-            ...itemEnchantVariableSuffix(packedKey),
-        }),
-        struct({
-            /** Two-list layout with a one-byte control between the lists. */
-            payloadLayout: literal("byte-five"),
-            /** First counted sequence of opaque five-byte entries. */
-            firstEntries: array(ItemEnchantArrayCount, bytes(5)),
-            /** Neutral one-byte control between the two lists. */
-            betweenLists: u8(),
-            /** Second counted sequence of opaque five-byte entries. */
-            secondEntries: array(ItemEnchantArrayCount, bytes(5)),
-            /** Fixed bytes after the two pre-name lists. */
-            afterLists: bytes(8),
-            ...itemEnchantVariableSuffix(packedKey),
-        }),
-        struct({
-            /** Two-list layout with a four-byte control between the lists. */
-            payloadLayout: literal("word-five"),
-            /** First counted sequence of opaque five-byte entries. */
-            firstEntries: array(ItemEnchantArrayCount, bytes(5)),
-            /** Neutral four-byte control between the two lists. */
-            betweenLists: u32(),
-            /** Second counted sequence of opaque five-byte entries. */
-            secondEntries: array(ItemEnchantArrayCount, bytes(5)),
-            /** Fixed bytes after the two pre-name lists. */
-            afterLists: bytes(8),
-            ...itemEnchantVariableSuffix(packedKey),
-        }),
-    );
-}
+/** Layout with five-byte entries followed by 32-bit values. */
+const ItemEnchantStandardVariable = struct({
+    payloadLayout: literal("standard"),
+    /** First counted sequence of opaque five-byte entries. */
+    firstEntries: array(u32(), bytes(5)),
+    /** Fixed bytes between the two pre-name lists. */
+    betweenLists: bytes(8),
+    /** Counted sequence of neutral 32-bit values. */
+    secondValues: array(u32(), u32()),
+    ...itemEnchantVariableSuffix(),
+});
+
+/** Layout containing two adjacent five-byte entry lists. */
+const ItemEnchantFiveVariable = struct({
+    payloadLayout: literal("five"),
+    /** First counted sequence of opaque five-byte entries. */
+    firstEntries: array(u32(), bytes(5)),
+    /** Second counted sequence of opaque five-byte entries. */
+    secondEntries: array(u32(), bytes(5)),
+    /** Fixed bytes after the two pre-name lists. */
+    afterLists: bytes(8),
+    ...itemEnchantVariableSuffix(),
+});
+
+/** Two-list layout with a one-byte control between the lists. */
+const ItemEnchantByteFiveVariable = struct({
+    payloadLayout: literal("byte-five"),
+    /** First counted sequence of opaque five-byte entries. */
+    firstEntries: array(u32(), bytes(5)),
+    /** Neutral one-byte control between the two lists. */
+    betweenLists: u8(),
+    /** Second counted sequence of opaque five-byte entries. */
+    secondEntries: array(u32(), bytes(5)),
+    /** Fixed bytes after the two pre-name lists. */
+    afterLists: bytes(8),
+    ...itemEnchantVariableSuffix(),
+});
+
+/** Two-list layout with a four-byte control between the lists. */
+const ItemEnchantWordFiveVariable = struct({
+    payloadLayout: literal("word-five"),
+    /** First counted sequence of opaque five-byte entries. */
+    firstEntries: array(u32(), bytes(5)),
+    /** Neutral four-byte control between the two lists. */
+    betweenLists: u32(),
+    /** Second counted sequence of opaque five-byte entries. */
+    secondEntries: array(u32(), bytes(5)),
+    /** Fixed bytes after the two pre-name lists. */
+    afterLists: bytes(8),
+    ...itemEnchantVariableSuffix(),
+});
 
 /** Flattens a fixed row prefix and its linearly decoded variable payload. */
 function flattenItemEnchantRow<
@@ -281,38 +268,81 @@ function flattenItemEnchantRow<
     return { ...fixed, ...variable };
 }
 
-/** Installed expanded row, including its complete variable grammar and trailer. */
-const ItemEnchantModernRow = ItemEnchantModernFixed.pipe((fixed) =>
+/** Checks the repeated trailer identity after a complete static row branch. */
+function hasMatchingRepeatedRowKey(row: {
+    enhancementLevel: number;
+    itemId: number;
+    repeatedRowKey: number;
+}) {
+    return (
+        row.repeatedRowKey === ((row.enhancementLevel << 24) | row.itemId) >>> 0
+    );
+}
+
+/** Installed expanded rows across all four intrinsic payload layouts. */
+const ItemEnchantModernRow = union(
     struct({
-        /** Fixed expanded-layout prefix already consumed by this schema. */
-        fixed: literal(fixed),
-        /** Counted lists and strings that intrinsically delimit the row. */
-        variable: itemEnchantVariable(
-            ((fixed.enhancementLevel << 24) | fixed.itemId) >>> 0,
-        ),
-    }).transform(flattenItemEnchantRow),
+        fixed: ItemEnchantModernFixed,
+        variable: ItemEnchantStandardVariable,
+    })
+        .transform(flattenItemEnchantRow)
+        .check(hasMatchingRepeatedRowKey),
+    struct({
+        fixed: ItemEnchantModernFixed,
+        variable: ItemEnchantFiveVariable,
+    })
+        .transform(flattenItemEnchantRow)
+        .check(hasMatchingRepeatedRowKey),
+    struct({
+        fixed: ItemEnchantModernFixed,
+        variable: ItemEnchantByteFiveVariable,
+    })
+        .transform(flattenItemEnchantRow)
+        .check(hasMatchingRepeatedRowKey),
+    struct({
+        fixed: ItemEnchantModernFixed,
+        variable: ItemEnchantWordFiveVariable,
+    })
+        .transform(flattenItemEnchantRow)
+        .check(hasMatchingRepeatedRowKey),
 );
 
-/** Historical pre-expansion row with the same complete variable grammar. */
-const ItemEnchantLegacyRow = ItemEnchantLegacyFixed.pipe((fixed) =>
+/** Historical pre-expansion rows across all four intrinsic payload layouts. */
+const ItemEnchantLegacyRow = union(
     struct({
-        /** Fixed pre-expansion prefix already consumed by this schema. */
-        fixed: literal(fixed),
-        /** Counted lists and strings that intrinsically delimit the row. */
-        variable: itemEnchantVariable(
-            ((fixed.enhancementLevel << 24) | fixed.itemId) >>> 0,
-        ),
-    }).transform(flattenItemEnchantRow),
+        fixed: ItemEnchantLegacyFixed,
+        variable: ItemEnchantStandardVariable,
+    })
+        .transform(flattenItemEnchantRow)
+        .check(hasMatchingRepeatedRowKey),
+    struct({
+        fixed: ItemEnchantLegacyFixed,
+        variable: ItemEnchantFiveVariable,
+    })
+        .transform(flattenItemEnchantRow)
+        .check(hasMatchingRepeatedRowKey),
+    struct({
+        fixed: ItemEnchantLegacyFixed,
+        variable: ItemEnchantByteFiveVariable,
+    })
+        .transform(flattenItemEnchantRow)
+        .check(hasMatchingRepeatedRowKey),
+    struct({
+        fixed: ItemEnchantLegacyFixed,
+        variable: ItemEnchantWordFiveVariable,
+    })
+        .transform(flattenItemEnchantRow)
+        .check(hasMatchingRepeatedRowKey),
 );
 
-/** The two viable complete row layouts, distinguished by their own bytes. */
+/** The two viable complete row-layout families, selected by full schemas. */
 const ItemEnchantRow = union(ItemEnchantModernRow, ItemEnchantLegacyRow);
 
-/** Complete item-enchant table with intrinsic row framing. */
-export const ItemEnchantDbss = dbss("gamecommondata/binary/itemenchant.dbss")({
-    /** Count-framed physical rows, each intrinsically delimited by its schema. */
-    rows: array(u32(), ItemEnchantRow),
-});
+/** Complete item-enchant table with intrinsic row framing and streaming output. */
+export const ItemEnchantDbss = dbssRows(
+    "gamecommondata/binary/itemenchant.dbss",
+    ItemEnchantRow,
+);
 
 if (import.meta.main) {
     await ItemEnchantDbss.load();
