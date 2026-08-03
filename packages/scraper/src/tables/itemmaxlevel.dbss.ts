@@ -1,5 +1,4 @@
 import { array, bytes, struct, u32, u8 } from "@marceloclp/bsd";
-
 import { bss } from "./common/helpers";
 
 /** One fixed five-byte item maximum-enhancement record. */

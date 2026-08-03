@@ -1,5 +1,4 @@
 import { array, bytes, struct, u32 } from "@marceloclp/bsd";
-
 import { bss } from "./common/helpers";
 
 /** One source item and the market-listed item whose price it references. */
@@ -22,8 +21,6 @@ const ItemLinkPriceFooter = struct({
 
 /** Complete physical item-price-link table. */
 export const ItemLinkPriceBss = bss("gamecommondata/binary/itemlinkprice.bss")({
-    /** Stored link count retained independently of the decoded array. */
-    rowCount: u32().peek(),
     /** Directional item-price links in physical file order. */
     rows: array(u32(), ItemLinkPriceRow),
     /** Informational footer framing the table. */

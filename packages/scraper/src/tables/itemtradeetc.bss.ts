@@ -1,4 +1,5 @@
 import { array, bytes, struct, u24, u32, u8 } from "@marceloclp/bsd";
+import { reserved } from "./common/bsd";
 import { bss } from "./common/helpers";
 
 /** One ten-byte directed conversion ratio. */
@@ -7,7 +8,7 @@ const ItemTradeEtcRatioEntry = struct({
     sourceCode: u8(),
     /** Destination namespace produced by the conversion. */
     targetCode: u8(),
-    /** Required zero byte before the structural marker. */
+    /** Unused byte before the structural marker; zero in the verified capture. */
     reserved02: bytes(1).reserved(),
     /** Invariant 24-bit structural marker at entry offset `+3`. */
     marker24: u24().is(0x492ae6),
@@ -21,18 +22,14 @@ const ItemTradeEtcRatioGroup = struct({
     sourceCode: u8(),
     /** Directed conversion entries in physical order. */
     entries: array(u32(), ItemTradeEtcRatioEntry),
-}).check((group) =>
-    group.entries.every((entry) => entry.sourceCode === group.sourceCode),
-);
+}).check((g) => g.entries.every((e) => e.sourceCode === g.sourceCode));
 
 /** One twelve-byte trade-value threshold and multiplier. */
 const ItemTradeEtcThreshold = struct({
     /** Inclusive stored trade-value boundary. */
     thresholdValue: u32(),
     /** Required zero word between the boundary and multiplier. */
-    reserved04: bytes(4)
-        .check((value) => value.every((byte) => byte === 0))
-        .reserved(),
+    reserved04: reserved(4, 0),
     /** Fixed-point conversion multiplier with denominator 1,000,000. */
     ratioNumerator: u32(),
 }).fixedLength(12);

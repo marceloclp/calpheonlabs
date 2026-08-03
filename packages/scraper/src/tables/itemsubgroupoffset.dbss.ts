@@ -1,5 +1,4 @@
 import { array, bytes, struct, u16, u32 } from "@marceloclp/bsd";
-
 import { dbss } from "./common/helpers";
 
 /** One fixed-width pointer to a complete `itemsubgroup.dbss` group. */
@@ -27,17 +26,7 @@ export const ItemSubGroupOffsetDbss = dbss(
     "gamecommondata/binary/itemsubgroupoffset.dbss",
 )({
     /** Validated PABR signature, omitted as a byte-only framing range. */
-    magic: bytes(4)
-        .check(
-            (value) =>
-                value[0] === 0x50 &&
-                value[1] === 0x41 &&
-                value[2] === 0x42 &&
-                value[3] === 0x52,
-        )
-        .reserved(),
-    /** Stored pointer count retained independently of the decoded array. */
-    rowCount: u32().peek(),
+    magic: bytes(4).ascii().is("PABR"),
     /** Subgroup pointers in directory-file order. */
     rows: array(u32(), ItemSubGroupOffsetRow),
     /** Informational footer framing the directory. */

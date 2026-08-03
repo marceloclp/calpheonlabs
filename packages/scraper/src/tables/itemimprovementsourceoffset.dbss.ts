@@ -1,5 +1,4 @@
 import { array, struct, u32 } from "@marceloclp/bsd";
-
 import { dbss } from "./common/helpers";
 
 /** One twelve-byte pointer into `itemimprovementsource.dbss`. */

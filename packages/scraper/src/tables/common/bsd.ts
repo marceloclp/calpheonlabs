@@ -72,3 +72,15 @@ export function reserved(
         .check((buf) => buf.every((x) => x === expected))
         .reserved();
 }
+
+/**
+ * UTF-16 text preceded by the invariant one-byte marker used by table
+ * dictionaries.
+ */
+export function markedUtf16Text() {
+    return reserved(1, 1).pipe(bytes(u32()).utf16());
+}
+
+export function isEvery(expected: number) {
+    return (buf: Uint8Array) => buf.every((x) => x === expected);
+}

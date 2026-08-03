@@ -17,8 +17,8 @@ export function bss(path: string) {
                 /**
                  * Validated four-byte Pearl Abyss table signature.
                  *
-                 * The signature is framing rather than table data, so the
-                 * reserved byte range is intentionally absent from output.
+                 * The validated signature is retained in the decoded table so
+                 * the complete non-byte representation remains visible.
                  */
                 magic: bytes(4).ascii().is("PABR"),
                 ...shape,
@@ -32,7 +32,7 @@ class Table<S extends BsdShape> {
         /** File name (with extension). */
         private readonly name: string,
         private readonly schema: BsdStruct<S>,
-    ) { }
+    ) {}
 
     async load(bdoPath = Bun.env.BDO_GAME_PATH) {
         const meta = await PAZ.readMeta(bdoPath);

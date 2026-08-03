@@ -1,5 +1,4 @@
 import { array, struct, u32 } from "@marceloclp/bsd";
-
 import { dbss } from "./common/helpers";
 
 /** One pointer to a class-specific item-exchange payload. */

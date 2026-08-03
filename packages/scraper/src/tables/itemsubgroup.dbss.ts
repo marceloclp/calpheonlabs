@@ -12,7 +12,6 @@ import {
     u8,
     union,
 } from "@marceloclp/bsd";
-
 import { dbss } from "./common/helpers";
 
 /** Returns whether an opaque structural byte range is entirely zero. */
@@ -57,7 +56,7 @@ const ItemSubGroupMemberSingleFlag = struct({
     /** Sole nonempty value in the otherwise empty auxiliary block. */
     auxiliary: struct({
         /** Nonzero auxiliary discriminator whose gameplay meaning is unresolved. */
-        flag: u8().check((value) => value !== 0),
+        flag: u8().check((v) => v !== 0),
         /** Required empty remainder of the auxiliary block. */
         reserved: bytes(29).check(isZero).reserved(),
     }).fixedLength(30),
@@ -99,10 +98,7 @@ const ItemSubGroupMemberSentinel = struct({
         reserved: bytes(7).check(isZero).reserved(),
     })
         .fixedLength(30)
-        .check(
-            (value) =>
-                value.signedValue36 === (value.signedValue34 < 0 ? -1 : 0),
-        ),
+        .check((v) => v.signedValue36 === (v.signedValue34 < 0 ? -1 : 0)),
     /** Neutral byte control at member-relative offset `+46`. */
     field46: u8(),
     /** Neutral byte control at member-relative offset `+47`. */
@@ -151,31 +147,28 @@ const ItemSubGroupMemberTrade = struct({
     /** Required empty alignment before the 64-bit value slots. */
     reserved57: bytes(2).check(isZero).reserved(),
     /** Complete unsigned base-value slot, serialized losslessly as decimal text. */
-    baseValue64: u64().transform((value) => value.toString()),
+    baseValue64: u64().transform((v) => v.toString()),
     /**
      * Complete unsigned lower-bound slot, serialized losslessly as decimal
      * text.
      */
-    lowerValue64: u64().transform((value) => value.toString()),
+    lowerValue64: u64().transform((v) => v.toString()),
     /**
      * Complete unsigned upper-bound slot, serialized losslessly as decimal
      * text.
      */
-    upperValue64: u64().transform((value) => value.toString()),
+    upperValue64: u64().transform((v) => v.toString()),
     /** Complete signed row-local slot, serialized losslessly as decimal text. */
-    signedValue64: i64().transform((value) => value.toString()),
+    signedValue64: i64().transform((v) => v.toString()),
     /** Complete hundredth-unit slot, serialized losslessly as decimal text. */
-    valueUnit64: u64().transform((value) => value.toString()),
+    valueUnit64: u64().transform((v) => v.toString()),
     /** Required empty range before the final scalar. */
     reserved99: bytes(32).check(isZero).reserved(),
     /** Neutral final control scalar. */
     field131: u32(),
 })
     .fixedLength(135)
-    .check(
-        (value) =>
-            BigInt(value.valueUnit64) * 100n === BigInt(value.baseValue64),
-    );
+    .check((v) => BigInt(v.valueUnit64) * 100n === BigInt(v.baseValue64));
 
 /**
  * All four intrinsic 135-byte member layouts.
@@ -196,8 +189,6 @@ const ItemSubGroupGroup = struct({
     groupId: u32(),
     /** Required empty ten-byte range after the subgroup identifier. */
     reserved: bytes(10).check(isZero).reserved(),
-    /** Stored number of fixed-width subgroup members. */
-    memberCount: u32().peek(),
     /** Ordered members in physical file order. */
     members: array(u32(), ItemSubGroupMember),
 });
@@ -205,8 +196,6 @@ const ItemSubGroupGroup = struct({
 /** Complete physical item-subgroup table without an offset-table dependency. */
 export const ItemSubGroupDbss = dbss("gamecommondata/binary/itemsubgroup.dbss")(
     {
-        /** Stored subgroup count retained independently of the decoded array. */
-        groupCount: u32().peek(),
         /** Physical subgroups, required to have unique identifiers. */
         groups: array(u32(), ItemSubGroupGroup).check(
             (groups) =>

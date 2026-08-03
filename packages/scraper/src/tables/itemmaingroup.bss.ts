@@ -1,5 +1,5 @@
-import { array, bytes, struct, u16, u32, u8 } from "@marceloclp/bsd";
-
+import { array, bytes, struct, u16, u32 } from "@marceloclp/bsd";
+import { markedUtf16Text } from "./common/bsd";
 import { bss } from "./common/helpers";
 
 /** One ten-byte reference from a main group to an item subgroup. */
@@ -28,30 +28,8 @@ const ItemMainGroupRow = struct({
     reserved17: bytes(4).reserved(),
     /** Unused four-byte range at row-relative offset `+21`. */
     reserved21: bytes(4).reserved(),
-    /** Stored number of subgroup/condition references. */
-    entryCount: u32().peek(),
     /** Ordered subgroup and condition references. */
     entries: array(u32(), ItemMainGroupEntry),
-});
-
-/** One indexed UTF-16 condition expression from the table trailer. */
-const ItemMainGroupCondition = struct({
-    /** Required one-byte marker identifying a condition record. */
-    marker: u8().is(1),
-    /** Stored UTF-16 byte length retained independently of the text. */
-    byteLength: u32()
-        .check((value) => value % 2 === 0)
-        .peek(),
-    /** Condition expression decoded from its exact byte-length frame. */
-    text: bytes(u32()).utf16(),
-});
-
-/** Count-prefixed condition dictionary following all main-group rows. */
-const ItemMainGroupConditionTrailer = struct({
-    /** Stored number of indexed condition expressions. */
-    conditionCount: u32().peek(),
-    /** Condition expressions in index order. */
-    conditions: array(u32(), ItemMainGroupCondition),
 });
 
 /** Informational footer following the main-group condition dictionary. */
@@ -64,12 +42,10 @@ const ItemMainGroupFooter = struct({
 
 /** Complete physical item-main-group table without companion joins. */
 export const ItemMainGroupBss = bss("gamecommondata/binary/itemmaingroup.bss")({
-    /** Stored main-group count retained independently of the decoded array. */
-    rowCount: u32().peek(),
     /** Main-group rows in physical file order. */
     rows: array(u32(), ItemMainGroupRow),
     /** Indexed condition expressions referenced by row entries. */
-    trailer: ItemMainGroupConditionTrailer,
+    trailer: array(u32(), markedUtf16Text()),
     /** Informational pointer to the condition dictionary. */
     footer: ItemMainGroupFooter,
 });
