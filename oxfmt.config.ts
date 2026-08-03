@@ -4,6 +4,6 @@ export default defineConfig({
     printWidth: 80,
     semi: true,
     jsdoc: true,
-    sortImports: true,
+    sortImports: { newlinesBetween: false },
     tabWidth: 4,
 });

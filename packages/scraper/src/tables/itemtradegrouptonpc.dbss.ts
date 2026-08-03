@@ -7,7 +7,7 @@ const ItemTradeGroupToNpcEntry = struct({
     npcId: u16(),
     /** Item identifier offered by this trade entry. */
     tradeItemId: u32(),
-    /** Required zero bytes between the item ID and `field54`. */
+    /** Unused bytes between the item ID and `field54`; zero in the capture. */
     reserved06: bytes(48).reserved(),
     /** Raw unsigned trade-system control retained over its byte views. */
     field54: u16().peek(),
@@ -15,7 +15,7 @@ const ItemTradeGroupToNpcEntry = struct({
     namespaceCode: u8(),
     /** High byte of `field54`; its exact operation remains unresolved. */
     field55: u8(),
-    /** Required zero bytes between `field54` and `field107`. */
+    /** Unused bytes between `field54` and `field107`; zero in the capture. */
     reserved56: bytes(51).reserved(),
     /** Raw unsigned control retained over two neutral byte views. */
     field107: u16().peek(),
@@ -23,7 +23,7 @@ const ItemTradeGroupToNpcEntry = struct({
     field107LowByte: u8(),
     /** High physical byte of `field107`. */
     field108: u8(),
-    /** Required zero bytes between `field107` and `field124`. */
+    /** Unused bytes between `field107` and `field124`; zero in the capture. */
     reserved109: bytes(15).reserved(),
     /** Raw unsigned control retained over two neutral byte views. */
     field124: u16().peek(),
@@ -31,7 +31,7 @@ const ItemTradeGroupToNpcEntry = struct({
     field124LowByte: u8(),
     /** High physical byte of `field124`. */
     field125: u8(),
-    /** Required zero byte completing the entry. */
+    /** Unused final byte; zero in the verified capture. */
     reserved126: bytes(1).reserved(),
 }).fixedLength(127);
 
@@ -39,8 +39,6 @@ const ItemTradeGroupToNpcEntry = struct({
 const ItemTradeGroupToNpcRow = struct({
     /** NPC that owns the nested item entries. */
     npcId: u16(),
-    /** Stored entry count retained while the array rereads its prefix. */
-    entryCount: u32().peek(),
     /** Fixed-width item entries in physical order. */
     entries: array(u32(), ItemTradeGroupToNpcEntry),
 });

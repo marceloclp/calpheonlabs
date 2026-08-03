@@ -1,7 +1,6 @@
 import { join } from "node:path/posix";
 import { type BsdShape, type BsdStruct, bytes, struct } from "@marceloclp/bsd";
 import { JsonStreamStringify } from "json-stream-stringify";
-
 import { PAZ } from "../../paz/archive";
 
 export function dbss(path: string) {
@@ -18,8 +17,8 @@ export function bss(path: string) {
                 /**
                  * Validated four-byte Pearl Abyss table signature.
                  *
-                 * The signature is framing rather than table data, so the
-                 * reserved byte range is intentionally absent from output.
+                 * The validated signature is retained in the decoded table so
+                 * the complete non-byte representation remains visible.
                  */
                 magic: bytes(4).ascii().is("PABR"),
                 ...shape,
@@ -33,7 +32,7 @@ class Table<S extends BsdShape> {
         /** File name (with extension). */
         private readonly name: string,
         private readonly schema: BsdStruct<S>,
-    ) { }
+    ) {}
 
     async load(bdoPath = Bun.env.BDO_GAME_PATH) {
         const meta = await PAZ.readMeta(bdoPath);
@@ -49,10 +48,13 @@ class Table<S extends BsdShape> {
 
         const buffer = await PAZ.extract(entry, bdoPath);
         const decoded = this.schema.decode(buffer);
+        console.log("decoded");
 
         const path = join(entry.folderName, entry.fileName);
         const file = Bun.file(`out/${path.split("/").at(-1)}.json`);
-        await file.write("");
+        if (await file.exists()) {
+            await file.delete();
+        }
         const sink = file.writer({ highWaterMark: 1024 * 1024 });
         const stream = new JsonStreamStringify(decoded, undefined, 4);
         for await (const chunk of stream) {

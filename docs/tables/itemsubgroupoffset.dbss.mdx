@@ -14,11 +14,11 @@ search:
 | ------------------ | ---------------------------------------------------------------------------------------------------------- |
 | Evidence state     | Reconciled                                                                                                 |
 | Coverage           | 100%                                                                                                       |
-| Iteration          | 3                                                                                                          |
-| Last reviewed      | 2026-07-31                                                                                                 |
+| Iteration          | 4                                                                                                          |
+| Last reviewed      | 2026-08-03                                                                                                 |
 | Captures examined  | Build 2938; `Paz/pad00000.meta` SHA-256 `b7eefe6059818f84c0545f10020fe93bd3bd5d0647e043120caf78726ccafe8f` |
 | Primary bytes      | 164,300; SHA-256 `4788ed6960441e6457e809751401d23ebe266dfc7ba2de1dcb0e05ee4c0b6c01`                        |
-| Snapshot proof     | 16,428 rows; normalized SHA-256 `958699ce4a935c7be4e473ca8982fbc8973e28581b56443bbfb75e25d61e1c5a`         |
+| Snapshot proof     | 16,428 rows; normalized SHA-256 `1b3e95c9df6746cc3d362e916e4aee46e60d8efcdf31f0ee0d34dcf0b8cc0da6`         |
 | Decoder            | `packages/scraper/src/tables/itemsubgroupoffset.dbss.ts`                                                   |
 | Remaining blockers | None                                                                                                       |
 
@@ -29,15 +29,15 @@ load or import it.
 
 ## Field ledger
 
-| Field/path                               | Offset and width           | Representation                      | Claimed meaning          | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                         | Status |
-| ---------------------------------------- | -------------------------- | ----------------------------------- | ------------------------ | ------------------- | ------------------------- | ------------------- | ---------------------------------------------------------------- | ------ |
-| `magic` (PABR signature)                 | file `+0`, 4               | checked `bytes(4).reserved()`       | Table framing            | Certain             | Certain                   | Certain             | Exact `PABR` bytes; byte-only framing is intentionally omitted   | Closed |
-| `rowCount`, `rows[]`                     | file `+4`, 4; then 10 each | retained `u32`, counted fixed array | Pointer count and rows   | Certain             | Certain                   | Certain             | 16,428 rows consume exactly to the footer                        | Closed |
-| `rows[].groupId`                         | row `+0`, 2                | `u16`                               | Item-subgroup identifier | Certain             | Certain                   | Certain             | Equals the pointed payload group's `u32` identifier exhaustively | Closed |
-| `rows[].offset`                          | row `+2`, 4                | `u32`                               | Payload-group start      | Certain             | Certain                   | Certain             | Sorting spans partitions `itemsubgroup.dbss` from byte 4         | Closed |
-| `rows[].byteLength`                      | row `+6`, 4                | `u32`                               | Payload-group width      | Certain             | Certain                   | Certain             | Equals `18 + memberCount * 135` for every group                  | Closed |
-| `footer.reserved00`, `footer.reserved08` | final outer words, 4 each  | `bytes(4).reserved()`               | Byte-only PABR framing   | Certain             | Certain                   | Unknown             | Explicitly consumed and intentionally omitted                    | Closed |
-| `footer.footerOffset`                    | final middle word, 4       | retained `u32`                      | Footer position          | Certain             | Certain                   | Certain             | Matches the observed footer start; footer remains informational  | Closed |
+| Field/path                               | Offset and width           | Representation                               | Claimed meaning          | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                             | Status |
+| ---------------------------------------- | -------------------------- | -------------------------------------------- | ------------------------ | ------------------- | ------------------------- | ------------------- | -------------------------------------------------------------------- | ------ |
+| `magic` (PABR signature)                 | file `+0`, 4               | validated ASCII string retained              | Table framing            | Certain             | Certain                   | Certain             | Exact `PABR` token is emitted as part of the table representation    | Closed |
+| encoded row count, `rows[]`              | file `+4`, 4; then 10 each | count consumed by fixed array; rows retained | Pointer count and rows   | Certain             | Certain                   | Certain             | 16,428 rows consume exactly to the footer; no count alias is emitted | Closed |
+| `rows[].groupId`                         | row `+0`, 2                | `u16`                                        | Item-subgroup identifier | Certain             | Certain                   | Certain             | Equals the pointed payload group's `u32` identifier exhaustively     | Closed |
+| `rows[].offset`                          | row `+2`, 4                | `u32`                                        | Payload-group start      | Certain             | Certain                   | Certain             | Sorting spans partitions `itemsubgroup.dbss` from byte 4             | Closed |
+| `rows[].byteLength`                      | row `+6`, 4                | `u32`                                        | Payload-group width      | Certain             | Certain                   | Certain             | Equals `18 + encoded member count * 135` for every group             | Closed |
+| `footer.reserved00`, `footer.reserved08` | final outer words, 4 each  | `bytes(4).reserved()`                        | Byte-only PABR framing   | Certain             | Certain                   | Unknown             | Explicitly consumed and intentionally omitted                        | Closed |
+| `footer.footerOffset`                    | final middle word, 4       | retained `u32`                               | Footer position          | Certain             | Certain                   | Certain             | Matches the observed footer start; footer remains informational      | Closed |
 
 ## Active assumptions
 

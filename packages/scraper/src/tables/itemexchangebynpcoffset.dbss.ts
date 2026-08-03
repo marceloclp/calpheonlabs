@@ -1,5 +1,4 @@
 import { array, struct, u16, u32 } from "@marceloclp/bsd";
-
 import { dbss } from "./common/helpers";
 
 /** One ten-byte directory entry for an NPC item-exchange payload. */

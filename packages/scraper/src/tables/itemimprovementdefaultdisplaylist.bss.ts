@@ -1,5 +1,4 @@
 import { array, bytes, struct, u32 } from "@marceloclp/bsd";
-
 import { bss } from "./common/helpers";
 
 /** One improvement source selected for the client's default display list. */

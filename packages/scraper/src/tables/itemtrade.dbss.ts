@@ -1,5 +1,4 @@
 import { array, struct, u16, u32 } from "@marceloclp/bsd";
-
 import { dbss } from "./common/helpers";
 
 /** One physical two-byte identifier row. */

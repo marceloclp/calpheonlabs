@@ -1,5 +1,4 @@
 import { array, bytes, struct, u32, u8 } from "@marceloclp/bsd";
-
 import { dbss } from "./common/helpers";
 
 /** One intrinsically framed item-improvement result group. */
@@ -9,12 +8,10 @@ const ItemImprovementRow = struct({
     /**
      * Ordered result item identifiers.
      *
-     * The stored count is followed by a four-byte reserved range before the
-     * array, so row boundaries require no offset-table dependency.
+     * The count schema pads across the following four-byte reserved range, so
+     * row boundaries require no offset-table dependency.
      */
-    groupItemIds: u32().pipe((count) =>
-        bytes(4).reserved().pipe(array(count, u32().positive())),
-    ),
+    groupItemIds: array(u32().pad(4), u32().positive()),
     /** Unresolved one-byte control in the compiled name representation. */
     itemNameControl: u8(),
     /** Numeric text/name index in the compiled name representation. */

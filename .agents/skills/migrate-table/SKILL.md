@@ -237,12 +237,25 @@ decode. Therefore:
 2. Order the strongest and most specific branch before a permissive branch.
 3. Treat a mismatch that reports the wrong variant as a union-discrimination
    failure, not an output-normalization problem.
-4. Re-run every variant after changing branch order; a full-table pass is the
-   proof.
+4. Record an exhaustive full-capture branch histogram after changing a branch
+   or its order. Remove every zero-hit branch, its supporting code, and its
+   ledger claims, then rerun exact snapshot parity.
+5. Treat fixed-prefix layouts and variable-payload layouts as independent axes.
+   When both vary, compose complete static branches for their viable
+   combinations instead of assuming one variant set determines the other.
+6. Build branch schemas once. Do not use `.pipe()` or a per-row schema factory
+   merely to select among layouts that static unions can express.
+7. Decode counted arrays and length-prefixed strings linearly. Do not add
+   lookahead to rediscover boundaries already encoded by those fields.
+8. Use a repeated identity or trailer as branch-local validation after decoding
+   the complete branch. Do not scan for that value to locate the row boundary.
 
-Use `literal("variantName")` for an emitted discriminant when useful. A literal
-labels a successful branch but consumes no bytes, so it cannot discriminate a
-branch by itself.
+Use `literal("variantName")` for an emitted discriminant when useful; it labels
+a successful branch but consumes no bytes, so it cannot discriminate by itself.
+
+Do not preserve a source or former-lookahead branch solely for historical
+compatibility. Retain it only when an in-scope binary fixture exercises it and
+passes the same exact snapshot gate.
 
 ### Remove offset-table dependencies
 
@@ -277,6 +290,15 @@ Treat this as a verification-only escape hatch required by the current helper.
 Do not add test hooks to the production decoder or relax the rule against
 production escape hatches. See the strict-harness example in
 [`references/snapshot-adapters.md`](references/snapshot-adapters.md).
+
+If a full-table decode appears stuck, separate grammar correctness from
+materialization cost before changing the row schema. Benchmark isolated rows on
+detached slices and compare that with a full decode that retains every row. If
+isolated decoding is fast but retained decoding causes severe memory or garbage
+collection pressure, stream the same complete row schema one row at a time.
+Keep row framing intrinsic, account for every consumed byte outside the emitted
+shape, require exact EOF, and verify that the streamed JSON is parseable. Static
+schemas improve clarity but do not by themselves solve whole-table retention.
 
 ## Iterate from the first mismatch
 
@@ -417,8 +439,8 @@ Confirm that every omission is a `bytes(n).reserved()` field, every transform
 returns a defined value, every non-byte field remains in the output, and no
 `.pad(n)` or `padded(...)` schema skips bytes implicitly.
 
-Compare the page's row count, digest, capture identity, and variant counts with
-the current verification artifacts. Search the destination page and related
+Compare the page's row count, digest, capture identity, and exact branch counts
+with the current verification artifacts. Search the destination page and related
 pages for stale `src/tables2` paths, obsolete output fields, and language that
 describes an offset table as a production dependency. Review the overview,
 catalog state, frontmatter title/label, canonical route, and inbound related
@@ -448,7 +470,8 @@ Do not complete the migration until all of these pass:
 - the new schema consumes the complete primary table;
 - the transformed reference snapshot and new output match completely in
   physical row order;
-- every union variant present in the capture is represented and compared;
+- the table page records every retained branch's nonzero full-capture count,
+  those counts sum to the row count, and every branch is compared;
 - TSDoc covers schemas, fields, invariants, and unresolved meanings;
 - the type-qualified Blume page exists, is catalogued, and accurately
   describes the final BSD representation and confidence;

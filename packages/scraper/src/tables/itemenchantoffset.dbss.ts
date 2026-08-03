@@ -1,5 +1,4 @@
 import { array, bytes, struct, u24, u32, u8 } from "@marceloclp/bsd";
-
 import { dbss } from "./common/helpers";
 
 /** One fixed-width pointer into `itemenchant.dbss`. */
@@ -29,17 +28,7 @@ export const ItemEnchantOffsetDbss = dbss(
     "gamecommondata/binary/itemenchantoffset.dbss",
 )({
     /** Validated PABR signature, omitted as a byte-only framing range. */
-    magic: bytes(4)
-        .check(
-            (value) =>
-                value[0] === 0x50 &&
-                value[1] === 0x41 &&
-                value[2] === 0x42 &&
-                value[3] === 0x52,
-        )
-        .reserved(),
-    /** Stored pointer count retained independently of the decoded array. */
-    rowCount: u32().peek(),
+    magic: bytes(4).ascii().is("PABR"),
     /** Item/enhancement pointers in directory-file order. */
     rows: array(u32(), ItemEnchantOffsetRow),
     /** Informational footer framing the directory. */

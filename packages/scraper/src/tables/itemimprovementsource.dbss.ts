@@ -1,5 +1,4 @@
-import { array, bytes, struct, u16, u32 } from "@marceloclp/bsd";
-
+import { array, struct, u16, u32 } from "@marceloclp/bsd";
 import { dbss } from "./common/helpers";
 
 /** One intrinsically framed improvement material and its result rates. */
@@ -9,12 +8,10 @@ const ItemImprovementSourceRow = struct({
     /**
      * Ordered per-result rates on the client's one-million scale.
      *
-     * The stored count is followed by a four-byte reserved range before the
-     * array, so row boundaries require no offset-table dependency.
+     * The count schema pads across the following four-byte reserved range, so
+     * row boundaries require no offset-table dependency.
      */
-    resultRatesMillionths: u32().pipe((count) =>
-        bytes(4).reserved().pipe(array(count, u32())),
-    ),
+    resultRatesMillionths: array(u32().pad(4), u32()),
     /** Historical equipment-family selector. */
     equipTypeCode: u32(),
     /** Unresolved four-byte control following the equipment selector. */
