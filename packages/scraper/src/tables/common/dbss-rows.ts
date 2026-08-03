@@ -10,6 +10,13 @@ import {
 } from "@marceloclp/bsd";
 import { PAZ } from "../../paz/archive";
 
+interface DbssRowContext {
+    /** Zero-based physical row index. */
+    index: number;
+    /** Absolute byte offset of the row in the DBSS file. */
+    byteOffset: number;
+}
+
 /** Serializes byte views in the tagged base64 form used by snapshot proofs. */
 function snapshotJsonReplacer(_key: string, value: unknown) {
     if (value instanceof Uint8Array) {
@@ -23,9 +30,9 @@ function snapshotJsonReplacer(_key: string, value: unknown) {
  *
  * The ordinary complete schema remains available for consumers and strict
  * snapshot harnesses. Streaming applies the same complete row schema to a
- * detached adaptive frame and records its terminal offset, avoiding retention
- * of multi-gigabyte decoded object graphs while preserving intrinsic row
- * framing.
+ * bounded adaptive frame view and records its terminal offset, avoiding
+ * retention of multi-gigabyte decoded object graphs while preserving intrinsic
+ * row framing.
  */
 class DbssRowTable<Row extends BsdShape> {
     /** Complete count-framed schema retained for strict verification. */
@@ -39,6 +46,11 @@ class DbssRowTable<Row extends BsdShape> {
         private readonly name: string,
         /** Complete intrinsic schema for one physical row. */
         rowSchema: Bsd<Row>,
+        /** Adds file-level context that a standalone row frame cannot expose. */
+        private readonly normalizeSnapshotRow: (
+            row: Row,
+            context: DbssRowContext,
+        ) => Row,
     ) {
         this.schema = struct({ rows: array(u32(), rowSchema) });
         this.streamingRowSchema = struct({
@@ -72,6 +84,7 @@ class DbssRowTable<Row extends BsdShape> {
         let bufferedJson = '{"rows":[';
         try {
             for (let index = 0; index < rowCount; index++) {
+                const rowByteOffset = byteOffset;
                 let frameByteLength = 8 * 1024;
                 let decoded: { byteLength: number; row: Row };
                 while (true) {
@@ -81,7 +94,7 @@ class DbssRowTable<Row extends BsdShape> {
                     );
                     try {
                         decoded = this.streamingRowSchema.decode(
-                            buffer.slice(byteOffset, end),
+                            buffer.subarray(byteOffset, end),
                         );
                         break;
                     } catch (error) {
@@ -94,7 +107,10 @@ class DbssRowTable<Row extends BsdShape> {
                         frameByteLength *= 2;
                     }
                 }
-                let row: Row | undefined = decoded.row;
+                let row: Row | undefined = this.normalizeSnapshotRow(
+                    decoded.row,
+                    { index, byteOffset: rowByteOffset },
+                );
                 byteOffset += decoded.byteLength;
                 if (index > 0) bufferedJson += ",";
                 bufferedJson += JSON.stringify(row, snapshotJsonReplacer);
@@ -120,6 +136,8 @@ class DbssRowTable<Row extends BsdShape> {
 export function dbssRows<const Row extends BsdShape>(
     path: string,
     rowSchema: Bsd<Row>,
+    normalizeSnapshotRow: (row: Row, context: DbssRowContext) => Row = (row) =>
+        row,
 ) {
-    return new DbssRowTable(path, rowSchema);
+    return new DbssRowTable(path, rowSchema, normalizeSnapshotRow);
 }

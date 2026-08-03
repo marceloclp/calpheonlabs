@@ -1,7 +1,6 @@
 import { join } from "node:path/posix";
 import { type BsdShape, type BsdStruct, bytes, struct } from "@marceloclp/bsd";
 import { JsonStreamStringify } from "json-stream-stringify";
-
 import { PAZ } from "../../paz/archive";
 
 export function dbss(path: string) {
@@ -49,10 +48,13 @@ class Table<S extends BsdShape> {
 
         const buffer = await PAZ.extract(entry, bdoPath);
         const decoded = this.schema.decode(buffer);
+        console.log("decoded");
 
         const path = join(entry.folderName, entry.fileName);
         const file = Bun.file(`out/${path.split("/").at(-1)}.json`);
-        await file.write("");
+        if (await file.exists()) {
+            await file.delete();
+        }
         const sink = file.writer({ highWaterMark: 1024 * 1024 });
         const stream = new JsonStreamStringify(decoded, undefined, 4);
         for await (const chunk of stream) {

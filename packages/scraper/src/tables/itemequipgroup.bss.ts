@@ -1,5 +1,4 @@
 import { array, bytes, struct, u16, u32 } from "@marceloclp/bsd";
-
 import { bss } from "./common/helpers";
 
 /** One variable-width equipment-family membership group. */
@@ -12,7 +11,7 @@ const ItemEquipGroupRow = struct({
     memberCount: u32().peek(),
     /** Member item identifiers in physical order. */
     itemIds: array(u32(), u32()),
-}).check((row) => row.repeatedGroupId === row.groupId);
+});
 
 /** Informational PABR footer following the equipment groups. */
 const ItemEquipGroupFooter = struct({
@@ -28,8 +27,6 @@ const ItemEquipGroupFooter = struct({
 export const ItemEquipGroupBss = bss(
     "gamecommondata/binary/itemequipgroup.bss",
 )({
-    /** Stored group count retained independently of the decoded array. */
-    rowCount: u32().peek(),
     /** Equipment groups in physical file order. */
     rows: array(u32(), ItemEquipGroupRow),
     /** Informational footer framing the table. */
