@@ -1,0 +1,68 @@
+---
+title: "manufacture.bss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the intrinsic BSD manufacture decoder."
+sidebar:
+    label: "manufacture.bss"
+    icon: database
+search:
+    tags: [tables, bss, binary-schema]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                     |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                      |
+| Iteration          | BSD migration                                                                                                                                                                             |
+| Review state       | BSD migration reconciled                                                                                                                                                                  |
+| Last reviewed      | 2026-08-03                                                                                                                                                                                |
+| Captures examined  | Steam capture ads_version 856; PAZ 1422; file hash 1862541422; 385,602 extracted bytes; 6,661 rows; normalized SHA-256 `1b6b213142c635a3623053af887a2444f5fb5b1486e014bd654a7e9e5bb1dfc8` |
+| Decoder            | `packages/scraper/src/tables/manufacture.bss.ts`                                                                                                                                          |
+| Remaining blockers | None                                                                                                                                                                                      |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The source investigation ledger was reconciled against the intrinsic BSD schema and its current full-snapshot proof.
+The production decoder consumes the table sequentially without an offset-table runtime dependency.
+:::
+
+## Field ledger
+
+| Field/path                              | Offset and width               | Representation                     | Claimed meaning                                         | Physical confidence | Representation confidence | Semantic confidence  | Evidence                                                                                                                | Status         |
+| --------------------------------------- | ------------------------------ | ---------------------------------- | ------------------------------------------------------- | ------------------- | ------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------- | -------------- |
+| PABR/count/footer                       | signature, `u32`, self-pointer | signature, `u32`, self-pointer     | Table framing                                           | Certain             | Certain                   | Certain              | Canonical PABR footer and exact EOF                                                                                     | Closed         |
+| `keyItemId` / `keyItemEnhancementLevel` | row `+0`, `u24` + `u8`         | row `+0`, `u24` + `u8`             | First material packed item/enhancement key              | Certain             | Certain                   | Certain              | Equals both key components in `materials[0]` in all 6,618 rows; same physical key convention as `itemenchantoffset`     | Closed         |
+| reserved `+4..+11`                      | eight zero bytes               | eight zero bytes                   | Retired processing controls                             | Certain             | Certain                   | Certain (reserved)   | Zero in every action/rate/material family; rejected on mutation                                                         | Closed         |
+| `actionIndex`                           | `+12`, `u32`                   | `+12`, `u32`                       | Index into the action-name pool                         | Certain             | Certain                   | Certain              | Index and independent hash resolve the same string in every row                                                         | Closed         |
+| `successRateMillionths`                 | `+16`, `u32`                   | `+16`, `u32`                       | Recipe success probability                              | Certain             | Certain                   | Certain              | Archived `SuccessPercent`, current value range, and recipe correlations                                                 | Closed         |
+| `actionHash`                            | `+20`, `u32`                   | `+20`, `u32`                       | Pearl Abyss hash of the action name                     | Certain             | Certain                   | Certain              | Recomputed for every row                                                                                                | Closed         |
+| marker `+24`                            | byte `40`                      | byte `40`                          | Required row format marker                              | Certain             | Certain                   | Certain (structural) | Constant across all 6,618 rows and all 14 actions                                                                       | Closed         |
+| `resultDropGroupId`                     | `+25`, `u32`                   | `+25`, `u32`                       | Result drop group                                       | Certain             | Certain                   | Certain              | Archived `ResultDropGroup` and current recipe joins                                                                     | Closed         |
+| `materials[]`                           | counted `{u24,u8,u64}`         | counted `{u24,u8,u64}`             | Ordered ingredient item/enhancement keys and quantities | Certain             | Certain                   | Certain              | 669 enhanced material occurrences would be lossy as plain item IDs; all keys use the established `ItemEnchantKey` split | Closed         |
+| `actions`                               | counted one-byte strings       | counted one-byte strings           | Processing/cooking/alchemy action dictionary            | Certain             | Certain                   | Certain              | Every index and hash validates                                                                                          | Closed         |
+| Reserved ranges                         | schema-local fixed widths      | consumed with `.pad()` and omitted | framing or semantically neutral capacity                | Certain             | Certain                   | Neutral              | Adjacent fields, strict EOF, and exact snapshot parity establish each width                                             | Closed neutral |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                    | Evidence                                                                                                                    | Schema/documentation impact                                               | Status |
+| ---- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------ |
+| F-01 | The intrinsic decoder reproduces the transformed reference output exactly. | Full snapshot comparison; 6,661 rows; normalized SHA-256 `1b6b213142c635a3623053af887a2444f5fb5b1486e014bd654a7e9e5bb1dfc8` | The BSD schema is the production source of truth.                         | Closed |
+| F-02 | Row and section boundaries are intrinsic.                                  | Strict decoding reaches exact EOF on the installed capture.                                                                 | No companion offset table is loaded by this decoder.                      | Closed |
+| F-03 | Reserved byte ranges are representation details.                           | Their widths are fixed by adjacent fields and full-snapshot parity.                                                         | `.pad()` keeps the schema readable and omits redundant output properties. | Closed |
+
+### Reconciled source findings
+
+| ID     | Finding                                                                 | Evidence                                                                                                                                         | Schema impact                                                               | Status   |
+| ------ | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------- | -------- |
+| MFG-01 | Byte `+24` is structural marker `40`, not an installation enum          | It never varies across 6,618 recipes, actions, or success rates                                                                                  | Enforced and omitted with `reserved(1, 40)`                                 | Resolved |
+| MFG-02 | Every row is intrinsically framed                                       | Counted material list plus fixed prefix reaches the action trailer exactly                                                                       | No offset companion or heuristic                                            | Resolved |
+| MFG-03 | Recipe item words are packed item/enhancement keys, not scalar item IDs | 483 lookup keys and 669 material occurrences have nonzero high bytes; those bytes resolve as enhancement levels through the installed item index | Split every four-byte item key into `u24 itemId` plus `u8 enhancementLevel` | Resolved |
+
+Archived SQLite is semantic corroboration only; the installed binary remains the decoder authority.

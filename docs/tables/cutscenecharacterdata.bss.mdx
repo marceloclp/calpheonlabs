@@ -1,0 +1,50 @@
+---
+title: "cutscenecharacterdata.bss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the intrinsic BSD cutscenecharacterdata decoder."
+sidebar:
+    label: "cutscenecharacterdata.bss"
+    icon: database
+search:
+    tags: [tables, bss, binary-schema]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                               |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                |
+| Iteration          | BSD migration                                                                                                                                                                       |
+| Review state       | BSD migration reconciled                                                                                                                                                            |
+| Last reviewed      | 2026-08-03                                                                                                                                                                          |
+| Captures examined  | Steam capture ads_version 856; PAZ 5685; file hash 1942779601; 264 extracted bytes; 122 rows; normalized SHA-256 `ca6ed05f2291b39d99ace9715a5bdd38cc9ed727a00048c8f41bca4fd558654d` |
+| Decoder            | `packages/scraper/src/tables/cutscenecharacterdata.bss.ts`                                                                                                                          |
+| Remaining blockers | None                                                                                                                                                                                |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+This destination ledger was established from the legacy decoder, the installed capture, and the current full-snapshot proof.
+The production decoder consumes the table sequentially without an offset-table runtime dependency.
+:::
+
+## Field ledger
+
+| Field/path      | Offset and width          | Representation                                  | Claimed meaning                          | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                    | Status |
+| --------------- | ------------------------- | ----------------------------------------------- | ---------------------------------------- | ------------------- | ------------------------- | ------------------- | --------------------------------------------------------------------------- | ------ |
+| File framing    | whole file                | intrinsic BSD schema with strict EOF validation | record framing and section boundaries    | Certain             | Certain                   | High                | Fresh extraction and strict decoding consume the capture exactly            | Closed |
+| `rows[]`        | table rows, `u16`         | retained scalar array                           | cutscene character keys                  | Certain             | Certain                   | High                | Every value is reproduced by the exact legacy snapshot                      | Closed |
+| Reserved ranges | schema-local fixed widths | consumed with `.pad()` and omitted              | framing or semantically neutral capacity | Certain             | Certain                   | Neutral             | Adjacent fields, strict EOF, and exact snapshot parity establish each width | Closed |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                    | Evidence                                                                                                                  | Schema/documentation impact                                               | Status |
+| ---- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------ |
+| F-01 | The intrinsic decoder reproduces the transformed reference output exactly. | Full snapshot comparison; 122 rows; normalized SHA-256 `ca6ed05f2291b39d99ace9715a5bdd38cc9ed727a00048c8f41bca4fd558654d` | The BSD schema is the production source of truth.                         | Closed |
+| F-02 | Row and section boundaries are intrinsic.                                  | Strict decoding reaches exact EOF on the installed capture.                                                               | No companion offset table is loaded by this decoder.                      | Closed |
+| F-03 | Reserved byte ranges are representation details.                           | Their widths are fixed by adjacent fields and full-snapshot parity.                                                       | `.pad()` keeps the schema readable and omits redundant output properties. | Closed |

@@ -1,0 +1,72 @@
+---
+title: "enchantstaticstatus.dbss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the intrinsic BSD enchantstaticstatus decoder."
+sidebar:
+    label: "enchantstaticstatus.dbss"
+    icon: database
+search:
+    tags: [tables, dbss, binary-schema]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                       |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                        |
+| Iteration          | BSD migration                                                                                                                                                                               |
+| Review state       | BSD migration reconciled                                                                                                                                                                    |
+| Last reviewed      | 2026-08-03                                                                                                                                                                                  |
+| Captures examined  | Steam capture ads_version 856; PAZ 61; file hash 2501711862; 23,771,570 extracted bytes; 33,464 rows; normalized SHA-256 `08ace33d4d3c7cbe7ac4e1257e280db9caf51e562f1c7c03c4d906f7b255e85f` |
+| Decoder            | `packages/scraper/src/tables/enchantstaticstatus.dbss.ts`                                                                                                                                   |
+| Remaining blockers | None                                                                                                                                                                                        |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The source investigation ledger was reconciled against the intrinsic BSD schema and its current full-snapshot proof.
+The production decoder consumes the table sequentially without an offset-table runtime dependency.
+:::
+
+## Field ledger
+
+| Field/path                                               | Offset and width                        | Representation                                       | Claimed meaning                          | Physical confidence | Representation confidence | Semantic confidence                      | Evidence                                                                                                     | Status         |
+| -------------------------------------------------------- | --------------------------------------- | ---------------------------------------------------- | ---------------------------------------- | ------------------- | ------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------ | -------------- |
+| Row count (omitted)                                      | table `+0`, 4                           | count consumed by the enclosing BSD array            | row-count framing                        | Certain             | Certain                   | Certain                                  | Equals both companion counts in both captures                                                                | Closed         |
+| `rows[]`                                                 | table `+4..EOF`                         | intrinsic sequential array                           | Physical row sequence                    | Certain             | Certain                   | Certain                                  | Companion spans form an exact partition in both captures                                                     | Closed         |
+| `staticStatusKey`                                        | row `+0`, 4                             | `u32`                                                | Status-family key                        | Certain             | Certain                   | High                                     | Repeats companion packed-key low bytes for every row                                                         | Closed         |
+| `enhancementLevel`                                       | row `+4`, 1                             | `u8`                                                 | Enhancement discriminator                | Certain             | Certain                   | High                                     | Repeats companion packed-key high byte for every row                                                         | Closed         |
+| `unknown05`                                              | row `+5..+182`, 178                     | zero-copy bytes                                      | Unknown bounded prefix                   | Certain             | Certain                   | Unknown                                  | Exact legacy companion-span coverage and intrinsic destination framing                                       | Closed         |
+| `float183`                                               | row `+183..+226`, 44                    | 11 little-endian `f32`                               | Neutral float block                      | Certain             | Certain                   | Unknown                                  | 1,134,801 aligned values across two captures; all finite; integer interpretation falsified by float patterns | Closed         |
+| `float227`                                               | row `+227..+238`, 12                    | 3 little-endian `f32`                                | Neutral float block                      | Certain             | Certain                   | Unknown                                  | Same aligned finite-number evidence                                                                          | Closed         |
+| `float239`                                               | row `+239..+250`, 12                    | 3 little-endian `f32`                                | Neutral float block                      | Certain             | Certain                   | Unknown                                  | Same aligned finite-number evidence                                                                          | Closed         |
+| `tail.layout`                                            | row `+251..end`                         | intrinsic `standard` / `compact` union discriminator | physical tail family                     | Certain             | Certain                   | Certain (structural)                     | 33,320 standard rows and 144 compact rows sum to all 33,464 rows                                             | Closed         |
+| standard `tail.unknown251`                               | 12 bytes                                | retained opaque bytes                                | neutral standard-tail prefix             | Certain             | Certain                   | Unknown                                  | Exact intrinsic boundary before the counted effect script                                                    | Closed neutral |
+| standard `tail.effectScript`                             | counted UTF-16LE                        | retained string                                      | effect script text                       | Certain             | Certain                   | High                                     | Intrinsic code-unit count and exact snapshot equality                                                        | Closed         |
+| standard `tail.unknownAfterEffectScript`                 | 13 bytes                                | retained opaque bytes                                | neutral interstitial block               | Certain             | Certain                   | Unknown                                  | Exact boundary before three auxiliary strings                                                                | Closed neutral |
+| standard `tail.auxiliaryTexts[0..2]`                     | three padded counted UTF-16LE strings   | retained strings                                     | auxiliary effect text slots              | Certain             | Certain                   | Unknown                                  | Every standard row consumes exactly three framed strings                                                     | Closed neutral |
+| standard `tail.unknownTailPrefix`, `unknownTailSuffix`   | 125-byte prefix and six-byte suffix     | retained opaque bytes                                | neutral terminal framing                 | Certain             | Certain                   | Unknown                                  | They bound the intrinsic counted `tailValues` array in every standard row                                    | Closed neutral |
+| standard `tail.tailValues[]`                             | counted `u32[]`                         | retained numeric values                              | unknown variable terminal values         | Certain             | Certain                   | Unknown                                  | Counts 0 through 3 explain all observed standard row-length variants                                         | Closed neutral |
+| compact `tail.unknown251`, `effectScript`, `unknownTail` | four bytes, counted UTF-16LE, 222 bytes | retained compact-tail fields                         | compact effect-script profile            | Certain             | Certain                   | Unknown beyond the script representation | All 144 compact rows consume exactly without the standard auxiliary-string framing                           | Closed neutral |
+| Reserved ranges                                          | schema-local fixed widths               | consumed with `.pad()` and omitted                   | framing or semantically neutral capacity | Certain             | Certain                   | Neutral                                  | Adjacent fields, strict EOF, and exact snapshot parity establish each width                                  | Closed neutral |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                    | Evidence                                                                                                                     | Schema/documentation impact                                               | Status |
+| ---- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------ |
+| F-01 | The intrinsic decoder reproduces the transformed reference output exactly. | Full snapshot comparison; 33,464 rows; normalized SHA-256 `08ace33d4d3c7cbe7ac4e1257e280db9caf51e562f1c7c03c4d906f7b255e85f` | The BSD schema is the production source of truth.                         | Closed |
+| F-02 | Row and section boundaries are intrinsic.                                  | Strict decoding reaches exact EOF on the installed capture.                                                                  | No companion offset table is loaded by this decoder.                      | Closed |
+| F-03 | Reserved byte ranges are representation details.                           | Their widths are fixed by adjacent fields and full-snapshot parity.                                                          | `.pad()` keeps the schema readable and omits redundant output properties. | Closed |
+| F-04 | The row tail has two intrinsic layouts.                                    | The full capture contains 33,320 standard and 144 compact rows; both branches are included in exact snapshot parity.         | A BSD union replaces legacy raw-tail parsing.                             | Closed |
+
+### Reconciled source findings
+
+| ID     | Finding                                                     | Evidence                                                                | Schema/documentation impact                              | Status   |
+| ------ | ----------------------------------------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------- | -------- |
+| ESS-01 | Prefix-domain scanning was capture-specific and unnecessary | Offset companion exactly partitions both builds                         | Companion is now migration-only framing evidence         | Resolved |
+| ESS-02 | Player-stat projections were not independently proven       | Their source was a separate semantic parser and marker-relative guesses | Removed derived stats and renamed float blocks neutrally | Resolved |

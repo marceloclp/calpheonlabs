@@ -1,0 +1,63 @@
+---
+title: "cookingstatdata.bss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the intrinsic BSD cookingstatdata decoder."
+sidebar:
+    label: "cookingstatdata.bss"
+    icon: database
+search:
+    tags: [tables, bss, binary-schema]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                               |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                |
+| Iteration          | BSD migration                                                                                                                                                                       |
+| Review state       | BSD migration reconciled                                                                                                                                                            |
+| Last reviewed      | 2026-08-03                                                                                                                                                                          |
+| Captures examined  | Steam capture ads_version 856; PAZ 1420; file hash 742201259; 1,484 extracted bytes; 61 rows; normalized SHA-256 `ab39bf160b5cf498cad33933715489f701ab65104d8264151b4ee48b97338fde` |
+| Decoder            | `packages/scraper/src/tables/cookingstatdata.bss.ts`                                                                                                                                |
+| Remaining blockers | None                                                                                                                                                                                |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The source investigation ledger was reconciled against the intrinsic BSD schema and its current full-snapshot proof.
+The production decoder consumes the table sequentially without an offset-table runtime dependency.
+:::
+
+## Field ledger
+
+| Field/path                            | Offset and width          | Representation                     | Claimed meaning                          | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                    | Status         |
+| ------------------------------------- | ------------------------- | ---------------------------------- | ---------------------------------------- | ------------------- | ------------------------- | ------------------- | --------------------------------------------------------------------------- | -------------- |
+| `cookingMasteryThreshold`             | schema-defined            | `f32`                              | Cooking Mastery threshold                | Certain             | Certain                   | Certain             | Exact client/public breakpoint sequence                                     | Closed         |
+| `productAmountIncreaseMillionths`     | schema-defined            | `u32`                              | Product amount increase                  | Certain             | Certain                   | Certain             | Client `_speedCookRate` and published mastery column                        | Closed         |
+| `byproductAmountIncreaseMillionths`   | schema-defined            | `u32`                              | Byproduct amount increase                | Certain             | Certain                   | Certain             | Client `_basicMaxDropRate` and published mastery column                     | Closed         |
+| `rareProductAmountIncreaseMillionths` | schema-defined            | `u32`                              | Rare product amount increase             | Certain             | Certain                   | Certain             | Client `_addCriticalDropRate` and published mastery column                  | Closed         |
+| `massProductionChanceMillionths`      | schema-defined            | `u32`                              | Mass-production chance                   | Certain             | Certain                   | Certain             | Client `_addCriticalMaxDropRate` and published mastery column               | Closed         |
+| `royalTradeSilverBonusMillionths`     | schema-defined            | `u32`                              | Imperial/royal delivery silver bonus     | Certain             | Certain                   | Certain             | Client `_addRoyalTradeBonus` and published mastery column                   | Closed         |
+| Reserved ranges                       | schema-local fixed widths | consumed with `.pad()` and omitted | framing or semantically neutral capacity | Certain             | Certain                   | Neutral             | Adjacent fields, strict EOF, and exact snapshot parity establish each width | Closed neutral |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                    | Evidence                                                                                                                 | Schema/documentation impact                                               | Status |
+| ---- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- | ------ |
+| F-01 | The intrinsic decoder reproduces the transformed reference output exactly. | Full snapshot comparison; 61 rows; normalized SHA-256 `ab39bf160b5cf498cad33933715489f701ab65104d8264151b4ee48b97338fde` | The BSD schema is the production source of truth.                         | Closed |
+| F-02 | Row and section boundaries are intrinsic.                                  | Strict decoding reaches exact EOF on the installed capture.                                                              | No companion offset table is loaded by this decoder.                      | Closed |
+| F-03 | Reserved byte ranges are representation details.                           | Their widths are fixed by adjacent fields and full-snapshot parity.                                                      | `.pad()` keeps the schema readable and omits redundant output properties. | Closed |
+
+### Reconciled source findings
+
+| ID    | Finding                                                  | Evidence                                        | Schema impact                    | Status   |
+| ----- | -------------------------------------------------------- | ----------------------------------------------- | -------------------------------- | -------- |
+| CS-01 | All five integer fields are millionth-scaled percentages | Client divides each by 1,000,000 before display | Units encoded in all field names | Resolved |
+
+Client evidence comes from `panel_characterinfo_life_all_2.luac`; column labels are independently
+corroborated by the [Cooking Mastery table](https://bdocodex.com/us/cookingmastery/).

@@ -1,0 +1,58 @@
+---
+title: "guildquestoffset.dbss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the intrinsic BSD guildquestoffset decoder."
+sidebar:
+    label: "guildquestoffset.dbss"
+    icon: database
+search:
+    tags: [tables, dbss, binary-schema]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                 |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                  |
+| Iteration          | BSD migration                                                                                                                                                                         |
+| Review state       | BSD migration reconciled                                                                                                                                                              |
+| Last reviewed      | 2026-08-03                                                                                                                                                                            |
+| Captures examined  | Steam capture ads_version 856; PAZ 3595; file hash 3429969654; 1,444 extracted bytes; 120 rows; normalized SHA-256 `18b500fb946453c8c2b2dd17aa1f0ab33d8129a16eef4312523d2a75f665de4a` |
+| Decoder            | `packages/scraper/src/tables/guildquestoffset.dbss.ts`                                                                                                                                |
+| Remaining blockers | None                                                                                                                                                                                  |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The source investigation ledger was reconciled against the intrinsic BSD schema and its current full-snapshot proof.
+The production decoder consumes the table sequentially without an offset-table runtime dependency.
+:::
+
+## Field ledger
+
+| Field/path             | Offset and width          | Representation                     | Claimed meaning                          | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                    | Status         |
+| ---------------------- | ------------------------- | ---------------------------------- | ---------------------------------------- | ------------------- | ------------------------- | ------------------- | --------------------------------------------------------------------------- | -------------- |
+| count                  | file `+0`, `u32`          | decoder control omitted            | pointer count                            | Certain             | Certain                   | Certain             | Intrinsic DBSS framing                                                      | Closed         |
+| `guildMissionId`       | row `+0`, `u32`           | retained                           | mission identity                         | Certain             | Certain                   | Certain             | Repeated at every target row                                                | Closed         |
+| `offset`, `byteLength` | row `+4/+8`, `u32`        | retained                           | absolute row span                        | Certain             | Certain                   | Certain             | Sorted spans exactly partition the companion data                           | Closed         |
+| Reserved ranges        | schema-local fixed widths | consumed with `.pad()` and omitted | framing or semantically neutral capacity | Certain             | Certain                   | Neutral             | Adjacent fields, strict EOF, and exact snapshot parity establish each width | Closed neutral |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                    | Evidence                                                                                                                  | Schema/documentation impact                                               | Status |
+| ---- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------ |
+| F-01 | The intrinsic decoder reproduces the transformed reference output exactly. | Full snapshot comparison; 120 rows; normalized SHA-256 `18b500fb946453c8c2b2dd17aa1f0ab33d8129a16eef4312523d2a75f665de4a` | The BSD schema is the production source of truth.                         | Closed |
+| F-02 | Row and section boundaries are intrinsic.                                  | Strict decoding reaches exact EOF on the installed capture.                                                               | No companion offset table is loaded by this decoder.                      | Closed |
+| F-03 | Reserved byte ranges are representation details.                           | Their widths are fixed by adjacent fields and full-snapshot parity.                                                       | `.pad()` keeps the schema readable and omits redundant output properties. | Closed |
+
+### Reconciled source findings
+
+| ID   | Finding                                                                      | Evidence                                                                                                                                                         | Schema/documentation impact                                           | Status |
+| ---- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | ------ |
+| F-01 | The offset companion is structurally required.                               | Guild rows have no independent outer boundary after their counted inner fields are exhausted.                                                                    | Production keeps the companion dependency explicit.                   | Closed |
+| F-02 | The companion is an exact identity-bearing partition, not an advisory index. | All 120 spans are contiguous in physical order, cover all 210,868 data bytes, and repeat their target mission IDs. Gap, length, key, and count mutations reject. | Complete-capture equality and rejecting tests cover the relationship. | Closed |

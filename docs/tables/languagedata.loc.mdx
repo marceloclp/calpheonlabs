@@ -1,0 +1,64 @@
+---
+title: "languagedata.loc"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the intrinsic BSD languagedata decoder."
+sidebar:
+    label: "languagedata.loc"
+    icon: database
+search:
+    tags: [tables, loc, binary-schema]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                  |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                   |
+| Iteration          | BSD migration                                                                                                                                                                          |
+| Review state       | BSD migration reconciled                                                                                                                                                               |
+| Last reviewed      | 2026-08-03                                                                                                                                                                             |
+| Captures examined  | Steam capture ads_version 856; languagedata_pt.loc; 41,016,427 compressed bytes; 1,395,807 rows; normalized SHA-256 `f302dd62926574f9b4c847253ec4c32becd088128098738f91547088e998c4d9` |
+| Decoder            | `packages/scraper/src/tables/languagedata.loc.ts`                                                                                                                                      |
+| Remaining blockers | None                                                                                                                                                                                   |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The source investigation ledger was reconciled against the intrinsic BSD schema and its current full-snapshot proof.
+The production decoder consumes the table sequentially without an offset-table runtime dependency.
+:::
+
+## Field ledger
+
+| Field/path      | Offset and width          | Representation                     | Claimed meaning                          | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                    | Status         |
+| --------------- | ------------------------- | ---------------------------------- | ---------------------------------------- | ------------------- | ------------------------- | ------------------- | --------------------------------------------------------------------------- | -------------- |
+| `rows[]`        | inflated `+0..EOF`        | repeat self-sized records          | Localization records                     | Certain             | Certain                   | High                | Both complete locales end exactly at a row boundary                         | Closed         |
+| `textSize`      | row `+0`, 4               | `u32`                              | UTF-16 code-unit count                   | Certain             | Certain                   | Certain             | Determines exact text width and next record                                 | Closed         |
+| `type`          | row `+4`, 4               | `u32`                              | Broad localization key component         | Certain             | Certain                   | High                | Repeats across locales with corresponding ids/text                          | Closed         |
+| `id1`           | row `+8`, 4               | `u32`                              | Primary key component                    | Certain             | Certain                   | High                | Cross-locale key correlation                                                | Closed         |
+| `id2`           | row `+12`, 2              | `u16`                              | Secondary key component                  | Certain             | Certain                   | High                | Cross-locale key correlation                                                | Closed         |
+| `id3`           | row `+14`, 1              | `u8`                               | Third key component                      | Certain             | Certain                   | High                | Cross-locale key correlation                                                | Closed         |
+| `id4`           | row `+15`, 1              | `u8`                               | Fourth key component                     | Certain             | Certain                   | High                | Cross-locale key correlation                                                | Closed         |
+| `text`          | row `+16`, `textSize*2`   | strict-width UTF-16LE              | Localized text                           | Certain             | Certain                   | Certain             | Valid strings and paired locale variation                                   | Closed         |
+| `terminator`    | final 4 per row           | zero reserved                      | Record terminator                        | Certain             | Certain                   | Certain             | Every 2.78M installed rows; mutation rejects                                | Closed         |
+| Reserved ranges | schema-local fixed widths | consumed with `.pad()` and omitted | framing or semantically neutral capacity | Certain             | Certain                   | Neutral             | Adjacent fields, strict EOF, and exact snapshot parity establish each width | Closed neutral |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                    | Evidence                                                                                                                        | Schema/documentation impact                                               | Status |
+| ---- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------ |
+| F-01 | The intrinsic decoder reproduces the transformed reference output exactly. | Full snapshot comparison; 1,395,807 rows; normalized SHA-256 `f302dd62926574f9b4c847253ec4c32becd088128098738f91547088e998c4d9` | The BSD schema is the production source of truth.                         | Closed |
+| F-02 | Row and section boundaries are intrinsic.                                  | Strict decoding reaches exact EOF on the installed capture.                                                                     | No companion offset table is loaded by this decoder.                      | Closed |
+| F-03 | Reserved byte ranges are representation details.                           | Their widths are fixed by adjacent fields and full-snapshot parity.                                                             | `.pad()` keeps the schema readable and omits redundant output properties. | Closed |
+
+### Reconciled source findings
+
+| ID    | Finding                                         | Evidence                               | Schema/documentation impact                 | Status   |
+| ----- | ----------------------------------------------- | -------------------------------------- | ------------------------------------------- | -------- |
+| LD-01 | Locale-specific row counts are not format rules | PT and ES have different totals        | Decoder repeats self-sized rows to EOF      | Resolved |
+| LD-02 | Unused helper duplicated schema decoding        | Lint reported dead `decodeDesktopText` | Helper removed; schema remains sole decoder | Resolved |

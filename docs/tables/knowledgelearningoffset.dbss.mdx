@@ -1,0 +1,57 @@
+---
+title: "knowledgelearningoffset.dbss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the intrinsic BSD knowledgelearningoffset decoder."
+sidebar:
+    label: "knowledgelearningoffset.dbss"
+    icon: database
+search:
+    tags: [tables, dbss, binary-schema]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                        |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                         |
+| Iteration          | BSD migration                                                                                                                                                                |
+| Review state       | BSD migration reconciled                                                                                                                                                     |
+| Last reviewed      | 2026-08-03                                                                                                                                                                   |
+| Captures examined  | Steam capture ads_version 856; PAZ 5152; file hash 1208798355; 55,332 extracted bytes; normalized SHA-256 `86bc7419bdc9c4e696570f44058225d45709135dea16016bd78b2b7b56012dad` |
+| Decoder            | `packages/scraper/src/tables/knowledgelearningoffset.dbss.ts`                                                                                                                |
+| Remaining blockers | None                                                                                                                                                                         |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The source investigation ledger was reconciled against the intrinsic BSD schema and its current full-snapshot proof.
+The production decoder consumes the table sequentially without an offset-table runtime dependency.
+:::
+
+## Field ledger
+
+| Field/path                     | Offset and width                        | Representation                                         | Claimed meaning                          | Physical confidence | Representation confidence | Semantic confidence  | Evidence                                                                    | Status         |
+| ------------------------------ | --------------------------------------- | ------------------------------------------------------ | ---------------------------------------- | ------------------- | ------------------------- | -------------------- | --------------------------------------------------------------------------- | -------------- |
+| section framing and row counts | four padded bytes plus two `u32` counts | framing bytes and counts consumed; omitted from output | two namespace directories                | Certain             | Certain                   | Certain (structural) | Intrinsic array framing and exact EOF                                       | Closed         |
+| `sourceId`                     | row `+0`, `u32`                         | retained                                               | companion source key                     | Certain             | Certain                   | Certain              | Key sets exactly equal both companion sections in two builds                | Closed         |
+| `offset`, `byteLength`         | row `+4`, two `u32`                     | retained                                               | companion payload span                   | Certain             | Certain                   | Certain              | Legacy comparison and complete span coverage                                | Closed         |
+| Reserved ranges                | schema-local fixed widths               | consumed with `.pad()` and omitted                     | framing or semantically neutral capacity | Certain             | Certain                   | Neutral              | Adjacent fields, strict EOF, and exact snapshot parity establish each width | Closed neutral |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                    | Evidence                                                                                                                          | Schema/documentation impact                                               | Status |
+| ---- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------ |
+| F-01 | The intrinsic decoder reproduces the transformed reference output exactly. | Full snapshot comparison; complete payload; normalized SHA-256 `86bc7419bdc9c4e696570f44058225d45709135dea16016bd78b2b7b56012dad` | The BSD schema is the production source of truth.                         | Closed |
+| F-02 | Row and section boundaries are intrinsic.                                  | Strict decoding reaches exact EOF on the installed capture.                                                                       | No companion offset table is loaded by this decoder.                      | Closed |
+| F-03 | Reserved byte ranges are representation details.                           | Their widths are fixed by adjacent fields and full-snapshot parity.                                                               | `.pad()` keeps the schema readable and omits redundant output properties. | Closed |
+
+### Reconciled source findings
+
+| ID   | Finding                                                         | Evidence                         | Schema/documentation impact    | Status |
+| ---- | --------------------------------------------------------------- | -------------------------------- | ------------------------------ | ------ |
+| F-02 | Both directory key sets exactly cover their companion sections. | Exhaustive two-build comparison. | Aggregate equality test added. | Closed |

@@ -1,0 +1,61 @@
+---
+title: "mentalcard.dbss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the intrinsic BSD mentalcard decoder."
+sidebar:
+    label: "mentalcard.dbss"
+    icon: database
+search:
+    tags: [tables, dbss, binary-schema]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                       |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                        |
+| Iteration          | BSD migration                                                                                                                                                                               |
+| Review state       | BSD migration reconciled                                                                                                                                                                    |
+| Last reviewed      | 2026-08-03                                                                                                                                                                                  |
+| Captures examined  | Steam capture ads_version 856; PAZ 3595; file hash 787889889; 6,214,242 extracted bytes; 12,086 rows; normalized SHA-256 `fcd4796c90f1b4d4d5cc711dbc0ca5e58e1ed35f25ab18ea9cbdc73ab4c161d8` |
+| Decoder            | `packages/scraper/src/tables/mentalcard.dbss.ts`                                                                                                                                            |
+| Remaining blockers | None                                                                                                                                                                                        |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The source investigation ledger was reconciled against the intrinsic BSD schema and its current full-snapshot proof.
+The production decoder consumes the table sequentially without an offset-table runtime dependency.
+:::
+
+## Field ledger
+
+| Field/path                   | Offset and width          | Representation                      | Claimed meaning                                 | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                             | Status         |
+| ---------------------------- | ------------------------- | ----------------------------------- | ----------------------------------------------- | ------------------- | ------------------------- | ------------------- | ------------------------------------------------------------------------------------ | -------------- |
+| identity/theme/flags         | fixed prefix              | retained                            | card ID, owning theme, packed acquisition flags | Certain             | Certain                   | High                | Exact membership inverse and row-local flag relationships                            | Closed         |
+| conversation values          | fixed numeric block       | retained                            | favor/interest and combo controls               | Certain             | Certain                   | High                | Legacy/client symbols plus discriminator/payload covariance                          | Closed         |
+| counted presentation strings | variable                  | decoded, controls omitted           | Korean text, icon, acquisition hint             | Certain             | Certain                   | Certain             | Self-describing counts/flags and path grammar                                        | Closed         |
+| marker fields                | fixed trailer             | retained                            | location/service marker                         | Certain             | Certain                   | High                | Intrinsic coordinate/flag equivalences                                               | Closed         |
+| `relatedHashes`              | counted `u32[]`           | retained hashes                     | related region/location identifiers             | Certain             | Certain                   | High                | Current CharacterStatic join: 3,874 overlaps and 3,549 exact lists among 5,555 pairs | Closed         |
+| row terminator               | final 5 bytes             | consumed with `.pad(5)` and omitted | neutral row framing                             | Certain             | Certain                   | Neutral             | Exact intrinsic boundary after `relatedHashes`                                       | Closed neutral |
+| Reserved ranges              | schema-local fixed widths | consumed with `.pad()` and omitted  | framing or semantically neutral capacity        | Certain             | Certain                   | Neutral             | Adjacent fields, strict EOF, and exact snapshot parity establish each width          | Closed neutral |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                    | Evidence                                                                                                                     | Schema/documentation impact                                               | Status |
+| ---- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------ |
+| F-01 | The intrinsic decoder reproduces the transformed reference output exactly. | Full snapshot comparison; 12,086 rows; normalized SHA-256 `fcd4796c90f1b4d4d5cc711dbc0ca5e58e1ed35f25ab18ea9cbdc73ab4c161d8` | The BSD schema is the production source of truth.                         | Closed |
+| F-02 | Row and section boundaries are intrinsic.                                  | Strict decoding reaches exact EOF on the installed capture.                                                                  | No companion offset table is loaded by this decoder.                      | Closed |
+| F-03 | Reserved byte ranges are representation details.                           | Their widths are fixed by adjacent fields and full-snapshot parity.                                                          | `.pad()` keeps the schema readable and omits redundant output properties. | Closed |
+
+### Reconciled source findings
+
+| ID   | Finding                                                             | Evidence                                                                                                           | Schema/documentation impact                                               | Status |
+| ---- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- | ------ |
+| F-02 | Card ownership exactly equals theme membership.                     | Every `(themeKey, cardId)` pair agrees in both directions and builds.                                              | Aggregate equality test added.                                            | Closed |
+| F-03 | `relatedHashes` shares CharacterStatic's region/location namespace. | Of 5,555 current joins, 3,874 overlap and 3,549 ordered lists are identical; proprietary preimages remain unknown. | Promoted the field meaning and TSDoc without resolving individual hashes. | Closed |

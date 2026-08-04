@@ -1,0 +1,58 @@
+---
+title: "displayexchangeitemnpc.dbss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the intrinsic BSD displayexchangeitemnpc decoder."
+sidebar:
+    label: "displayexchangeitemnpc.dbss"
+    icon: database
+search:
+    tags: [tables, dbss, binary-schema]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                 |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                  |
+| Iteration          | BSD migration                                                                                                                                                                         |
+| Review state       | BSD migration reconciled                                                                                                                                                              |
+| Last reviewed      | 2026-08-03                                                                                                                                                                            |
+| Captures examined  | Steam capture ads_version 856; PAZ 3600; file hash 4093843561; 2,944 extracted bytes; 124 rows; normalized SHA-256 `2427f8f5f0e9e540e7ba57d38c56809bc0c22f67ad803f0cc66a8b3bb5dfa415` |
+| Decoder            | `packages/scraper/src/tables/displayexchangeitemnpc.dbss.ts`                                                                                                                          |
+| Remaining blockers | None                                                                                                                                                                                  |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The source investigation ledger was reconciled against the intrinsic BSD schema and its current full-snapshot proof.
+The production decoder consumes the table sequentially without an offset-table runtime dependency.
+:::
+
+## Field ledger
+
+| Field/path                        | Offset and width          | Representation                                                | Claimed meaning                          | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                                                          | Status         |
+| --------------------------------- | ------------------------- | ------------------------------------------------------------- | ---------------------------------------- | ------------------- | ------------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------- | -------------- |
+| row count and packed/repeated key | variable row              | repeated identity validated; packed and split values retained | character/display-group identity         | Certain             | Certain                   | High                | Intrinsic equality and character-key joins                                                                        | Closed         |
+| exchange count                    | `u32` control             | consumed/omitted                                              | selector count                           | Certain             | Certain                   | Certain             | Self-framing array                                                                                                | Closed         |
+| `exchangeIds`                     | counted `u16[]`           | retained as ordered selectors                                 | runtime item-exchange recipe selectors   | Certain             | Certain                   | High                | Client wrapper indexes this list; 204 values resolve locally and 12 retained references lack captured definitions | Closed         |
+| Reserved ranges                   | schema-local fixed widths | consumed with `.pad()` and omitted                            | framing or semantically neutral capacity | Certain             | Certain                   | Neutral             | Adjacent fields, strict EOF, and exact snapshot parity establish each width                                       | Closed neutral |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                    | Evidence                                                                                                                  | Schema/documentation impact                                               | Status |
+| ---- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------ |
+| F-01 | The intrinsic decoder reproduces the transformed reference output exactly. | Full snapshot comparison; 124 rows; normalized SHA-256 `2427f8f5f0e9e540e7ba57d38c56809bc0c22f67ad803f0cc66a8b3bb5dfa415` | The BSD schema is the production source of truth.                         | Closed |
+| F-02 | Row and section boundaries are intrinsic.                                  | Strict decoding reaches exact EOF on the installed capture.                                                               | No companion offset table is loaded by this decoder.                      | Closed |
+| F-03 | Reserved byte ranges are representation details.                           | Their widths are fixed by adjacent fields and full-snapshot parity.                                                       | `.pad()` keeps the schema readable and omits redundant output properties. | Closed |
+
+### Reconciled source findings
+
+| ID   | Finding                                                                                                       | Evidence                                                                                                                       | Schema/documentation impact                                                                     | Status |
+| ---- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- | ------ |
+| F-01 | The selector list is not a total FK into `itemexchangebynpc.dbss`.                                            | Complete installed comparison has dangling values.                                                                             | Misleading “keys into” comment replaced; negative regression test added.                        | Closed |
+| F-02 | The selectors address ordered runtime item-exchange recipes despite the incomplete captured static namespace. | Client indexed-wrapper consumer; 216 display values, 204 locally resolved, 12 unmatched, and five unreferenced static recipes. | Promoted semantic confidence while preserving unmatched values and forbidding a total-FK check. | Closed |

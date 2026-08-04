@@ -1,0 +1,68 @@
+---
+title: "guildmanufacture.dbss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the intrinsic BSD guildmanufacture decoder."
+sidebar:
+    label: "guildmanufacture.dbss"
+    icon: database
+search:
+    tags: [tables, dbss, binary-schema]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Coverage           | 100%                                                                                                                                                                                 |
+| Iteration          | BSD migration                                                                                                                                                                        |
+| Review state       | BSD migration reconciled                                                                                                                                                             |
+| Last reviewed      | 2026-08-03                                                                                                                                                                           |
+| Captures examined  | Steam capture ads_version 856; PAZ 3600; file hash 1844538179; 2,120 extracted bytes; 16 rows; normalized SHA-256 `0a61f4d7d31c671de1522c756b3b5851ca275952eb0965bfe62ac520c1a3d9db` |
+| Decoder            | `packages/scraper/src/tables/guildmanufacture.dbss.ts`                                                                                                                               |
+| Remaining blockers | None                                                                                                                                                                                 |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The source investigation ledger was reconciled against the intrinsic BSD schema and its current full-snapshot proof.
+The production decoder consumes the table sequentially without an offset-table runtime dependency.
+:::
+
+## Field ledger
+
+| Field/path                         | Offset and width          | Representation                     | Claimed meaning                                             | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                                                   | Status         |
+| ---------------------------------- | ------------------------- | ---------------------------------- | ----------------------------------------------------------- | ------------------- | ------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------- | -------------- |
+| outer key / `productItemId`        | schema-defined            | repeated `u32`                     | Crafted product item id                                     | Certain             | Certain                   | Certain             | Companion key, repetition, and current item names                                                          | Closed         |
+| `itemExchangeKey`                  | schema-defined            | `u32`                              | Worker recipe used to produce the product                   | Certain             | Certain                   | Certain             | Exact joins to `itemexchangesource` / house recipe tiers                                                   | Closed         |
+| `productionTimeSeconds`            | schema-defined            | `u64`                              | Base production time in seconds                             | Certain             | Certain                   | Certain             | Values 43,200/72,000/86,400 and guild UI time consumers                                                    | Closed         |
+| `instantCompletionSilverPerSecond` | schema-defined            | `u64`                              | Complete Now cost per remaining second                      | Certain             | Certain                   | Certain             | Constant 10,000; historical official guild-crafting rule states 10,000 silver per second                   | Closed         |
+| `productItemQuantity`              | schema-defined            | `u64`                              | Product quantity per craft                                  | Certain             | Certain                   | Certain             | Client `getProductItemCount` and values 1/2                                                                | Closed         |
+| required ids / quantities          | schema-defined            | six `u32`, six `u64`               | Six fixed required-material slots                           | Certain             | Certain                   | Certain             | Client `getRequiredItemEnchantKey` / `getRequiredItemCount`; `__eGuildManufactureRequiredItemCount` is six | Closed         |
+| `categoryCode`                     | schema-defined            | `u8`                               | Guild-craft category: final craft, component, or mount part | Certain             | Certain                   | Certain             | Client category selector plus exact item/exchange partition for codes 0/1/2                                | Closed         |
+| guild-house keys                   | schema-defined            | counted `u16[]`                    | Guild houses allowed to perform the recipe                  | Certain             | Certain                   | Certain             | Character-table house names and client house filters                                                       | Closed         |
+| skill ids                          | schema-defined            | `u16` count plus `u16[]`           | Required guild skills                                       | Certain             | Certain                   | Certain             | Exact joins to the reverse skill-link list and client skill checks                                         | Closed         |
+| Reserved ranges                    | schema-local fixed widths | consumed with `.pad()` and omitted | framing or semantically neutral capacity                    | Certain             | Certain                   | Neutral             | Adjacent fields, strict EOF, and exact snapshot parity establish each width                                | Closed neutral |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                    | Evidence                                                                                                                 | Schema/documentation impact                                               | Status |
+| ---- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- | ------ |
+| F-01 | The intrinsic decoder reproduces the transformed reference output exactly. | Full snapshot comparison; 16 rows; normalized SHA-256 `0a61f4d7d31c671de1522c756b3b5851ca275952eb0965bfe62ac520c1a3d9db` | The BSD schema is the production source of truth.                         | Closed |
+| F-02 | Row and section boundaries are intrinsic.                                  | Strict decoding reaches exact EOF on the installed capture.                                                              | No companion offset table is loaded by this decoder.                      | Closed |
+| F-03 | Reserved byte ranges are representation details.                           | Their widths are fixed by adjacent fields and full-snapshot parity.                                                      | `.pad()` keeps the schema readable and omits redundant output properties. | Closed |
+
+### Reconciled source findings
+
+| ID    | Finding                                                                 | Evidence                                            | Schema impact                                                         | Status   |
+| ----- | ----------------------------------------------------------------------- | --------------------------------------------------- | --------------------------------------------------------------------- | -------- |
+| GM-01 | Companion offsets begin after the outer product key                     | All 16 rows                                         | Decoder validates the omitted outer key against product and companion | Resolved |
+| GM-02 | Every byte after the stable prefix is a fixed/count-framed domain field | Complete 16-row parse and compiled-client accessors | Removed opaque `tail`                                                 | Resolved |
+
+Client evidence comes from `panel_guild_manufactureselect_all_2.luac` and
+`worldmap_grand_guildcraft.luac`. The 10,000-silver unit is independently stated in the
+[official guild-crafting update](https://store.steampowered.com/news/posts/?appids=582660&enddate=1529568540).

@@ -1,0 +1,65 @@
+---
+title: "enchantstaticstatusoffset.dbss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the intrinsic BSD enchantstaticstatusoffset decoder."
+sidebar:
+    label: "enchantstaticstatusoffset.dbss"
+    icon: database
+search:
+    tags: [tables, dbss, binary-schema]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                     |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                      |
+| Iteration          | BSD migration                                                                                                                                                                             |
+| Review state       | BSD migration reconciled                                                                                                                                                                  |
+| Last reviewed      | 2026-08-03                                                                                                                                                                                |
+| Captures examined  | Steam capture ads_version 856; PAZ 4649; file hash 183877821; 401,588 extracted bytes; 33,464 rows; normalized SHA-256 `e0b61f788284365d09c6b911d5fd1be9da342146eaf1b3c2b7b8b68fce18f608` |
+| Decoder            | `packages/scraper/src/tables/enchantstaticstatusoffset.dbss.ts`                                                                                                                           |
+| Remaining blockers | None                                                                                                                                                                                      |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The source investigation ledger was reconciled against the intrinsic BSD schema and its current full-snapshot proof.
+The production decoder consumes the table sequentially without an offset-table runtime dependency.
+:::
+
+## Field ledger
+
+| Field/path                | Offset and width          | Representation                            | Claimed meaning                          | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                    | Status         |
+| ------------------------- | ------------------------- | ----------------------------------------- | ---------------------------------------- | ------------------- | ------------------------- | ------------------- | --------------------------------------------------------------------------- | -------------- |
+| `magic`                   | `+0`, 4                   | ASCII                                     | PABR signature                           | Certain             | Certain                   | Certain             | Self-identifying bytes in both captures                                     | Closed         |
+| Row count (omitted)       | `+4`, 4                   | count consumed by the enclosing BSD array | row-count framing                        | Certain             | Certain                   | Certain             | Frames all 12-byte rows and equals data count                               | Closed         |
+| `rows[].key`              | row `+0`, 4               | `u32` overlap                             | Packed family/level identity             | Certain             | Certain                   | High                | Equals pointed data row fields exhaustively                                 | Closed         |
+| `rows[].staticStatusKey`  | row `+0`, 2               | `u16` overlap                             | Status-family key                        | Certain             | Certain                   | High                | Equals pointed data row key                                                 | Closed         |
+| `rows[].reserved02`       | row `+2`, 1               | zero reserved                             | Packed-key zero byte                     | Certain             | Certain                   | Unknown             | Zero in every pointer across both builds; mutation rejects                  | Closed         |
+| `rows[].enhancementLevel` | row `+3`, 1               | `u8` overlap                              | Enhancement discriminator                | Certain             | Certain                   | High                | Equals pointed row level                                                    | Closed         |
+| `rows[].offset`           | row `+4`, 4               | `u32`                                     | Data-row start                           | Certain             | Certain                   | Certain             | Sorted spans partition the companion data                                   | Closed         |
+| `rows[].byteLength`       | row `+8`, 4               | `u32`                                     | Data-row width                           | Certain             | Certain                   | Certain             | Spans end exactly at the next row/EOF                                       | Closed         |
+| `footer.reserved00`       | footer `+0`, 4            | zero reserved                             | Padding                                  | Certain             | Certain                   | Unknown             | PABR footer pattern in all local PABR tables                                | Closed         |
+| `footer.footerOffset`     | footer `+4`, 4            | `u32`                                     | Footer self-pointer                      | Certain             | Certain                   | Certain             | Equals its own absolute position                                            | Closed         |
+| `footer.reserved08`       | footer `+8`, 4            | zero reserved                             | Padding                                  | Certain             | Certain                   | Unknown             | PABR footer pattern; mutation rejects                                       | Closed         |
+| Reserved ranges           | schema-local fixed widths | consumed with `.pad()` and omitted        | framing or semantically neutral capacity | Certain             | Certain                   | Neutral             | Adjacent fields, strict EOF, and exact snapshot parity establish each width | Closed neutral |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                    | Evidence                                                                                                                     | Schema/documentation impact                                               | Status |
+| ---- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------ |
+| F-01 | The intrinsic decoder reproduces the transformed reference output exactly. | Full snapshot comparison; 33,464 rows; normalized SHA-256 `e0b61f788284365d09c6b911d5fd1be9da342146eaf1b3c2b7b8b68fce18f608` | The BSD schema is the production source of truth.                         | Closed |
+| F-02 | Row and section boundaries are intrinsic.                                  | Strict decoding reaches exact EOF on the installed capture.                                                                  | No companion offset table is loaded by this decoder.                      | Closed |
+| F-03 | Reserved byte ranges are representation details.                           | Their widths are fixed by adjacent fields and full-snapshot parity.                                                          | `.pad()` keeps the schema readable and omits redundant output properties. | Closed |
+
+### Reconciled source findings
+
+| ID      | Finding                                              | Evidence                                                                         | Schema/documentation impact                                             | Status   |
+| ------- | ---------------------------------------------------- | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | -------- |
+| ESSO-01 | The stored count is framing rather than payload data | The BSD array consumes it and exact snapshot parity omits the redundant property | The destination exposes `rows.length` instead of a duplicate `rowCount` | Resolved |

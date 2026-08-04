@@ -1,0 +1,58 @@
+---
+title: "extractitemoffset.dbss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the intrinsic BSD extractitemoffset decoder."
+sidebar:
+    label: "extractitemoffset.dbss"
+    icon: database
+search:
+    tags: [tables, dbss, binary-schema]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                    |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                     |
+| Iteration          | BSD migration                                                                                                                                                                            |
+| Review state       | BSD migration reconciled                                                                                                                                                                 |
+| Last reviewed      | 2026-08-03                                                                                                                                                                               |
+| Captures examined  | Steam capture ads_version 856; PAZ 3600; file hash 4207944439; 27,940 extracted bytes; 2,328 rows; normalized SHA-256 `5d5364bdd26aea2c7606fa88984b2899a3dcadf6cc919fd6d6d4d126e449ac17` |
+| Decoder            | `packages/scraper/src/tables/extractitemoffset.dbss.ts`                                                                                                                                  |
+| Remaining blockers | None                                                                                                                                                                                     |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The source investigation ledger was reconciled against the intrinsic BSD schema and its current full-snapshot proof.
+The production decoder consumes the table sequentially without an offset-table runtime dependency.
+:::
+
+## Field ledger
+
+| Field/path          | Offset and width          | Representation                     | Claimed meaning                          | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                    | Status         |
+| ------------------- | ------------------------- | ---------------------------------- | ---------------------------------------- | ------------------- | ------------------------- | ------------------- | --------------------------------------------------------------------------- | -------------- |
+| row count           | file `+0`, 4              | decoder-only `u32`                 | frames pointers                          | Certain             | Certain                   | Certain             | exact consumption                                                           | Closed         |
+| `extractableItemId` | row `+0`, 4               | positive `u32`                     | companion recipe key                     | Certain             | Certain                   | High                | equals first item in pointed row                                            | Closed         |
+| `offset`            | row `+4`, 4               | `u32`                              | complete row start                       | Certain             | Certain                   | Certain             | rows partition from byte 4 to EOF                                           | Closed         |
+| `byteLength`        | row `+8`, 4               | `u32`                              | complete row width                       | Certain             | Certain                   | Certain             | every span is exactly the row's 48 bytes                                    | Closed         |
+| Reserved ranges     | schema-local fixed widths | consumed with `.pad()` and omitted | framing or semantically neutral capacity | Certain             | Certain                   | Neutral             | Adjacent fields, strict EOF, and exact snapshot parity establish each width | Closed neutral |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                    | Evidence                                                                                                                    | Schema/documentation impact                                               | Status |
+| ---- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------ |
+| F-01 | The intrinsic decoder reproduces the transformed reference output exactly. | Full snapshot comparison; 2,328 rows; normalized SHA-256 `5d5364bdd26aea2c7606fa88984b2899a3dcadf6cc919fd6d6d4d126e449ac17` | The BSD schema is the production source of truth.                         | Closed |
+| F-02 | Row and section boundaries are intrinsic.                                  | Strict decoding reaches exact EOF on the installed capture.                                                                 | No companion offset table is loaded by this decoder.                      | Closed |
+| F-03 | Reserved byte ranges are representation details.                           | Their widths are fixed by adjacent fields and full-snapshot parity.                                                         | `.pad()` keeps the schema readable and omits redundant output properties. | Closed |
+
+### Reconciled source findings
+
+| ID      | Finding                                                                | Evidence                                                                   | Schema/documentation impact                | Status   |
+| ------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------ | -------- |
+| EXTO-01 | Unlike several keyed DBSS companions, these spans include the row key. | First offset is immediately after file count and every span is contiguous. | TSDoc distinguishes complete-row pointers. | Resolved |

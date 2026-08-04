@@ -1,0 +1,59 @@
+---
+title: "employeecharactership.dbss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the intrinsic BSD employeecharactership decoder."
+sidebar:
+    label: "employeecharactership.dbss"
+    icon: database
+search:
+    tags: [tables, dbss, binary-schema]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Coverage           | 100%                                                                                                                                                                                 |
+| Iteration          | BSD migration                                                                                                                                                                        |
+| Review state       | BSD migration reconciled                                                                                                                                                             |
+| Last reviewed      | 2026-08-03                                                                                                                                                                           |
+| Captures examined  | Steam capture ads_version 856; PAZ 3600; file hash 2455167407; 3,348 extracted bytes; 38 rows; normalized SHA-256 `ee13ee7b89f16b8a4e178b284304dafa7dc385cc7c50f82ee2bc1417a38e2663` |
+| Decoder            | `packages/scraper/src/tables/employeecharactership.dbss.ts`                                                                                                                          |
+| Remaining blockers | None                                                                                                                                                                                 |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+This destination ledger was established from the legacy decoder, the installed capture, and the current full-snapshot proof.
+The production decoder consumes the table sequentially without an offset-table runtime dependency.
+:::
+
+## Field ledger
+
+| Field/path                                                          | Offset and width                          | Representation                                  | Claimed meaning                                      | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                    | Status |
+| ------------------------------------------------------------------- | ----------------------------------------- | ----------------------------------------------- | ---------------------------------------------------- | ------------------- | ------------------------- | ------------------- | --------------------------------------------------------------------------- | ------ |
+| File framing                                                        | whole file                                | intrinsic BSD schema with strict EOF validation | record framing and section boundaries                | Certain             | Certain                   | High                | Fresh extraction and strict decoding consume the capture exactly            | Closed |
+| `shipCharacterKey`                                                  | row `+0`, `u16`                           | retained                                        | ship character identity                              | Certain             | Certain                   | High                | Legacy field evidence and exact snapshot equality                           | Closed |
+| `cabinQuantity`, `baseSailorCapacity`                               | two `u32`                                 | retained                                        | crew-space capacities                                | Certain             | Certain                   | High                | Legacy semantic names retained and exact snapshot equality                  | Closed |
+| `rations`, `cannonballCapacity`                                     | two `u32`                                 | retained                                        | ship consumable capacities                           | Certain             | Certain                   | High                | Legacy semantic names retained and exact snapshot equality                  | Closed |
+| `cannonDamageMultiplier`                                            | `f32`                                     | retained                                        | cannon damage multiplier                             | Certain             | Certain                   | High                | Finite captured values and legacy semantic evidence                         | Closed |
+| `damageGaugeStepBasisPoints`, `damageStepRepairCost`                | two `f32` separated by eight padded bytes | retained values; gap omitted                    | damage/repair tuning                                 | Certain             | Certain                   | High                | Exact snapshot equality across all 38 rows                                  | Closed |
+| handling and cannon-control flags                                   | strict Boolean fields                     | retained                                        | vessel-control capabilities                          | Certain             | Certain                   | High                | Both captain-control flags agree in every row and are schema-validated      | Closed |
+| `cannonCount`, `cannonReloadSeconds`                                | `u8`, `f32`                               | retained                                        | mounted-cannon count and reload duration             | Certain             | Certain                   | High                | Legacy semantic evidence and exact snapshot equality                        | Closed |
+| `minimumCannonRangeCentimeters`, `maximumFocusFireRangeCentimeters` | two `f32`                                 | retained                                        | cannon range thresholds                              | Certain             | Certain                   | High                | Legacy units retained and exact snapshot equality                           | Closed |
+| focus-fire tuning fields                                            | three `f32`, `u32`, Boolean               | retained                                        | focus-fire angle, power, precision, and availability | Certain             | Certain                   | High                | Legacy field evidence and cross-field capture consistency                   | Closed |
+| `condition`                                                         | counted UTF-16LE                          | retained string                                 | availability condition expression                    | Certain             | Certain                   | High                | Intrinsic string length and exact snapshot equality                         | Closed |
+| Reserved ranges                                                     | schema-local fixed widths                 | consumed with `.pad()` and omitted              | framing or semantically neutral capacity             | Certain             | Certain                   | Neutral             | Adjacent fields, strict EOF, and exact snapshot parity establish each width | Closed |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                    | Evidence                                                                                                                 | Schema/documentation impact                                               | Status |
+| ---- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- | ------ |
+| F-01 | The intrinsic decoder reproduces the transformed reference output exactly. | Full snapshot comparison; 38 rows; normalized SHA-256 `ee13ee7b89f16b8a4e178b284304dafa7dc385cc7c50f82ee2bc1417a38e2663` | The BSD schema is the production source of truth.                         | Closed |
+| F-02 | Row and section boundaries are intrinsic.                                  | Strict decoding reaches exact EOF on the installed capture.                                                              | No companion offset table is loaded by this decoder.                      | Closed |
+| F-03 | Reserved byte ranges are representation details.                           | Their widths are fixed by adjacent fields and full-snapshot parity.                                                      | `.pad()` keeps the schema readable and omits redundant output properties. | Closed |

@@ -1,0 +1,55 @@
+---
+title: "houseinforeceipeoffset.dbss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the intrinsic BSD houseinforeceipeoffset decoder."
+sidebar:
+    label: "houseinforeceipeoffset.dbss"
+    icon: database
+search:
+    tags: [tables, dbss, binary-schema]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                 |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                  |
+| Iteration          | BSD migration                                                                                                                                                                         |
+| Review state       | BSD migration reconciled                                                                                                                                                              |
+| Last reviewed      | 2026-08-03                                                                                                                                                                            |
+| Captures examined  | Steam capture ads_version 856; PAZ 5156; file hash 2320386503; 1,576 extracted bytes; 131 rows; normalized SHA-256 `f1f52c148b2c207ca7578bde4ee12b0efc087bd91fb7fb9a1c7beecf13c9c371` |
+| Decoder            | `packages/scraper/src/tables/houseinforeceipeoffset.dbss.ts`                                                                                                                          |
+| Remaining blockers | None                                                                                                                                                                                  |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The source investigation ledger was reconciled against the intrinsic BSD schema and its current full-snapshot proof.
+The production decoder consumes the table sequentially without an offset-table runtime dependency.
+:::
+
+## Field ledger
+
+| Field/path                            | Offset and width          | Representation                     | Claimed meaning                          | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                    | Status         |
+| ------------------------------------- | ------------------------- | ---------------------------------- | ---------------------------------------- | ------------------- | ------------------------- | ------------------- | --------------------------------------------------------------------------- | -------------- |
+| count, `rows[].key/offset/byteLength` | `+0`, 4; 12 each          | `u32`                              | House recipe-list directory              | Certain             | Certain                   | Certain             | 131 keyed spans partition the primary bytes exactly                         | Closed         |
+| Reserved ranges                       | schema-local fixed widths | consumed with `.pad()` and omitted | framing or semantically neutral capacity | Certain             | Certain                   | Neutral             | Adjacent fields, strict EOF, and exact snapshot parity establish each width | Closed neutral |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                    | Evidence                                                                                                                  | Schema/documentation impact                                               | Status |
+| ---- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------ |
+| F-01 | The intrinsic decoder reproduces the transformed reference output exactly. | Full snapshot comparison; 131 rows; normalized SHA-256 `f1f52c148b2c207ca7578bde4ee12b0efc087bd91fb7fb9a1c7beecf13c9c371` | The BSD schema is the production source of truth.                         | Closed |
+| F-02 | Row and section boundaries are intrinsic.                                  | Strict decoding reaches exact EOF on the installed capture.                                                               | No companion offset table is loaded by this decoder.                      | Closed |
+| F-03 | Reserved byte ranges are representation details.                           | Their widths are fixed by adjacent fields and full-snapshot parity.                                                       | `.pad()` keeps the schema readable and omits redundant output properties. | Closed |
+
+### Reconciled source findings
+
+| ID      | Finding                            | Evidence                                    | Schema/documentation impact                   | Status   |
+| ------- | ---------------------------------- | ------------------------------------------- | --------------------------------------------- | -------- |
+| HIRO-01 | Offsets include the row key itself | Every pointer key equals the first row word | Primary decoder starts each frame at `offset` | Resolved |

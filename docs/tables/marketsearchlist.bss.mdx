@@ -1,0 +1,62 @@
+---
+title: "marketsearchlist.bss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the intrinsic BSD marketsearchlist decoder."
+sidebar:
+    label: "marketsearchlist.bss"
+    icon: database
+search:
+    tags: [tables, bss, binary-schema]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                     |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                      |
+| Iteration          | BSD migration                                                                                                                                                                             |
+| Review state       | BSD migration reconciled                                                                                                                                                                  |
+| Last reviewed      | 2026-08-03                                                                                                                                                                                |
+| Captures examined  | Steam capture ads_version 856; PAZ 1422; file hash 797070064; 541,724 extracted bytes; 12,524 rows; normalized SHA-256 `1b5026cc0b8a7a82b0e3e08617aec4e352b0d4b42b35330e794d8f31269c3a8a` |
+| Decoder            | `packages/scraper/src/tables/marketsearchlist.bss.ts`                                                                                                                                     |
+| Remaining blockers | None                                                                                                                                                                                      |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The source investigation ledger was reconciled against the intrinsic BSD schema and its current full-snapshot proof.
+The production decoder consumes the table sequentially without an offset-table runtime dependency.
+:::
+
+## Field ledger
+
+| Field/path                | Offset and width                  | Representation                              | Claimed meaning                          | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                                | Status         |
+| ------------------------- | --------------------------------- | ------------------------------------------- | ---------------------------------------- | ------------------- | ------------------------- | ------------------- | --------------------------------------------------------------------------------------- | -------------- |
+| `rows`                    | `+8`, count × 12                  | PABR count and fixed rows                   | market-search item references            | Certain             | Certain                   | High                | Table name, exact local text dictionary, and marketplace consumers                      | Closed         |
+| `rows[].itemId`           | row `+0`, 4                       | `u32`                                       | item-family identifier                   | Certain             | Certain                   | Certain             | All 12,330 values resolve through installed `itemenchantoffset`; no duplicates          | Closed         |
+| `rows[].searchTextIndex`  | row `+4`, 4                       | `u32`                                       | index into `searchTexts`                 | Certain             | Certain                   | Certain             | All indexes resolve; 12,330 rows use 12,144 dictionary entries                          | Closed         |
+| `rows[].reserved08`       | row `+8`, 4                       | zero reserved                               | fixed-row padding                        | Certain             | Certain                   | Unknown             | Zero in every installed row; targeted mutation rejects                                  | Closed         |
+| `searchTexts`             | after rows, counted variable data | marker `1`, byte length, UTF-16LE           | Korean market-search label dictionary    | Certain             | Certain                   | High                | Exact labels include `메디아 낚싯대` for item 16165 and `마노스 낚시꾼의 옷` for 705052 | Closed         |
+| footer `searchTextOffset` | final `-8`, 4                     | retained `u32`; following four bytes padded | text-dictionary start                    | Certain             | Certain                   | Certain             | Equals `8 + rows.length * 12` (`150,296`)                                               | Closed         |
+| footer `reserved04`       | final `-4`, 4                     | zero reserved                               | terminator                               | Certain             | Certain                   | Unknown             | Exact installed value; targeted mutation rejects                                        | Closed         |
+| Reserved ranges           | schema-local fixed widths         | consumed with `.pad()` and omitted          | framing or semantically neutral capacity | Certain             | Certain                   | Neutral             | Adjacent fields, strict EOF, and exact snapshot parity establish each width             | Closed neutral |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                    | Evidence                                                                                                                     | Schema/documentation impact                                               | Status |
+| ---- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------ |
+| F-01 | The intrinsic decoder reproduces the transformed reference output exactly. | Full snapshot comparison; 12,524 rows; normalized SHA-256 `1b5026cc0b8a7a82b0e3e08617aec4e352b0d4b42b35330e794d8f31269c3a8a` | The BSD schema is the production source of truth.                         | Closed |
+| F-02 | Row and section boundaries are intrinsic.                                  | Strict decoding reaches exact EOF on the installed capture.                                                                  | No companion offset table is loaded by this decoder.                      | Closed |
+| F-03 | Reserved byte ranges are representation details.                           | Their widths are fixed by adjacent fields and full-snapshot parity.                                                          | `.pad()` keeps the schema readable and omits redundant output properties. | Closed |
+
+### Reconciled source findings
+
+| ID     | Finding                                                                                      | Evidence                                                                                                                                                                                                                                                                    | Schema/documentation impact                                                                                    | Status   |
+| ------ | -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | -------- |
+| MSL-01 | The table is a complete locally indexed market-search relation, not an unframed string blob. | The row count gives an exact 12-byte region, the following count frames every marked UTF-16LE string, and the final pointer returns to the dictionary start.                                                                                                                | Added a full Eke decoder with exact EOF coverage and index validation.                                         | Resolved |
+| MSL-02 | Market-search membership is disjoint from locally explicit market-registration prohibitions. | The installed 12,330 item IDs have zero overlap with 1,923 item families whose exact item payload contains `NO_MARKET_REGISTER()`. Tuvala Longsword 695113 is absent; Mediah Fishing Rod 16165, Manos Fisher's Clothes 705052, and Loggia Butcher Knife 720523 are present. | The item aggregate can expose search membership and the exact local search label without a website dependency. | Resolved |

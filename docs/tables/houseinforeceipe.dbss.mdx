@@ -1,0 +1,65 @@
+---
+title: "houseinforeceipe.dbss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the intrinsic BSD houseinforeceipe decoder."
+sidebar:
+    label: "houseinforeceipe.dbss"
+    icon: database
+search:
+    tags: [tables, dbss, binary-schema]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                  |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                   |
+| Iteration          | BSD migration                                                                                                                                                                          |
+| Review state       | BSD migration reconciled                                                                                                                                                               |
+| Last reviewed      | 2026-08-03                                                                                                                                                                             |
+| Captures examined  | Steam capture ads_version 856; PAZ 5156; file hash 2267559784; 25,880 extracted bytes; 131 rows; normalized SHA-256 `404828de3b462848fd7f25950e16d34d87ffa94010004c9061349de2d636c320` |
+| Decoder            | `packages/scraper/src/tables/houseinforeceipe.dbss.ts`                                                                                                                                 |
+| Remaining blockers | None                                                                                                                                                                                   |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The source investigation ledger was reconciled against the intrinsic BSD schema and its current full-snapshot proof.
+The production decoder consumes the table sequentially without an offset-table runtime dependency.
+:::
+
+## Field ledger
+
+| Field/path               | Offset and width          | Representation                                | Claimed meaning                                 | Physical confidence | Representation confidence | Semantic confidence  | Evidence                                                                                                                                  | Status         |
+| ------------------------ | ------------------------- | --------------------------------------------- | ----------------------------------------------- | ------------------- | ------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| `recipeListId`           | schema-defined            | `u32`                                         | House/workshop recipe-list id                   | Certain             | Certain                   | Certain              | Repeated companion key and compiled-client lookups                                                                                        | Closed         |
+| `transferKey`            | schema-defined            | `u16`                                         | House transfer/upgrade requirement key          | Certain             | Certain                   | Certain              | Exact join to `houseinfoneeditem` and archived `TransferKey`                                                                              | Closed         |
+| `name`                   | schema-defined            | `u32` code units, four padded bytes, UTF-16LE | Korean workshop/house-function name             | Certain             | Certain                   | Certain              | Valid strings for all rows; intrinsic framing reaches the following fields exactly                                                        | Closed         |
+| `groupTypeCode`          | schema-defined            | `u8`                                          | `EHouseReceipeType` family                      | Certain             | Certain                   | Certain              | Archived `GroupType` and compiled enum consumers                                                                                          | Closed         |
+| `workshopSubtypeCode`    | schema-defined            | `u8`                                          | Specific regional workshop or processor subtype | Certain             | Certain                   | Certain              | Codes 24–35 partition Florin/Tarif/Arehaza/Duvencrune/Grána/O'dyllita workshops and fish/mushroom/crop/wood/mineral/jangdokdae processors | Closed         |
+| separator                | schema-defined            | zero byte                                     | Tier-list framing                               | Certain             | Certain                   | Certain (structural) | Enforced on all rows                                                                                                                      | Closed         |
+| `exchangeKeyTiers`       | schema-defined            | five counted `u32[]`                          | Item-exchange recipe keys by workshop tier      | Certain             | Certain                   | Certain              | Every nonzero key resolves, including embedded extended keys 7926 and 7855                                                                | Closed         |
+| `contentsGroupKey`       | schema-defined            | `u32`                                         | Legacy content gate                             | Certain             | Certain                   | Certain              | Archived column; zero means no extra legacy gate in this capture                                                                          | Closed         |
+| `houseUseGroupTypeCodes` | schema-defined            | counted `u8[]`                                | Accepted `eHouseUseGroupType` codes             | Certain             | Certain                   | Certain              | Compiled `getGroupTypeByIndex` consumer and enum-backed sets                                                                              | Closed         |
+| Reserved ranges          | schema-local fixed widths | consumed with `.pad()` and omitted            | framing or semantically neutral capacity        | Certain             | Certain                   | Neutral              | Adjacent fields, strict EOF, and exact snapshot parity establish each width                                                               | Closed neutral |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                    | Evidence                                                                                                                  | Schema/documentation impact                                               | Status |
+| ---- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------ |
+| F-01 | The intrinsic decoder reproduces the transformed reference output exactly. | Full snapshot comparison; 131 rows; normalized SHA-256 `404828de3b462848fd7f25950e16d34d87ffa94010004c9061349de2d636c320` | The BSD schema is the production source of truth.                         | Closed |
+| F-02 | Row and section boundaries are intrinsic.                                  | Strict decoding reaches exact EOF on the installed capture.                                                               | No companion offset table is loaded by this decoder.                      | Closed |
+| F-03 | Reserved byte ranges are representation details.                           | Their widths are fixed by adjacent fields and full-snapshot parity.                                                       | `.pad()` keeps the schema readable and omits redundant output properties. | Closed |
+
+### Reconciled source findings
+
+| ID     | Finding                                                  | Evidence                                                  | Schema impact                                        | Status   |
+| ------ | -------------------------------------------------------- | --------------------------------------------------------- | ---------------------------------------------------- | -------- |
+| HIR-01 | The byte after group type is a distinct workshop subtype | Stable subtype-to-name/family mapping across all 131 rows | Renamed from neutral `fieldAfterGroupType`           | Resolved |
+| HIR-02 | The trailing bytes are house-use group enums             | Compiled client iterates them via `getGroupTypeByIndex`   | Renamed from `trailingCodes`                         | Resolved |
+| HIR-03 | The word after the name length is required zero framing  | Zero in all 131 rows and rejected on targeted mutation    | Replaced a silent skip with `reserved(4)` validation | Resolved |

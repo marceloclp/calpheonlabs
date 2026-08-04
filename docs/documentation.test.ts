@@ -33,10 +33,10 @@ const section = (source: string, heading: string): string => {
 
 const tableNameFromDecoder = async (decoder: string): Promise<string> => {
     const source = await readFile(join(decoderDirectory, decoder), "utf8");
-    const match = source.match(
-        /\b(?:dbssRows|dbss|bss)\(\s*"([^"]+\.(?:bss|dbss))"/s,
-    );
-    if (!match) throw new Error(`No BSS/DBSS declaration in ${decoder}`);
+    const match =
+        source.match(/\b(?:dbssRows|dbss|bss)\(\s*"([^"]+\.(?:bss|dbss))"/s) ??
+        source.match(/\breadonly name = "([^"]+\.loc)"/);
+    if (!match) throw new Error(`No table declaration in ${decoder}`);
     return basename(match[1]!);
 };
 

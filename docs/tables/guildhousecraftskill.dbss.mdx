@@ -1,0 +1,59 @@
+---
+title: "guildhousecraftskill.dbss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the intrinsic BSD guildhousecraftskill decoder."
+sidebar:
+    label: "guildhousecraftskill.dbss"
+    icon: database
+search:
+    tags: [tables, dbss, binary-schema]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                              |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                               |
+| Iteration          | BSD migration                                                                                                                                                                      |
+| Review state       | BSD migration reconciled                                                                                                                                                           |
+| Last reviewed      | 2026-08-03                                                                                                                                                                         |
+| Captures examined  | Steam capture ads_version 856; PAZ 3753; file hash 2247149628; 384 extracted bytes; 19 rows; normalized SHA-256 `2be67d3d380c0df8057b41b28ff13f89003c8fccc6a6f4a8d3b7bab9b0b601fe` |
+| Decoder            | `packages/scraper/src/tables/guildhousecraftskill.dbss.ts`                                                                                                                         |
+| Remaining blockers | None                                                                                                                                                                               |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The source investigation ledger was reconciled against the intrinsic BSD schema and its current full-snapshot proof.
+The production decoder consumes the table sequentially without an offset-table runtime dependency.
+:::
+
+## Field ledger
+
+| Field/path      | Offset and width                   | Representation                     | Claimed meaning                          | Physical confidence | Representation confidence | Semantic confidence  | Evidence                                                                    | Status         |
+| --------------- | ---------------------------------- | ---------------------------------- | ---------------------------------------- | ------------------- | ------------------------- | -------------------- | --------------------------------------------------------------------------- | -------------- |
+| count/keys      | table `+0`, 4; row `+0/+4`, 4 each | repeated `u32`                     | Recipe-list identity                     | Certain             | Certain                   | Certain              | Equal keys and reverse-link joins                                           | Closed         |
+| `reserved08`    | row `+8`, 2                        | zero                               | Required separator                       | Certain             | Certain                   | Certain (structural) | Zero in all rows and enforced                                               | Closed         |
+| `skillIds`      | row `+10`, five `u16`              | fixed slots                        | Required skills; zero means unused       | Certain             | Certain                   | Certain              | Archived rows, reverse links, and compiled client skill checks              | Closed         |
+| Reserved ranges | schema-local fixed widths          | consumed with `.pad()` and omitted | framing or semantically neutral capacity | Certain             | Certain                   | Neutral              | Adjacent fields, strict EOF, and exact snapshot parity establish each width | Closed neutral |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                    | Evidence                                                                                                                 | Schema/documentation impact                                               | Status |
+| ---- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- | ------ |
+| F-01 | The intrinsic decoder reproduces the transformed reference output exactly. | Full snapshot comparison; 19 rows; normalized SHA-256 `2be67d3d380c0df8057b41b28ff13f89003c8fccc6a6f4a8d3b7bab9b0b601fe` | The BSD schema is the production source of truth.                         | Closed |
+| F-02 | Row and section boundaries are intrinsic.                                  | Strict decoding reaches exact EOF on the installed capture.                                                              | No companion offset table is loaded by this decoder.                      | Closed |
+| F-03 | Reserved byte ranges are representation details.                           | Their widths are fixed by adjacent fields and full-snapshot parity.                                                      | `.pad()` keeps the schema readable and omits redundant output properties. | Closed |
+
+### Reconciled source findings
+
+| ID       | Finding                                  | Evidence           | Schema/documentation impact   | Status   |
+| -------- | ---------------------------------------- | ------------------ | ----------------------------- | -------- |
+| GHCSK-01 | Five slots are physical even when unused | Fixed 20-byte rows | Zero slots retained in output | Resolved |
+
+Archived SQLite: `GuildHouseCraftSkillInfo` supplies historical names and 12 older recipe-list rows; current capture adds seven rows.

@@ -1,0 +1,62 @@
+---
+title: "manufacturecondition.dbss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the intrinsic BSD manufacturecondition decoder."
+sidebar:
+    label: "manufacturecondition.dbss"
+    icon: database
+search:
+    tags: [tables, dbss, binary-schema]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                               |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                |
+| Iteration          | BSD migration                                                                                                                                                                       |
+| Review state       | BSD migration reconciled                                                                                                                                                            |
+| Last reviewed      | 2026-08-03                                                                                                                                                                          |
+| Captures examined  | Steam capture ads_version 856; PAZ 3600; file hash 292732007; 1,183 extracted bytes; 14 rows; normalized SHA-256 `b0bc62c5314084678cec6352639bdb915f4970a69004ce43f8db8d24533c7493` |
+| Decoder            | `packages/scraper/src/tables/manufacturecondition.dbss.ts`                                                                                                                          |
+| Remaining blockers | None                                                                                                                                                                                |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The source investigation ledger was reconciled against the intrinsic BSD schema and its current full-snapshot proof.
+The production decoder consumes the table sequentially without an offset-table runtime dependency.
+:::
+
+## Field ledger
+
+| Field/path         | Offset and width                           | Representation                                | Claimed meaning                          | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                         | Status         |
+| ------------------ | ------------------------------------------ | --------------------------------------------- | ---------------------------------------- | ------------------- | ------------------------- | ------------------- | -------------------------------------------------------------------------------- | -------------- |
+| count/prefixes     | table `+0`; four bytes before each payload | `u32`                                         | Row count/action hash                    | Certain             | Certain                   | Certain             | Companion count, keys, and payload hashes agree                                  | Closed         |
+| `actionName`       | payload `+0`, `8+n`                        | `u32` length, four padded bytes, ASCII        | Processing action name                   | Certain             | Certain                   | Certain             | Stored hash matches for all rows; intrinsic framing reaches `actionHash` exactly | Closed         |
+| `actionHash`       | after action name, 4                       | `u32`                                         | Action-name hash                         | Certain             | Certain                   | Certain             | Outer key, companion key, local hash all agree                                   | Closed         |
+| `visibleCondition` | variable                                   | `u32` code units, four padded bytes, UTF-16LE | Visibility expression                    | Certain             | Certain                   | Certain             | Intrinsic length framing, archived identity, and client consumer                 | Closed         |
+| `enableCondition`  | variable                                   | `u32` code units, four padded bytes, UTF-16LE | Enablement expression                    | Certain             | Certain                   | Certain             | Intrinsic length framing, archived identity, and client consumer                 | Closed         |
+| Reserved ranges    | schema-local fixed widths                  | consumed with `.pad()` and omitted            | framing or semantically neutral capacity | Certain             | Certain                   | Neutral             | Adjacent fields, strict EOF, and exact snapshot parity establish each width      | Closed neutral |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                    | Evidence                                                                                                                 | Schema/documentation impact                                               | Status |
+| ---- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- | ------ |
+| F-01 | The intrinsic decoder reproduces the transformed reference output exactly. | Full snapshot comparison; 14 rows; normalized SHA-256 `b0bc62c5314084678cec6352639bdb915f4970a69004ce43f8db8d24533c7493` | The BSD schema is the production source of truth.                         | Closed |
+| F-02 | Row and section boundaries are intrinsic.                                  | Strict decoding reaches exact EOF on the installed capture.                                                              | No companion offset table is loaded by this decoder.                      | Closed |
+| F-03 | Reserved byte ranges are representation details.                           | Their widths are fixed by adjacent fields and full-snapshot parity.                                                      | `.pad()` keeps the schema readable and omits redundant output properties. | Closed |
+
+### Reconciled source findings
+
+| ID    | Finding                                                     | Evidence                                        | Schema/documentation impact                         | Status   |
+| ----- | ----------------------------------------------------------- | ----------------------------------------------- | --------------------------------------------------- | -------- |
+| MC-01 | Payloads cannot be partitioned from the primary table alone | Variable strings have no outer row terminator   | Offset companion is an explicit dependency          | Resolved |
+| MC-02 | All three string control words are required zero framing    | Complete capture and targeted nonzero mutations | Replaced silent skips with `reserved(4)` validation | Resolved |
+
+Archived SQLite: all 14 actions exist in `ManufactureCondition_Table`; build-local hashes and bytes remain the physical authority.

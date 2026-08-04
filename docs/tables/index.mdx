@@ -1,6 +1,6 @@
 ---
 title: Table confidence
-description: Browse physical, representation, and semantic confidence ledgers for every BSS and DBSS decoder maintained by the calpheonlabs scraper package.
+description: Browse physical, representation, and semantic confidence ledgers for every BSS, DBSS, and LOC decoder maintained by the calpheonlabs scraper package.
 sidebar:
     label: Overview
     icon: database
@@ -12,74 +12,135 @@ Every decoder has one type-qualified confidence page. **Ported** preserves a sou
 that still needs a destination cold audit, **reconciled** has been checked against the current BSD
 schema and snapshot proof, and **pending** makes missing snapshot and field evidence explicit.
 
-| Table                                                                                    | Decoder                                                                | Evidence state         |
-| ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | ---------------------- |
-| [`acceptquest.bss`](/tables/acceptquest.bss)                                             | `packages/scraper/src/tables/acceptquest.bss.ts`                       | Ported evidence ledger |
-| [`alchemystatdata.bss`](/tables/alchemystatdata.bss)                                     | `packages/scraper/src/tables/alchemystatdata.bss.ts`                   | Ported evidence ledger |
-| [`allquestlist.bss`](/tables/allquestlist.bss)                                           | `packages/scraper/src/tables/allquestlist.bss.ts`                      | Ported evidence ledger |
-| [`barter_npclist.bss`](/tables/barter_npclist.bss)                                       | `packages/scraper/src/tables/barter_npclist.ts`                        | Evidence port pending  |
-| [`base_dialog.dbss`](/tables/base_dialog.dbss)                                           | `packages/scraper/src/tables/base_dialog.dbss.ts`                      | Ported evidence ledger |
-| [`base_dialogoffset.dbss`](/tables/base_dialogoffset.dbss)                               | `packages/scraper/src/tables/base_dialogoffset.dbss.ts`                | Ported evidence ledger |
-| [`branchquest.bss`](/tables/branchquest.bss)                                             | `packages/scraper/src/tables/branchquest.bss.ts`                       | Evidence port pending  |
-| [`characteraudioradius.dbss`](/tables/characteraudioradius.dbss)                         | `packages/scraper/src/tables/characteraudioradius.dbss.ts`             | Evidence port pending  |
-| [`characteraudioradiusoffset.dbss`](/tables/characteraudioradiusoffset.dbss)             | `packages/scraper/src/tables/characteraudioradiusoffset.dbss.ts`       | Evidence port pending  |
-| [`characterfunction.dbss`](/tables/characterfunction.dbss)                               | `packages/scraper/src/tables/characterfunction.ts`                     | Ported evidence ledger |
-| [`characterfunctionoffset.dbss`](/tables/characterfunctionoffset.dbss)                   | `packages/scraper/src/tables/characterfunctionoffset.dbss.ts`          | Ported evidence ledger |
-| [`characterobject.dbss`](/tables/characterobject.dbss)                                   | `packages/scraper/src/tables/characterobject.dbss.ts`                  | Reconciled             |
-| [`characterobjectoffset.dbss`](/tables/characterobjectoffset.dbss)                       | `packages/scraper/src/tables/characterobjectoffset.dbss.ts`            | Reconciled             |
-| [`charactersimply.bss`](/tables/charactersimply.bss)                                     | `packages/scraper/src/tables/charactersimply.bss.ts`                   | Reconciled             |
-| [`characterspawntype.dbss`](/tables/characterspawntype.dbss)                             | `packages/scraper/src/tables/characterspawntype.dbss.ts`               | Reconciled             |
-| [`characterspawntypeoffset.dbss`](/tables/characterspawntypeoffset.dbss)                 | `packages/scraper/src/tables/characterspawntypeoffset.dbss.ts`         | Reconciled             |
-| [`characterstaticoffset.dbss`](/tables/characterstaticoffset.dbss)                       | `packages/scraper/src/tables/characterstaticoffset.dbss.ts`            | Reconciled             |
-| [`completequest.bss`](/tables/completequest.bss)                                         | `packages/scraper/src/tables/completequest.bss.ts`                     | Ported evidence ledger |
-| [`itemenchant.dbss`](/tables/itemenchant.dbss)                                           | `packages/scraper/src/tables/itemenchant.dbss.ts`                      | Reconciled             |
-| [`itemenchantoffset.dbss`](/tables/itemenchantoffset.dbss)                               | `packages/scraper/src/tables/itemenchantoffset.dbss.ts`                | Reconciled             |
-| [`itemequipgroup.bss`](/tables/itemequipgroup.bss)                                       | `packages/scraper/src/tables/itemequipgroup.bss.ts`                    | Reconciled             |
-| [`itemexchangebynpc.dbss`](/tables/itemexchangebynpc.dbss)                               | `packages/scraper/src/tables/itemexchangebynpc.dbss.ts`                | Reconciled             |
-| [`itemexchangebynpcoffset.dbss`](/tables/itemexchangebynpcoffset.dbss)                   | `packages/scraper/src/tables/itemexchangebynpcoffset.dbss.ts`          | Reconciled             |
-| [`itemexchangesource.bss`](/tables/itemexchangesource.bss)                               | `packages/scraper/src/tables/itemexchangesource.bss.ts`                | Reconciled             |
-| [`itemexchangetoclass.dbss`](/tables/itemexchangetoclass.dbss)                           | `packages/scraper/src/tables/itemexchangetoclass.dbss.ts`              | Reconciled             |
-| [`itemexchangetoclassmapkey.bss`](/tables/itemexchangetoclassmapkey.bss)                 | `packages/scraper/src/tables/itemexchangetoclassmapkey.bss.ts`         | Reconciled             |
-| [`itemexchangetoclassoffset.dbss`](/tables/itemexchangetoclassoffset.dbss)               | `packages/scraper/src/tables/itemexchangetoclassoffset.dbss.ts`        | Reconciled             |
-| [`itemimprovement.dbss`](/tables/itemimprovement.dbss)                                   | `packages/scraper/src/tables/itemimprovement.dbss.ts`                  | Reconciled             |
-| [`itemimprovementdefaultdisplaylist.bss`](/tables/itemimprovementdefaultdisplaylist.bss) | `packages/scraper/src/tables/itemimprovementdefaultdisplaylist.bss.ts` | Reconciled             |
-| [`itemimprovementoffset.dbss`](/tables/itemimprovementoffset.dbss)                       | `packages/scraper/src/tables/itemimprovementoffset.dbss.ts`            | Reconciled             |
-| [`itemimprovementsource.dbss`](/tables/itemimprovementsource.dbss)                       | `packages/scraper/src/tables/itemimprovementsource.dbss.ts`            | Reconciled             |
-| [`itemimprovementsourceoffset.dbss`](/tables/itemimprovementsourceoffset.dbss)           | `packages/scraper/src/tables/itemimprovementsourceoffset.dbss.ts`      | Reconciled             |
-| [`itemlinkprice.bss`](/tables/itemlinkprice.bss)                                         | `packages/scraper/src/tables/itemlinkprice.bss.ts`                     | Reconciled             |
-| [`itemmaingroup.bss`](/tables/itemmaingroup.bss)                                         | `packages/scraper/src/tables/itemmaingroup.bss.ts`                     | Reconciled             |
-| [`itemmarketcategory.bss`](/tables/itemmarketcategory.bss)                               | `packages/scraper/src/tables/itemmarketcategory.bss.ts`                | Reconciled             |
-| [`itemmaxlevel.dbss`](/tables/itemmaxlevel.dbss)                                         | `packages/scraper/src/tables/itemmaxlevel.dbss.ts`                     | Reconciled             |
-| [`itemmaxleveloffset.dbss`](/tables/itemmaxleveloffset.dbss)                             | `packages/scraper/src/tables/itemmaxleveloffset.dbss.ts`               | Reconciled             |
-| [`itemsubgroup.dbss`](/tables/itemsubgroup.dbss)                                         | `packages/scraper/src/tables/itemsubgroup.dbss.ts`                     | Reconciled             |
-| [`itemsubgroupoffset.dbss`](/tables/itemsubgroupoffset.dbss)                             | `packages/scraper/src/tables/itemsubgroupoffset.dbss.ts`               | Reconciled             |
-| [`itemtrade.dbss`](/tables/itemtrade.dbss)                                               | `packages/scraper/src/tables/itemtrade.dbss.ts`                        | Reconciled             |
-| [`itemtradeetc.bss`](/tables/itemtradeetc.bss)                                           | `packages/scraper/src/tables/itemtradeetc.bss.ts`                      | Reconciled             |
-| [`itemtradegroupfromnpc.dbss`](/tables/itemtradegroupfromnpc.dbss)                       | `packages/scraper/src/tables/itemtradegroupfromnpc.dbss.ts`            | Reconciled             |
-| [`itemtradegroupfromnpcoffset.dbss`](/tables/itemtradegroupfromnpcoffset.dbss)           | `packages/scraper/src/tables/itemtradegroupfromnpcoffset.dbss.ts`      | Reconciled             |
-| [`itemtradegrouptonpc.dbss`](/tables/itemtradegrouptonpc.dbss)                           | `packages/scraper/src/tables/itemtradegrouptonpc.dbss.ts`              | Reconciled             |
-| [`itemtradegrouptonpcoffset.dbss`](/tables/itemtradegrouptonpcoffset.dbss)               | `packages/scraper/src/tables/itemtradegrouptonpcoffset.dbss.ts`        | Reconciled             |
-| [`itemtradeoffset.dbss`](/tables/itemtradeoffset.dbss)                                   | `packages/scraper/src/tables/itemtradeoffset.dbss.ts`                  | Reconciled             |
-| [`journalquest.dbss`](/tables/journalquest.dbss)                                         | `packages/scraper/src/tables/journalquest.dbss.ts`                     | Evidence port pending  |
-| [`journalquestoffset.dbss`](/tables/journalquestoffset.dbss)                             | `packages/scraper/src/tables/journalquestoffset.dbss.ts`               | Evidence port pending  |
-| [`mainquest.bss`](/tables/mainquest.bss)                                                 | `packages/scraper/src/tables/mainquest.bss.ts`                         | Ported evidence ledger |
-| [`multiplequest.bss`](/tables/multiplequest.bss)                                         | `packages/scraper/src/tables/multiplequest.bss.ts`                     | Evidence port pending  |
-| [`newquest.bss`](/tables/newquest.bss)                                                   | `packages/scraper/src/tables/newquest.bss.ts`                          | Ported evidence ledger |
-| [`normalgroupquest.bss`](/tables/normalgroupquest.bss)                                   | `packages/scraper/src/tables/normalgroupquest.bss.ts`                  | Evidence port pending  |
-| [`npcgift.dbss`](/tables/npcgift.dbss)                                                   | `packages/scraper/src/tables/npcgift.dbss.ts`                          | Evidence port pending  |
-| [`npcgiftdata.dbss`](/tables/npcgiftdata.dbss)                                           | `packages/scraper/src/tables/npcgiftdata.dbss.ts`                      | Evidence port pending  |
-| [`npcgiftdataoffset.dbss`](/tables/npcgiftdataoffset.dbss)                               | `packages/scraper/src/tables/npcgiftdataoffset.dbss.ts`                | Evidence port pending  |
-| [`npcgiftetc.bss`](/tables/npcgiftetc.bss)                                               | `packages/scraper/src/tables/npcgiftetc.bss.ts`                        | Evidence port pending  |
-| [`npcgiftoffset.dbss`](/tables/npcgiftoffset.dbss)                                       | `packages/scraper/src/tables/npcgiftoffset.dbss.ts`                    | Evidence port pending  |
-| [`npcpersonality.dbss`](/tables/npcpersonality.dbss)                                     | `packages/scraper/src/tables/npcpersonality.dbss.ts`                   | Ported evidence ledger |
-| [`npcpersonalityoffset.dbss`](/tables/npcpersonalityoffset.dbss)                         | `packages/scraper/src/tables/npcpersonalityoffset.dbss.ts`             | Ported evidence ledger |
-| [`npcsimply.bss`](/tables/npcsimply.bss)                                                 | `packages/scraper/src/tables/npcsimply.bss.ts`                         | Ported evidence ledger |
-| [`olviaacademycurriculumquestlist.bss`](/tables/olviaacademycurriculumquestlist.bss)     | `packages/scraper/src/tables/olviaacademycurriculumquestlist.bss.ts`   | Evidence port pending  |
-| [`olviaacademypassquestlist.bss`](/tables/olviaacademypassquestlist.bss)                 | `packages/scraper/src/tables/olviaacademypassquestlist.bss.ts`         | Evidence port pending  |
-| [`olviaacademyrewardquestlist.bss`](/tables/olviaacademyrewardquestlist.bss)             | `packages/scraper/src/tables/olviaacademyrewardquestlistt.bss.ts`      | Evidence port pending  |
-| [`quest.dbss`](/tables/quest.dbss)                                                       | `packages/scraper/src/tables/quest.dbss.ts`                            | Ported evidence ledger |
-| [`questgroup.dbss`](/tables/questgroup.dbss)                                             | `packages/scraper/src/tables/questgroup.dbss.ts`                       | Evidence port pending  |
-| [`questjournalvideoinfo.bss`](/tables/questjournalvideoinfo.bss)                         | `packages/scraper/src/tables/questjournalvideoinfo.bss.ts`             | Evidence port pending  |
-| [`questprogressgroup.bss`](/tables/questprogressgroup.bss)                               | `packages/scraper/src/tables/questprogressgroup.bss.ts`                | Evidence port pending  |
-| [`questrandomgroup.bss`](/tables/questrandomgroup.bss)                                   | `packages/scraper/src/tables/questrandomgroup.bss.ts`                  | Ported evidence ledger |
-| [`worldquest.dbss`](/tables/worldquest.dbss)                                             | `packages/scraper/src/tables/worldquest.dbss.ts`                       | Evidence port pending  |
+| Table                                                                                              | Decoder                                                                     | Evidence state         |
+| -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | ---------------------- |
+| [`acceptquest.bss`](/tables/acceptquest.bss)                                                       | `packages/scraper/src/tables/acceptquest.bss.ts`                            | Ported evidence ledger |
+| [`alchemystatdata.bss`](/tables/alchemystatdata.bss)                                               | `packages/scraper/src/tables/alchemystatdata.bss.ts`                        | Ported evidence ledger |
+| [`allquestlist.bss`](/tables/allquestlist.bss)                                                     | `packages/scraper/src/tables/allquestlist.bss.ts`                           | Ported evidence ledger |
+| [`barter_npclist.bss`](/tables/barter_npclist.bss)                                                 | `packages/scraper/src/tables/barter_npclist.ts`                             | Evidence port pending  |
+| [`base_dialog.dbss`](/tables/base_dialog.dbss)                                                     | `packages/scraper/src/tables/base_dialog.dbss.ts`                           | Ported evidence ledger |
+| [`base_dialogoffset.dbss`](/tables/base_dialogoffset.dbss)                                         | `packages/scraper/src/tables/base_dialogoffset.dbss.ts`                     | Ported evidence ledger |
+| [`branchquest.bss`](/tables/branchquest.bss)                                                       | `packages/scraper/src/tables/branchquest.bss.ts`                            | Evidence port pending  |
+| [`characteraudioradius.dbss`](/tables/characteraudioradius.dbss)                                   | `packages/scraper/src/tables/characteraudioradius.dbss.ts`                  | Evidence port pending  |
+| [`characteraudioradiusoffset.dbss`](/tables/characteraudioradiusoffset.dbss)                       | `packages/scraper/src/tables/characteraudioradiusoffset.dbss.ts`            | Evidence port pending  |
+| [`characterfunction.dbss`](/tables/characterfunction.dbss)                                         | `packages/scraper/src/tables/characterfunction.ts`                          | Ported evidence ledger |
+| [`characterfunctionoffset.dbss`](/tables/characterfunctionoffset.dbss)                             | `packages/scraper/src/tables/characterfunctionoffset.dbss.ts`               | Ported evidence ledger |
+| [`characterobject.dbss`](/tables/characterobject.dbss)                                             | `packages/scraper/src/tables/characterobject.dbss.ts`                       | Reconciled             |
+| [`characterobjectoffset.dbss`](/tables/characterobjectoffset.dbss)                                 | `packages/scraper/src/tables/characterobjectoffset.dbss.ts`                 | Reconciled             |
+| [`charactersimply.bss`](/tables/charactersimply.bss)                                               | `packages/scraper/src/tables/charactersimply.bss.ts`                        | Reconciled             |
+| [`characterspawntype.dbss`](/tables/characterspawntype.dbss)                                       | `packages/scraper/src/tables/characterspawntype.dbss.ts`                    | Reconciled             |
+| [`characterspawntypeoffset.dbss`](/tables/characterspawntypeoffset.dbss)                           | `packages/scraper/src/tables/characterspawntypeoffset.dbss.ts`              | Reconciled             |
+| [`characterstaticoffset.dbss`](/tables/characterstaticoffset.dbss)                                 | `packages/scraper/src/tables/characterstaticoffset.dbss.ts`                 | Reconciled             |
+| [`completequest.bss`](/tables/completequest.bss)                                                   | `packages/scraper/src/tables/completequest.bss.ts`                          | Ported evidence ledger |
+| [`contentsgroupoptionstaticstatusmanager.bss`](/tables/contentsgroupoptionstaticstatusmanager.bss) | `packages/scraper/src/tables/contentsgroupoptionstaticstatusmanager.bss.ts` | Reconciled             |
+| [`cookingstatdata.bss`](/tables/cookingstatdata.bss)                                               | `packages/scraper/src/tables/cookingstatdata.bss.ts`                        | Reconciled             |
+| [`cutscenecharacterdata.bss`](/tables/cutscenecharacterdata.bss)                                   | `packages/scraper/src/tables/cutscenecharacterdata.bss.ts`                  | Reconciled             |
+| [`detail_dialog.dbss`](/tables/detail_dialog.dbss)                                                 | `packages/scraper/src/tables/detail_dialog.dbss.ts`                         | Reconciled             |
+| [`detail_dialogoffset.dbss`](/tables/detail_dialogoffset.dbss)                                     | `packages/scraper/src/tables/detail_dialogoffset.dbss.ts`                   | Reconciled             |
+| [`dialogtext.dbss`](/tables/dialogtext.dbss)                                                       | `packages/scraper/src/tables/dialogtext.dbss.ts`                            | Reconciled             |
+| [`dialogtextoffset.dbss`](/tables/dialogtextoffset.dbss)                                           | `packages/scraper/src/tables/dialogtextoffset.dbss.ts`                      | Reconciled             |
+| [`displayexchangeitemnpc.dbss`](/tables/displayexchangeitemnpc.dbss)                               | `packages/scraper/src/tables/displayexchangeitemnpc.dbss.ts`                | Reconciled             |
+| [`displayexchangeitemnpcoffset.dbss`](/tables/displayexchangeitemnpcoffset.dbss)                   | `packages/scraper/src/tables/displayexchangeitemnpcoffset.dbss.ts`          | Reconciled             |
+| [`doguildquestlist.bss`](/tables/doguildquestlist.bss)                                             | `packages/scraper/src/tables/doguildquestlist.bss.ts`                       | Reconciled             |
+| [`employeecharactership.dbss`](/tables/employeecharactership.dbss)                                 | `packages/scraper/src/tables/employeecharactership.dbss.ts`                 | Reconciled             |
+| [`employeecharactershipoffset.dbss`](/tables/employeecharactershipoffset.dbss)                     | `packages/scraper/src/tables/employeecharactershipoffset.dbss.ts`           | Reconciled             |
+| [`enchantstaticstatus.dbss`](/tables/enchantstaticstatus.dbss)                                     | `packages/scraper/src/tables/enchantstaticstatus.dbss.ts`                   | Reconciled             |
+| [`enchantstaticstatusoffset.dbss`](/tables/enchantstaticstatusoffset.dbss)                         | `packages/scraper/src/tables/enchantstaticstatusoffset.dbss.ts`             | Reconciled             |
+| [`extractitem.dbss`](/tables/extractitem.dbss)                                                     | `packages/scraper/src/tables/extractitem.dbss.ts`                           | Reconciled             |
+| [`extractitemoffset.dbss`](/tables/extractitemoffset.dbss)                                         | `packages/scraper/src/tables/extractitemoffset.dbss.ts`                     | Reconciled             |
+| [`feverquestdatatable.bss`](/tables/feverquestdatatable.bss)                                       | `packages/scraper/src/tables/feverquestdatatable.bss.ts`                    | Reconciled             |
+| [`growthpassquestlist.bss`](/tables/growthpassquestlist.bss)                                       | `packages/scraper/src/tables/growthpassquestlist.bss.ts`                    | Reconciled             |
+| [`guildhousecraftskill.dbss`](/tables/guildhousecraftskill.dbss)                                   | `packages/scraper/src/tables/guildhousecraftskill.dbss.ts`                  | Reconciled             |
+| [`guildhousecraftskilloffset.dbss`](/tables/guildhousecraftskilloffset.dbss)                       | `packages/scraper/src/tables/guildhousecraftskilloffset.dbss.ts`            | Reconciled             |
+| [`guildhousecraftskillreverselinklist.bss`](/tables/guildhousecraftskillreverselinklist.bss)       | `packages/scraper/src/tables/guildhousecraftskillreverselinklist.bss.ts`    | Reconciled             |
+| [`guildhousecraftstorage.dbss`](/tables/guildhousecraftstorage.dbss)                               | `packages/scraper/src/tables/guildhousecraftstorage.dbss.ts`                | Reconciled             |
+| [`guildhousecraftstorageoffset.dbss`](/tables/guildhousecraftstorageoffset.dbss)                   | `packages/scraper/src/tables/guildhousecraftstorageoffset.dbss.ts`          | Reconciled             |
+| [`guildmanufacture.dbss`](/tables/guildmanufacture.dbss)                                           | `packages/scraper/src/tables/guildmanufacture.dbss.ts`                      | Reconciled             |
+| [`guildmanufactureoffset.dbss`](/tables/guildmanufactureoffset.dbss)                               | `packages/scraper/src/tables/guildmanufactureoffset.dbss.ts`                | Reconciled             |
+| [`guildquest.dbss`](/tables/guildquest.dbss)                                                       | `packages/scraper/src/tables/guildquest.dbss.ts`                            | Reconciled             |
+| [`guildquestoffset.dbss`](/tables/guildquestoffset.dbss)                                           | `packages/scraper/src/tables/guildquestoffset.dbss.ts`                      | Reconciled             |
+| [`houseinfoneeditem.dbss`](/tables/houseinfoneeditem.dbss)                                         | `packages/scraper/src/tables/houseinfoneeditem.dbss.ts`                     | Reconciled             |
+| [`houseinfoneeditemoffset.dbss`](/tables/houseinfoneeditemoffset.dbss)                             | `packages/scraper/src/tables/houseinfoneeditemoffset.dbss.ts`               | Reconciled             |
+| [`houseinforeceipe.dbss`](/tables/houseinforeceipe.dbss)                                           | `packages/scraper/src/tables/houseinforeceipe.dbss.ts`                      | Reconciled             |
+| [`houseinforeceipeoffset.dbss`](/tables/houseinforeceipeoffset.dbss)                               | `packages/scraper/src/tables/houseinforeceipeoffset.dbss.ts`                | Reconciled             |
+| [`itemenchant.dbss`](/tables/itemenchant.dbss)                                                     | `packages/scraper/src/tables/itemenchant.dbss.ts`                           | Reconciled             |
+| [`itemenchantoffset.dbss`](/tables/itemenchantoffset.dbss)                                         | `packages/scraper/src/tables/itemenchantoffset.dbss.ts`                     | Reconciled             |
+| [`itemequipgroup.bss`](/tables/itemequipgroup.bss)                                                 | `packages/scraper/src/tables/itemequipgroup.bss.ts`                         | Reconciled             |
+| [`itemexchangebynpc.dbss`](/tables/itemexchangebynpc.dbss)                                         | `packages/scraper/src/tables/itemexchangebynpc.dbss.ts`                     | Reconciled             |
+| [`itemexchangebynpcoffset.dbss`](/tables/itemexchangebynpcoffset.dbss)                             | `packages/scraper/src/tables/itemexchangebynpcoffset.dbss.ts`               | Reconciled             |
+| [`itemexchangesource.bss`](/tables/itemexchangesource.bss)                                         | `packages/scraper/src/tables/itemexchangesource.bss.ts`                     | Reconciled             |
+| [`itemexchangetoclass.dbss`](/tables/itemexchangetoclass.dbss)                                     | `packages/scraper/src/tables/itemexchangetoclass.dbss.ts`                   | Reconciled             |
+| [`itemexchangetoclassmapkey.bss`](/tables/itemexchangetoclassmapkey.bss)                           | `packages/scraper/src/tables/itemexchangetoclassmapkey.bss.ts`              | Reconciled             |
+| [`itemexchangetoclassoffset.dbss`](/tables/itemexchangetoclassoffset.dbss)                         | `packages/scraper/src/tables/itemexchangetoclassoffset.dbss.ts`             | Reconciled             |
+| [`itemimprovement.dbss`](/tables/itemimprovement.dbss)                                             | `packages/scraper/src/tables/itemimprovement.dbss.ts`                       | Reconciled             |
+| [`itemimprovementdefaultdisplaylist.bss`](/tables/itemimprovementdefaultdisplaylist.bss)           | `packages/scraper/src/tables/itemimprovementdefaultdisplaylist.bss.ts`      | Reconciled             |
+| [`itemimprovementoffset.dbss`](/tables/itemimprovementoffset.dbss)                                 | `packages/scraper/src/tables/itemimprovementoffset.dbss.ts`                 | Reconciled             |
+| [`itemimprovementsource.dbss`](/tables/itemimprovementsource.dbss)                                 | `packages/scraper/src/tables/itemimprovementsource.dbss.ts`                 | Reconciled             |
+| [`itemimprovementsourceoffset.dbss`](/tables/itemimprovementsourceoffset.dbss)                     | `packages/scraper/src/tables/itemimprovementsourceoffset.dbss.ts`           | Reconciled             |
+| [`itemlinkprice.bss`](/tables/itemlinkprice.bss)                                                   | `packages/scraper/src/tables/itemlinkprice.bss.ts`                          | Reconciled             |
+| [`itemmaingroup.bss`](/tables/itemmaingroup.bss)                                                   | `packages/scraper/src/tables/itemmaingroup.bss.ts`                          | Reconciled             |
+| [`itemmarketcategory.bss`](/tables/itemmarketcategory.bss)                                         | `packages/scraper/src/tables/itemmarketcategory.bss.ts`                     | Reconciled             |
+| [`itemmaxlevel.dbss`](/tables/itemmaxlevel.dbss)                                                   | `packages/scraper/src/tables/itemmaxlevel.dbss.ts`                          | Reconciled             |
+| [`itemmaxleveloffset.dbss`](/tables/itemmaxleveloffset.dbss)                                       | `packages/scraper/src/tables/itemmaxleveloffset.dbss.ts`                    | Reconciled             |
+| [`itemsubgroup.dbss`](/tables/itemsubgroup.dbss)                                                   | `packages/scraper/src/tables/itemsubgroup.dbss.ts`                          | Reconciled             |
+| [`itemsubgroupoffset.dbss`](/tables/itemsubgroupoffset.dbss)                                       | `packages/scraper/src/tables/itemsubgroupoffset.dbss.ts`                    | Reconciled             |
+| [`itemtrade.dbss`](/tables/itemtrade.dbss)                                                         | `packages/scraper/src/tables/itemtrade.dbss.ts`                             | Reconciled             |
+| [`itemtradeetc.bss`](/tables/itemtradeetc.bss)                                                     | `packages/scraper/src/tables/itemtradeetc.bss.ts`                           | Reconciled             |
+| [`itemtradegroupfromnpc.dbss`](/tables/itemtradegroupfromnpc.dbss)                                 | `packages/scraper/src/tables/itemtradegroupfromnpc.dbss.ts`                 | Reconciled             |
+| [`itemtradegroupfromnpcoffset.dbss`](/tables/itemtradegroupfromnpcoffset.dbss)                     | `packages/scraper/src/tables/itemtradegroupfromnpcoffset.dbss.ts`           | Reconciled             |
+| [`itemtradegrouptonpc.dbss`](/tables/itemtradegrouptonpc.dbss)                                     | `packages/scraper/src/tables/itemtradegrouptonpc.dbss.ts`                   | Reconciled             |
+| [`itemtradegrouptonpcoffset.dbss`](/tables/itemtradegrouptonpcoffset.dbss)                         | `packages/scraper/src/tables/itemtradegrouptonpcoffset.dbss.ts`             | Reconciled             |
+| [`itemtradeoffset.dbss`](/tables/itemtradeoffset.dbss)                                             | `packages/scraper/src/tables/itemtradeoffset.dbss.ts`                       | Reconciled             |
+| [`journalquest.dbss`](/tables/journalquest.dbss)                                                   | `packages/scraper/src/tables/journalquest.dbss.ts`                          | Evidence port pending  |
+| [`journalquestoffset.dbss`](/tables/journalquestoffset.dbss)                                       | `packages/scraper/src/tables/journalquestoffset.dbss.ts`                    | Evidence port pending  |
+| [`knowledgelearning.dbss`](/tables/knowledgelearning.dbss)                                         | `packages/scraper/src/tables/knowledgelearning.dbss.ts`                     | Reconciled             |
+| [`knowledgelearningcharacterkey.bss`](/tables/knowledgelearningcharacterkey.bss)                   | `packages/scraper/src/tables/knowledgelearningcharacterkey.bss.ts`          | Reconciled             |
+| [`knowledgelearningoffset.dbss`](/tables/knowledgelearningoffset.dbss)                             | `packages/scraper/src/tables/knowledgelearningoffset.dbss.ts`               | Reconciled             |
+| [`languagedata.loc`](/tables/languagedata.loc)                                                     | `packages/scraper/src/tables/languagedata.loc.ts`                           | Reconciled             |
+| [`mainquest.bss`](/tables/mainquest.bss)                                                           | `packages/scraper/src/tables/mainquest.bss.ts`                              | Ported evidence ledger |
+| [`manufacture.bss`](/tables/manufacture.bss)                                                       | `packages/scraper/src/tables/manufacture.bss.ts`                            | Reconciled             |
+| [`manufacturecondition.dbss`](/tables/manufacturecondition.dbss)                                   | `packages/scraper/src/tables/manufacturecondition.dbss.ts`                  | Reconciled             |
+| [`manufactureconditionoffset.dbss`](/tables/manufactureconditionoffset.dbss)                       | `packages/scraper/src/tables/manufactureconditionoffset.dbss.ts`            | Reconciled             |
+| [`manufactureitemnaminginfo.bss`](/tables/manufactureitemnaminginfo.bss)                           | `packages/scraper/src/tables/manufactureitemnaminginfo.bss.ts`              | Reconciled             |
+| [`manufacturingstat.bss`](/tables/manufacturingstat.bss)                                           | `packages/scraper/src/tables/manufacturingstat.bss.ts`                      | Reconciled             |
+| [`marketsearchlist.bss`](/tables/marketsearchlist.bss)                                             | `packages/scraper/src/tables/marketsearchlist.bss.ts`                       | Reconciled             |
+| [`mentalcard.dbss`](/tables/mentalcard.dbss)                                                       | `packages/scraper/src/tables/mentalcard.dbss.ts`                            | Reconciled             |
+| [`mentalcardoffset.dbss`](/tables/mentalcardoffset.dbss)                                           | `packages/scraper/src/tables/mentalcardoffset.dbss.ts`                      | Reconciled             |
+| [`mentaltheme.dbss`](/tables/mentaltheme.dbss)                                                     | `packages/scraper/src/tables/mentaltheme.dbss.ts`                           | Reconciled             |
+| [`mentalthemeoffset.dbss`](/tables/mentalthemeoffset.dbss)                                         | `packages/scraper/src/tables/mentalthemeoffset.dbss.ts`                     | Reconciled             |
+| [`multiplequest.bss`](/tables/multiplequest.bss)                                                   | `packages/scraper/src/tables/multiplequest.bss.ts`                          | Evidence port pending  |
+| [`newquest.bss`](/tables/newquest.bss)                                                             | `packages/scraper/src/tables/newquest.bss.ts`                               | Ported evidence ledger |
+| [`normalgroupquest.bss`](/tables/normalgroupquest.bss)                                             | `packages/scraper/src/tables/normalgroupquest.bss.ts`                       | Evidence port pending  |
+| [`npcgift.dbss`](/tables/npcgift.dbss)                                                             | `packages/scraper/src/tables/npcgift.dbss.ts`                               | Evidence port pending  |
+| [`npcgiftdata.dbss`](/tables/npcgiftdata.dbss)                                                     | `packages/scraper/src/tables/npcgiftdata.dbss.ts`                           | Evidence port pending  |
+| [`npcgiftdataoffset.dbss`](/tables/npcgiftdataoffset.dbss)                                         | `packages/scraper/src/tables/npcgiftdataoffset.dbss.ts`                     | Evidence port pending  |
+| [`npcgiftetc.bss`](/tables/npcgiftetc.bss)                                                         | `packages/scraper/src/tables/npcgiftetc.bss.ts`                             | Evidence port pending  |
+| [`npcgiftoffset.dbss`](/tables/npcgiftoffset.dbss)                                                 | `packages/scraper/src/tables/npcgiftoffset.dbss.ts`                         | Evidence port pending  |
+| [`npcpersonality.dbss`](/tables/npcpersonality.dbss)                                               | `packages/scraper/src/tables/npcpersonality.dbss.ts`                        | Ported evidence ledger |
+| [`npcpersonalityoffset.dbss`](/tables/npcpersonalityoffset.dbss)                                   | `packages/scraper/src/tables/npcpersonalityoffset.dbss.ts`                  | Ported evidence ledger |
+| [`npcsimply.bss`](/tables/npcsimply.bss)                                                           | `packages/scraper/src/tables/npcsimply.bss.ts`                              | Ported evidence ledger |
+| [`olviaacademycurriculumquestlist.bss`](/tables/olviaacademycurriculumquestlist.bss)               | `packages/scraper/src/tables/olviaacademycurriculumquestlist.bss.ts`        | Evidence port pending  |
+| [`olviaacademypassquestlist.bss`](/tables/olviaacademypassquestlist.bss)                           | `packages/scraper/src/tables/olviaacademypassquestlist.bss.ts`              | Evidence port pending  |
+| [`olviaacademyrewardquestlist.bss`](/tables/olviaacademyrewardquestlist.bss)                       | `packages/scraper/src/tables/olviaacademyrewardquestlistt.bss.ts`           | Evidence port pending  |
+| [`quest.dbss`](/tables/quest.dbss)                                                                 | `packages/scraper/src/tables/quest.dbss.ts`                                 | Ported evidence ledger |
+| [`questgroup.dbss`](/tables/questgroup.dbss)                                                       | `packages/scraper/src/tables/questgroup.dbss.ts`                            | Evidence port pending  |
+| [`questjournalvideoinfo.bss`](/tables/questjournalvideoinfo.bss)                                   | `packages/scraper/src/tables/questjournalvideoinfo.bss.ts`                  | Evidence port pending  |
+| [`questprogressgroup.bss`](/tables/questprogressgroup.bss)                                         | `packages/scraper/src/tables/questprogressgroup.bss.ts`                     | Evidence port pending  |
+| [`questrandomgroup.bss`](/tables/questrandomgroup.bss)                                             | `packages/scraper/src/tables/questrandomgroup.bss.ts`                       | Ported evidence ledger |
+| [`recommendationquest.bss`](/tables/recommendationquest.bss)                                       | `packages/scraper/src/tables/recommendationquest.bss.ts`                    | Reconciled             |
+| [`regionmonsterkillquestlist.bss`](/tables/regionmonsterkillquestlist.bss)                         | `packages/scraper/src/tables/regionmonsterkillquestlist.bss.ts`             | Reconciled             |
+| [`repairmaxendurance.dbss`](/tables/repairmaxendurance.dbss)                                       | `packages/scraper/src/tables/repairmaxendurance.dbss.ts`                    | Reconciled             |
+| [`repairmaxenduranceoffset.dbss`](/tables/repairmaxenduranceoffset.dbss)                           | `packages/scraper/src/tables/repairmaxenduranceoffset.dbss.ts`              | Reconciled             |
+| [`repetitionquest.bss`](/tables/repetitionquest.bss)                                               | `packages/scraper/src/tables/repetitionquest.bss.ts`                        | Reconciled             |
+| [`seasonpassquestlist.bss`](/tables/seasonpassquestlist.bss)                                       | `packages/scraper/src/tables/seasonpassquestlist.bss.ts`                    | Reconciled             |
+| [`seasonpassquestlistforcash.bss`](/tables/seasonpassquestlistforcash.bss)                         | `packages/scraper/src/tables/seasonpassquestlistforcash.bss.ts`             | Reconciled             |
+| [`seasonpassquestlistfornormal.bss`](/tables/seasonpassquestlistfornormal.bss)                     | `packages/scraper/src/tables/seasonpassquestlistfornormal.bss.ts`           | Reconciled             |
+| [`specialquestinfo.bss`](/tables/specialquestinfo.bss)                                             | `packages/scraper/src/tables/specialquestinfo.bss.ts`                       | Reconciled             |
+| [`specialquestlist.bss`](/tables/specialquestlist.bss)                                             | `packages/scraper/src/tables/specialquestlist.bss.ts`                       | Reconciled             |
+| [`supplyservantquestlist.bss`](/tables/supplyservantquestlist.bss)                                 | `packages/scraper/src/tables/supplyservantquestlist.bss.ts`                 | Reconciled             |
+| [`totalquestcountregion.bss`](/tables/totalquestcountregion.bss)                                   | `packages/scraper/src/tables/totalquestcountregion.bss.ts`                  | Reconciled             |
+| [`totalquestcounttype.bss`](/tables/totalquestcounttype.bss)                                       | `packages/scraper/src/tables/totalquestcounttype.bss.ts`                    | Reconciled             |
+| [`usernpc.bss`](/tables/usernpc.bss)                                                               | `packages/scraper/src/tables/usernpc.bss.ts`                                | Reconciled             |
+| [`worldquest.dbss`](/tables/worldquest.dbss)                                                       | `packages/scraper/src/tables/worldquest.dbss.ts`                            | Evidence port pending  |
+| [`yachtnpcdiceinfo.bss`](/tables/yachtnpcdiceinfo.bss)                                             | `packages/scraper/src/tables/yachtnpcdiceinfo.bss.ts`                       | Reconciled             |
+| [`zodiacsignorder.dbss`](/tables/zodiacsignorder.dbss)                                             | `packages/scraper/src/tables/zodiacsignorder.dbss.ts`                       | Reconciled             |

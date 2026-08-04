@@ -1,0 +1,61 @@
+---
+title: "extractitem.dbss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the intrinsic BSD extractitem decoder."
+sidebar:
+    label: "extractitem.dbss"
+    icon: database
+search:
+    tags: [tables, dbss, binary-schema]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                     |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                      |
+| Iteration          | BSD migration                                                                                                                                                                             |
+| Review state       | BSD migration reconciled                                                                                                                                                                  |
+| Last reviewed      | 2026-08-03                                                                                                                                                                                |
+| Captures examined  | Steam capture ads_version 856; PAZ 3600; file hash 1292357047; 111,748 extracted bytes; 2,328 rows; normalized SHA-256 `763c10c96f84491238f70fd43888165d68dcd0877f6dc83de6449b0114dfd95d` |
+| Decoder            | `packages/scraper/src/tables/extractitem.dbss.ts`                                                                                                                                         |
+| Remaining blockers | None                                                                                                                                                                                      |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The source investigation ledger was reconciled against the intrinsic BSD schema and its current full-snapshot proof.
+The production decoder consumes the table sequentially without an offset-table runtime dependency.
+:::
+
+## Field ledger
+
+| Field/path        | Offset and width          | Representation                     | Claimed meaning                          | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                     | Status         |
+| ----------------- | ------------------------- | ---------------------------------- | ---------------------------------------- | ------------------- | ------------------------- | ------------------- | ---------------------------------------------------------------------------- | -------------- |
+| row count         | file `+0`, 4              | decoder-only `u32`                 | frames 48-byte recipes                   | Certain             | Certain                   | Certain             | exact EOF consumption                                                        | Closed         |
+| `extractableItem` | row `+0`, 12              | item `u32` + count `u64`           | item placed in extractable slot          | Certain             | Certain                   | High                | client request has `_extractableSlotNo`; example is Storm Devoured equipment | Closed         |
+| `materialItem`    | row `+12`, 12             | item `u32` + count `u64`           | extraction material                      | Certain             | Certain                   | High                | client request has `_materialSlotNo`; example is Mirror of Equilibrium       | Closed         |
+| `resultItems[0]`  | row `+24`, 12             | item `u32` + count `u64`           | primary returned item                    | Certain             | Certain                   | High                | example returns base Dandelion weapon                                        | Closed         |
+| `resultItems[1]`  | row `+36`, 12             | item `u32` + count `u64`           | secondary returned item                  | Certain             | Certain                   | High                | example returns Inverted Heart of Garmoth                                    | Closed         |
+| Reserved ranges   | schema-local fixed widths | consumed with `.pad()` and omitted | framing or semantically neutral capacity | Certain             | Certain                   | Neutral             | Adjacent fields, strict EOF, and exact snapshot parity establish each width  | Closed neutral |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                    | Evidence                                                                                                                    | Schema/documentation impact                                               | Status |
+| ---- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------ |
+| F-01 | The intrinsic decoder reproduces the transformed reference output exactly. | Full snapshot comparison; 2,328 rows; normalized SHA-256 `763c10c96f84491238f70fd43888165d68dcd0877f6dc83de6449b0114dfd95d` | The BSD schema is the production source of truth.                         | Closed |
+| F-02 | Row and section boundaries are intrinsic.                                  | Strict decoding reaches exact EOF on the installed capture.                                                                 | No companion offset table is loaded by this decoder.                      | Closed |
+| F-03 | Reserved byte ranges are representation details.                           | Their widths are fixed by adjacent fields and full-snapshot parity.                                                         | `.pad()` keeps the schema readable and omits redundant output properties. | Closed |
+
+### Reconciled source findings
+
+| ID     | Finding                                                        | Evidence                                                                                                                                 | Schema/documentation impact               | Status   |
+| ------ | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | -------- |
+| EXT-01 | The row is four item/count stacks, not twelve unrelated words. | Every high count word is zero; low words are positive; client slot names and the 731222/320060 → 694273/9771 example identify the roles. | Structured as two inputs and two results. | Resolved |
+
+The archived SQLite database has no corresponding `ExtractItem` table. BDOCodex identifies representative items only and is not used by the decoder.

@@ -1,0 +1,60 @@
+---
+title: "zodiacsignorder.dbss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the intrinsic BSD zodiacsignorder decoder."
+sidebar:
+    label: "zodiacsignorder.dbss"
+    icon: database
+search:
+    tags: [tables, dbss, binary-schema]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                              |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                               |
+| Iteration          | BSD migration                                                                                                                                                                      |
+| Review state       | BSD migration reconciled                                                                                                                                                           |
+| Last reviewed      | 2026-08-03                                                                                                                                                                         |
+| Captures examined  | Steam capture ads_version 856; PAZ 3600; file hash 1311399054; 604 extracted bytes; 24 rows; normalized SHA-256 `cc4c4b904e5ad2915ea8aafdda23261cd449841491b70a6fa349e821933f25f4` |
+| Decoder            | `packages/scraper/src/tables/zodiacsignorder.dbss.ts`                                                                                                                              |
+| Remaining blockers | None                                                                                                                                                                               |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The source investigation ledger was reconciled against the intrinsic BSD schema and its current full-snapshot proof.
+The production decoder consumes the table sequentially without an offset-table runtime dependency.
+:::
+
+## Field ledger
+
+| Field/path                        | Offset and width                  | Representation                     | Claimed meaning                          | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                    | Status         |
+| --------------------------------- | --------------------------------- | ---------------------------------- | ---------------------------------------- | ------------------- | ------------------------- | ------------------- | --------------------------------------------------------------------------- | -------------- |
+| companion span and two order keys | prefix plus final `u16`           | prefix plus final `u16`            | order identity/boundary                  | Certain             | Certain                   | Certain             | Offset key, row prefix, and repeated trailer agree for every row            | Closed         |
+| leading count and zero capacity   | `u32` followed by four zero bytes | `u32` followed by four zero bytes  | frames the variable order payload        | Certain             | Certain                   | Certain/structural  | Count-derived row widths exactly match all companion spans                  | Closed         |
+| `orderValues`                     | `valueCount` little-endian words  | `valueCount` little-endian words   | neutral conversation-order values        | Certain             | Certain                   | Unknown             | Complete physical values retained; no gameplay label is asserted            | Closed neutral |
+| `zodiacSignId`                    | final `u8` before repeated key    | final `u8` before repeated key     | horoscope identifier                     | Certain             | Certain                   | Certain             | Two order rows map to each localization type-7 sign; NPC 40008 is Key 9     | Closed         |
+| Reserved ranges                   | schema-local fixed widths         | consumed with `.pad()` and omitted | framing or semantically neutral capacity | Certain             | Certain                   | Neutral             | Adjacent fields, strict EOF, and exact snapshot parity establish each width | Closed neutral |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                    | Evidence                                                                                                                 | Schema/documentation impact                                               | Status |
+| ---- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- | ------ |
+| F-01 | The intrinsic decoder reproduces the transformed reference output exactly. | Full snapshot comparison; 24 rows; normalized SHA-256 `cc4c4b904e5ad2915ea8aafdda23261cd449841491b70a6fa349e821933f25f4` | The BSD schema is the production source of truth.                         | Closed |
+| F-02 | Row and section boundaries are intrinsic.                                  | Strict decoding reaches exact EOF on the installed capture.                                                              | No companion offset table is loaded by this decoder.                      | Closed |
+| F-03 | Reserved byte ranges are representation details.                           | Their widths are fixed by adjacent fields and full-snapshot parity.                                                      | `.pad()` keeps the schema readable and omits redundant output properties. | Closed |
+
+### Reconciled source findings
+
+| ID   | Finding                                                                 | Evidence                                                                    | Schema impact                                              | Status |
+| ---- | ----------------------------------------------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------- | ------ |
+| F-01 | The final byte, not the order key itself, is the player-facing sign ID. | All 24 rows form two order variants for each of 12 localized horoscope IDs. | Aggregate code can expose localized horoscope information. | Closed |
+
+BDOCodex is corroboration only and is not a decoder dependency.

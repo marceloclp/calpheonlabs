@@ -1,0 +1,63 @@
+---
+title: "manufacturingstat.bss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the intrinsic BSD manufacturingstat decoder."
+sidebar:
+    label: "manufacturingstat.bss"
+    icon: database
+search:
+    tags: [tables, bss, binary-schema]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                       |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                        |
+| Iteration          | BSD migration                                                                                                                                                               |
+| Review state       | BSD migration reconciled                                                                                                                                                    |
+| Last reviewed      | 2026-08-03                                                                                                                                                                  |
+| Captures examined  | Steam capture ads_version 856; PAZ 1422; file hash 3704610183; 7,340 extracted bytes; normalized SHA-256 `57025478acb0906d4e1fd8c2a041c6f4c4935eb6927ce4628b1d3ed86bfa4268` |
+| Decoder            | `packages/scraper/src/tables/manufacturingstat.bss.ts`                                                                                                                      |
+| Remaining blockers | None                                                                                                                                                                        |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+The source investigation ledger was reconciled against the intrinsic BSD schema and its current full-snapshot proof.
+The production decoder consumes the table sequentially without an offset-table runtime dependency.
+:::
+
+## Field ledger
+
+| Field/path                    | Offset and width          | Representation                     | Claimed meaning                                    | Physical confidence | Representation confidence | Semantic confidence  | Evidence                                                                    | Status         |
+| ----------------------------- | ------------------------- | ---------------------------------- | -------------------------------------------------- | ------------------- | ------------------------- | -------------------- | --------------------------------------------------------------------------- | -------------- |
+| six tracks                    | schema-defined            | independently counted arrays       | Standard processing actions in client action order | Certain             | Certain                   | Certain              | Compiled UI queries `actionIndex + 1`; all six tracks are complete          | Closed         |
+| `processingMasteryThreshold`  | schema-defined            | `f32`                              | Processing Mastery threshold                       | Certain             | Certain                   | Certain              | Exact public mastery breakpoint sequence                                    | Closed         |
+| `betterGradeChanceMillionths` | schema-defined            | `u32`                              | Better-grade chance in millionths                  | Certain             | Certain                   | Certain              | UI label and exact formula `floor((count-10)/count*1e6)` for all 456 rows   | Closed         |
+| `materialBatchCount`          | schema-defined            | `u32`                              | Materials processed per mass-processing batch      | Certain             | Certain                   | Certain              | Client count accessor and published Materials Count column                  | Closed         |
+| final word                    | schema-defined            | zero `u32`                         | Row padding                                        | Certain             | Certain                   | Certain (structural) | Zero and enforced across all tracks                                         | Closed         |
+| Reserved ranges               | schema-local fixed widths | consumed with `.pad()` and omitted | framing or semantically neutral capacity           | Certain             | Certain                   | Neutral              | Adjacent fields, strict EOF, and exact snapshot parity establish each width | Closed neutral |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                    | Evidence                                                                                                                          | Schema/documentation impact                                               | Status |
+| ---- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------ |
+| F-01 | The intrinsic decoder reproduces the transformed reference output exactly. | Full snapshot comparison; complete payload; normalized SHA-256 `57025478acb0906d4e1fd8c2a041c6f4c4935eb6927ce4628b1d3ed86bfa4268` | The BSD schema is the production source of truth.                         | Closed |
+| F-02 | Row and section boundaries are intrinsic.                                  | Strict decoding reaches exact EOF on the installed capture.                                                                       | No companion offset table is loaded by this decoder.                      | Closed |
+| F-03 | Reserved byte ranges are representation details.                           | Their widths are fixed by adjacent fields and full-snapshot parity.                                                               | `.pad()` keeps the schema readable and omits redundant output properties. | Closed |
+
+### Reconciled source findings
+
+| ID    | Finding                                                                     | Evidence                     | Schema impact                                   | Status   |
+| ----- | --------------------------------------------------------------------------- | ---------------------------- | ----------------------------------------------- | -------- |
+| MS-01 | The six current tracks are byte-for-byte identical but independently framed | Complete capture             | Retained as six physical arrays                 | Resolved |
+| MS-02 | The probability channel is derivable from batch count                       | Exact equality for every row | Cross-field invariant added to confidence tests | Resolved |
+
+Client evidence comes from `panel_characterinfo_life_all_2.luac`; column labels are independently
+corroborated by the [Processing Mastery table](https://bdocodex.com/us/processingmastery/).

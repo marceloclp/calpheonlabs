@@ -26,17 +26,15 @@ export function mixedText() {
 }
 
 export function asciiText(n = u32(), pad = 4) {
-    return n
-        .pad(pad)
-        .pipe((x) => bytes(x))
-        .ascii();
+    return bytes(n.pad(pad)).ascii();
+}
+
+export function utf8Text(n = u32(), pad = 4) {
+    return bytes(n.pad(pad)).utf8();
 }
 
 export function utf16Text(n = u32(), pad = 4) {
-    return n
-        .pad(pad)
-        .pipe((x) => bytes(x * 2))
-        .utf16();
+    return bytes(n.pad(pad).transform((x) => x * 2)).utf16();
 }
 
 /** Converts a stored unsigned 64-bit element count into a safe byte length. */

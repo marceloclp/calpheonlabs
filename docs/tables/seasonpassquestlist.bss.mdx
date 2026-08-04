@@ -1,0 +1,50 @@
+---
+title: "seasonpassquestlist.bss"
+description: "Binary layout, byte coverage, field semantics, and validation evidence for the intrinsic BSD seasonpassquestlist decoder."
+sidebar:
+    label: "seasonpassquestlist.bss"
+    icon: database
+search:
+    tags: [tables, bss, binary-schema]
+---
+
+## Investigation status
+
+| Status             | Value                                                                                                                                                                                 |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coverage           | 100%                                                                                                                                                                                  |
+| Iteration          | BSD migration                                                                                                                                                                         |
+| Review state       | BSD migration reconciled                                                                                                                                                              |
+| Last reviewed      | 2026-08-03                                                                                                                                                                            |
+| Captures examined  | Steam capture ads_version 856; PAZ 3595; file hash 2043642783; 1,660 extracted bytes; 410 rows; normalized SHA-256 `2cebeee4d163f735487534a6c4f37b0730f09f3ba47214f0d38d7d0d8151943c` |
+| Decoder            | `packages/scraper/src/tables/seasonpassquestlist.bss.ts`                                                                                                                              |
+| Remaining blockers | None                                                                                                                                                                                  |
+
+See [Decoder methodology](/methodology) for the confidence scale and evidence rules.
+
+:::success[Destination ledger reconciled]
+This destination ledger was established from the legacy decoder, the installed capture, and the current full-snapshot proof.
+The production decoder consumes the table sequentially without an offset-table runtime dependency.
+:::
+
+## Field ledger
+
+| Field/path                           | Offset and width          | Representation                                  | Claimed meaning                          | Physical confidence | Representation confidence | Semantic confidence | Evidence                                                                    | Status |
+| ------------------------------------ | ------------------------- | ----------------------------------------------- | ---------------------------------------- | ------------------- | ------------------------- | ------------------- | --------------------------------------------------------------------------- | ------ |
+| File framing                         | whole file                | intrinsic BSD schema with strict EOF validation | record framing and section boundaries    | Certain             | Certain                   | High                | Fresh extraction and strict decoding consume the capture exactly            | Closed |
+| `rows[].questGroupId`, `questNumber` | four-byte row             | retained quest identifiers                      | combined Season Pass quest IDs           | Certain             | Certain                   | High                | Shared quest-ID representation and exact snapshot equality                  | Closed |
+| Reserved ranges                      | schema-local fixed widths | consumed with `.pad()` and omitted              | framing or semantically neutral capacity | Certain             | Certain                   | Neutral             | Adjacent fields, strict EOF, and exact snapshot parity establish each width | Closed |
+
+## Active assumptions
+
+:::success[No active assumptions]
+The current evidence ledger has no unresolved assumptions for this decoder.
+:::
+
+## Findings
+
+| ID   | Finding                                                                    | Evidence                                                                                                                  | Schema/documentation impact                                               | Status |
+| ---- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ------ |
+| F-01 | The intrinsic decoder reproduces the transformed reference output exactly. | Full snapshot comparison; 410 rows; normalized SHA-256 `2cebeee4d163f735487534a6c4f37b0730f09f3ba47214f0d38d7d0d8151943c` | The BSD schema is the production source of truth.                         | Closed |
+| F-02 | Row and section boundaries are intrinsic.                                  | Strict decoding reaches exact EOF on the installed capture.                                                               | No companion offset table is loaded by this decoder.                      | Closed |
+| F-03 | Reserved byte ranges are representation details.                           | Their widths are fixed by adjacent fields and full-snapshot parity.                                                       | `.pad()` keeps the schema readable and omits redundant output properties. | Closed |
