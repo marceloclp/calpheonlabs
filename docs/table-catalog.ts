@@ -120,6 +120,13 @@ export const tablePages = [
         type: "dbss",
     },
     {
+        decoder: "characterstatic.dbss.ts",
+        evidenceState: "reconciled",
+        name: "characterstatic.dbss",
+        sourceLedger: true,
+        type: "dbss",
+    },
+    {
         decoder: "characterstaticoffset.dbss.ts",
         evidenceState: "reconciled",
         name: "characterstaticoffset.dbss",
