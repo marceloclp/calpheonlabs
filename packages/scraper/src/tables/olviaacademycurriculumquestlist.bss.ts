@@ -18,5 +18,5 @@ export const OlviaAcademyCurriculumQuestListBss = bss(
 });
 
 if (import.meta.main) {
-    await OlviaAcademyCurriculumQuestListBss.load();
+    await OlviaAcademyCurriculumQuestListBss.decodeIntoDisk();
 }

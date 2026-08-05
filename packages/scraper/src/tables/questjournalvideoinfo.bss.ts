@@ -29,5 +29,5 @@ const QuestJournalVideoInfoBss = bss(
 });
 
 if (import.meta.main) {
-    await QuestJournalVideoInfoBss.load();
+    await QuestJournalVideoInfoBss.decodeIntoDisk();
 }

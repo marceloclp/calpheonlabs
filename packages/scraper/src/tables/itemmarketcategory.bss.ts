@@ -51,5 +51,5 @@ export const ItemMarketCategoryBss = bss(
 });
 
 if (import.meta.main) {
-    await ItemMarketCategoryBss.load();
+    await ItemMarketCategoryBss.decodeIntoDisk();
 }

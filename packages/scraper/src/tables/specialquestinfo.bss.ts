@@ -26,5 +26,5 @@ export const SpecialQuestInfoBss = bss(
 });
 
 if (import.meta.main) {
-    await SpecialQuestInfoBss.load();
+    await SpecialQuestInfoBss.decodeIntoDisk();
 }

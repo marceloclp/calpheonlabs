@@ -29,5 +29,5 @@ export const ItemImprovementSourceDbss = dbss(
 });
 
 if (import.meta.main) {
-    await ItemImprovementSourceDbss.load();
+    await ItemImprovementSourceDbss.decodeIntoDisk();
 }

@@ -238,5 +238,5 @@ export const CharacterObjectDbss = dbss("characterobject.dbss")({
 });
 
 if (import.meta.main) {
-    await CharacterObjectDbss.load();
+    await CharacterObjectDbss.decodeIntoDisk();
 }

@@ -28,5 +28,5 @@ export const ItemMaxLevelDbss = bss("gamecommondata/binary/itemmaxlevel.dbss")({
 });
 
 if (import.meta.main) {
-    await ItemMaxLevelDbss.load();
+    await ItemMaxLevelDbss.decodeIntoDisk();
 }

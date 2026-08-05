@@ -51,5 +51,5 @@ export const ItemMainGroupBss = bss("gamecommondata/binary/itemmaingroup.bss")({
 });
 
 if (import.meta.main) {
-    await ItemMainGroupBss.load();
+    await ItemMainGroupBss.decodeIntoDisk();
 }

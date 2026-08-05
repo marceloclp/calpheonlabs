@@ -18,5 +18,5 @@ export const OlviaAcademyPassQuestListBss = bss(
 });
 
 if (import.meta.main) {
-    await OlviaAcademyPassQuestListBss.load();
+    await OlviaAcademyPassQuestListBss.decodeIntoDisk();
 }

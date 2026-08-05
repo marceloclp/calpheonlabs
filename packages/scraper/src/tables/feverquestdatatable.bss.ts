@@ -20,5 +20,5 @@ export const FeverQuestDataTableBss = bss(
 });
 
 if (import.meta.main) {
-    await FeverQuestDataTableBss.load();
+    await FeverQuestDataTableBss.decodeIntoDisk();
 }

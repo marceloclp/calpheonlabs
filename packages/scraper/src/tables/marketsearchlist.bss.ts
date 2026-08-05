@@ -25,5 +25,5 @@ export const MarketSearchListBss = bss(
 });
 
 if (import.meta.main) {
-    await MarketSearchListBss.load();
+    await MarketSearchListBss.decodeIntoDisk();
 }

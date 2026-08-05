@@ -28,5 +28,5 @@ export const ItemLinkPriceBss = bss("gamecommondata/binary/itemlinkprice.bss")({
 });
 
 if (import.meta.main) {
-    await ItemLinkPriceBss.load();
+    await ItemLinkPriceBss.decodeIntoDisk();
 }

@@ -13,5 +13,5 @@ export const TotalQuestCountTypeBss = bss(
 });
 
 if (import.meta.main) {
-    await TotalQuestCountTypeBss.load();
+    await TotalQuestCountTypeBss.decodeIntoDisk();
 }

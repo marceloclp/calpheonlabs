@@ -287,5 +287,5 @@ export const ItemExchangeSourceBss = bss("itemexchangesource.bss")({
 });
 
 if (import.meta.main) {
-    await ItemExchangeSourceBss.load();
+    await ItemExchangeSourceBss.decodeIntoDisk();
 }

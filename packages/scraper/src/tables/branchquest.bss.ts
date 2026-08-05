@@ -25,5 +25,5 @@ export const BranchQuestBss = bss("branchquest.bss")({
 });
 
 if (import.meta.main) {
-    await BranchQuestBss.load();
+    await BranchQuestBss.decodeIntoDisk();
 }

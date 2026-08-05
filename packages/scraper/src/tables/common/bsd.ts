@@ -1,17 +1,40 @@
-import { bool, bytes, custom, u32, u64, type BsdNumber } from "@marceloclp/bsd";
+import { bool, type BsdReader, bytes, custom, u32, u64, type BsdNumber } from "@marceloclp/bsd";
 
-export const Cstring = custom((reader) => {
-    const buffer = reader.buffer;
-    const start = reader.byteOffset;
+/**
+ * Pads by a given number of bytes, or until the end of the frame.
+ * @param by - the number of bytes to pad by
+ */
+export function padBy(by: number) {
+    return (_: any, r: BsdReader) => Math.min(r.remaining, by);
+}
 
-    let end = start;
-    while (end < buffer.length && buffer[end] !== 0) {
-        end++;
-    }
+export function terminatedText(nullByte: number = 0) {
+    return custom((reader) => {
+        const buffer = reader.buffer;
+        const start = reader.byteOffset;
 
-    reader.byteOffset = Math.min(end + 1, reader.limit);
-    return Buffer.from(buffer.subarray(start, end)).toString("utf8");
-});
+        let end = start;
+        while (end < buffer.length && buffer[end] !== nullByte) {
+            end++;
+        }
+
+        reader.byteOffset = Math.min(end + 1, reader.limit);
+        return Buffer.from(buffer.subarray(start, end)).toString("utf8");
+    })
+}
+
+// export const Cstring = custom((reader) => {
+//     const buffer = reader.buffer;
+//     const start = reader.byteOffset;
+
+//     let end = start;
+//     while (end < buffer.length && buffer[end] !== 0) {
+//         end++;
+//     }
+
+//     reader.byteOffset = Math.min(end + 1, reader.limit);
+//     return Buffer.from(buffer.subarray(start, end)).toString("utf8");
+// });
 
 /**
  * Represents a string with mixed encoding.

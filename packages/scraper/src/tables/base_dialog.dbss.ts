@@ -54,5 +54,5 @@ export const BaseDialogDbss = dbss("base_dialog.dbss")({
 });
 
 if (import.meta.main) {
-    await BaseDialogDbss.load();
+    await BaseDialogDbss.decodeIntoDisk();
 }

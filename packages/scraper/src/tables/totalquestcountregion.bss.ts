@@ -13,5 +13,5 @@ export const TotalQuestCountRegionBss = bss(
 });
 
 if (import.meta.main) {
-    await TotalQuestCountRegionBss.load();
+    await TotalQuestCountRegionBss.decodeIntoDisk();
 }

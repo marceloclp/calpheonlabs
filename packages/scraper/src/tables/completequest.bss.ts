@@ -26,5 +26,5 @@ export const CompleteQuestBss = bss("gamecommondata/binary/completequest.bss")({
 });
 
 if (import.meta.main) {
-    await CompleteQuestBss.load();
+    await CompleteQuestBss.decodeIntoDisk();
 }

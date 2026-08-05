@@ -9,5 +9,5 @@ export const NormalGroupQuestBss = bss(
 });
 
 if (import.meta.main) {
-    await NormalGroupQuestBss.load();
+    await NormalGroupQuestBss.decodeIntoDisk();
 }

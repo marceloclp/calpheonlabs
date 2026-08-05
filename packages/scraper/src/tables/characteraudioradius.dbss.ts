@@ -15,5 +15,5 @@ export const CharacterAudioRadiusDbss = dbss("characteraudioradius.dbss")({
 });
 
 if (import.meta.main) {
-    await CharacterAudioRadiusDbss.load();
+    await CharacterAudioRadiusDbss.decodeIntoDisk();
 }

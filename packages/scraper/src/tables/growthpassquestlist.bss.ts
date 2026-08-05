@@ -19,5 +19,5 @@ export const GrowthPassQuestListBss = bss(
 });
 
 if (import.meta.main) {
-    await GrowthPassQuestListBss.load();
+    await GrowthPassQuestListBss.decodeIntoDisk();
 }

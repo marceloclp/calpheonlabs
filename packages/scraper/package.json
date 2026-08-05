@@ -4,7 +4,8 @@
     "type": "module",
     "module": "index.ts",
     "dependencies": {
-        "@marceloclp/bsd": "^0.1.5"
+        "@marceloclp/bsd": "^0.1.5",
+        "zod": "catalog:"
     },
     "devDependencies": {
         "@types/bun": "latest"

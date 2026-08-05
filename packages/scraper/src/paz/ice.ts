@@ -167,9 +167,9 @@ function iceF(p: number, sk: IceSubkey): number {
     al = (al ^ tl ^ sk.val[0]!) >>> 0;
     return u32(
         iceSbox[0]![al >>> 10]! |
-            iceSbox[1]![al & 0x3ff]! |
-            iceSbox[2]![ar >>> 10]! |
-            iceSbox[3]![ar & 0x3ff]!,
+        iceSbox[1]![al & 0x3ff]! |
+        iceSbox[2]![ar >>> 10]! |
+        iceSbox[3]![ar & 0x3ff]!,
     );
 }
 
@@ -272,15 +272,15 @@ export class IceKey {
     ): Uint8Array {
         let l = u32(
             (ciphertext[inputOffset]! << 24) |
-                (ciphertext[inputOffset + 1]! << 16) |
-                (ciphertext[inputOffset + 2]! << 8) |
-                ciphertext[inputOffset + 3]!,
+            (ciphertext[inputOffset + 1]! << 16) |
+            (ciphertext[inputOffset + 2]! << 8) |
+            ciphertext[inputOffset + 3]!,
         );
         let r = u32(
             (ciphertext[inputOffset + 4]! << 24) |
-                (ciphertext[inputOffset + 5]! << 16) |
-                (ciphertext[inputOffset + 6]! << 8) |
-                ciphertext[inputOffset + 7]!,
+            (ciphertext[inputOffset + 5]! << 16) |
+            (ciphertext[inputOffset + 6]! << 8) |
+            ciphertext[inputOffset + 7]!,
         );
 
         for (let i = this.rounds - 1; i > 0; i -= 2) {
@@ -373,4 +373,13 @@ export class IceKey {
             }
         }
     }
+}
+
+const BDO_ICE_KEY = new Uint8Array([
+    0x51, 0xf3, 0x0f, 0x11, 0x04, 0x24, 0x6a, 0x00,
+]);
+const ICE_KEY = new IceKey(0).set(BDO_ICE_KEY);
+
+export function decrypt(bytes: Uint8Array): Uint8Array<ArrayBuffer> {
+    return ICE_KEY.decrypt(bytes) as any;
 }

@@ -18,5 +18,5 @@ export const OlviaAcademyRewardQuestListBss = bss(
 });
 
 if (import.meta.main) {
-    await OlviaAcademyRewardQuestListBss.load();
+    await OlviaAcademyRewardQuestListBss.decodeIntoDisk();
 }

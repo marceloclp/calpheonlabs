@@ -21,5 +21,5 @@ export const DetailDialogOffsetDbss = bss(
 });
 
 if (import.meta.main) {
-    await DetailDialogOffsetDbss.load();
+    await DetailDialogOffsetDbss.decodeIntoDisk();
 }

@@ -55,5 +55,5 @@ export const ItemTradeEtcBss = bss("gamecommondata/binary/itemtradeetc.bss")({
 });
 
 if (import.meta.main) {
-    await ItemTradeEtcBss.load();
+    await ItemTradeEtcBss.decodeIntoDisk();
 }

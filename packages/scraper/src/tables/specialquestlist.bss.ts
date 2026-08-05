@@ -18,5 +18,5 @@ export const SpecialQuestListBss = bss(
 });
 
 if (import.meta.main) {
-    await SpecialQuestListBss.load();
+    await SpecialQuestListBss.decodeIntoDisk();
 }

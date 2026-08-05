@@ -22,5 +22,5 @@ export const GuildHouseCraftStorageDbss = dbss(
 });
 
 if (import.meta.main) {
-    await GuildHouseCraftStorageDbss.load();
+    await GuildHouseCraftStorageDbss.decodeIntoDisk();
 }

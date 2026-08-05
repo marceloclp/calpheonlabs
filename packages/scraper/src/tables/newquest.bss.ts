@@ -47,5 +47,5 @@ export const NewQuestBss = bss("gamecommondata/binary/newquest.bss")({
 });
 
 if (import.meta.main) {
-    await NewQuestBss.load();
+    await NewQuestBss.decodeIntoDisk();
 }

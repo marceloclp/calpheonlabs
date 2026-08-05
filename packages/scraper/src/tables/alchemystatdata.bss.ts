@@ -31,5 +31,5 @@ export const AlchemyStatDataBss = bss("alchemystatdata.bss")({
 });
 
 if (import.meta.main) {
-    await AlchemyStatDataBss.load();
+    await AlchemyStatDataBss.decodeIntoDisk();
 }

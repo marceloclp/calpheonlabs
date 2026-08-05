@@ -24,5 +24,5 @@ export const ContentsGroupOptionStaticStatusManagerBss = dbss(
 });
 
 if (import.meta.main) {
-    await ContentsGroupOptionStaticStatusManagerBss.load();
+    await ContentsGroupOptionStaticStatusManagerBss.decodeIntoDisk();
 }

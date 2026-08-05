@@ -26,5 +26,5 @@ export const CookingStatDataBss = bss(
 });
 
 if (import.meta.main) {
-    await CookingStatDataBss.load();
+    await CookingStatDataBss.decodeIntoDisk();
 }

@@ -26,5 +26,5 @@ export const ExtractItemDbss = dbss("gamecommondata/binary/extractitem.dbss")({
 });
 
 if (import.meta.main) {
-    await ExtractItemDbss.load();
+    await ExtractItemDbss.decodeIntoDisk();
 }

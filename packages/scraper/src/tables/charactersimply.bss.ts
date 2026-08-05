@@ -169,5 +169,5 @@ export const CharacterSimplyBss = bss("charactersimply.bss")({
 });
 
 if (import.meta.main) {
-    await CharacterSimplyBss.load();
+    await CharacterSimplyBss.decodeIntoDisk();
 }

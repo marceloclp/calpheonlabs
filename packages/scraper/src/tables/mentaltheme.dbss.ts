@@ -39,5 +39,5 @@ export const MentalThemeDbss = dbss("gamecommondata/binary/mentaltheme.dbss")({
 });
 
 if (import.meta.main) {
-    await MentalThemeDbss.load();
+    await MentalThemeDbss.decodeIntoDisk();
 }

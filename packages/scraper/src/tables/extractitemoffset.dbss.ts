@@ -20,5 +20,5 @@ export const ExtractItemOffsetDbss = dbss(
 });
 
 if (import.meta.main) {
-    await ExtractItemOffsetDbss.load();
+    await ExtractItemOffsetDbss.decodeIntoDisk();
 }

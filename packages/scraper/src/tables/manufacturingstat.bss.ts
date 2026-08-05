@@ -25,5 +25,5 @@ export const ManufacturingStatBss = bss(
 });
 
 if (import.meta.main) {
-    await ManufacturingStatBss.load();
+    await ManufacturingStatBss.decodeIntoDisk();
 }

@@ -16,5 +16,5 @@ export const ManufactureItemNamingInfoBss = bss(
 });
 
 if (import.meta.main) {
-    await ManufactureItemNamingInfoBss.load();
+    await ManufactureItemNamingInfoBss.decodeIntoDisk();
 }

@@ -18,5 +18,5 @@ export const SeasonPassQuestListForCashBss = bss(
 });
 
 if (import.meta.main) {
-    await SeasonPassQuestListForCashBss.load();
+    await SeasonPassQuestListForCashBss.decodeIntoDisk();
 }

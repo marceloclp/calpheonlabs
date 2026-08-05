@@ -30,5 +30,5 @@ export const ManufactureConditionDbss = dbss(
 });
 
 if (import.meta.main) {
-    await ManufactureConditionDbss.load();
+    await ManufactureConditionDbss.decodeIntoDisk();
 }

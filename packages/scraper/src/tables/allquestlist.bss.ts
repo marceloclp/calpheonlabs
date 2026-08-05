@@ -15,5 +15,5 @@ export const AllQuestListBss = bss("allquestlist.bss")({
 });
 
 if (import.meta.main) {
-    await AllQuestListBss.load();
+    await AllQuestListBss.decodeIntoDisk();
 }

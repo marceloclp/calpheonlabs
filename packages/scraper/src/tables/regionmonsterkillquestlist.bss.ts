@@ -19,5 +19,5 @@ export const RegionMonsterKillQuestListBss = bss(
 });
 
 if (import.meta.main) {
-    await RegionMonsterKillQuestListBss.load();
+    await RegionMonsterKillQuestListBss.decodeIntoDisk();
 }

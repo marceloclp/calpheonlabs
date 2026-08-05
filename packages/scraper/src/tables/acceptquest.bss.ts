@@ -1,5 +1,4 @@
 import { array, struct, u16, u32 } from "@marceloclp/bsd";
-
 import { bss } from "./common/helpers";
 
 /**
@@ -26,5 +25,5 @@ export const AcceptQuestBss = bss("gamecommondata/binary/acceptquest.bss")({
 });
 
 if (import.meta.main) {
-    await AcceptQuestBss.load();
+    await AcceptQuestBss.decodeIntoDisk();
 }

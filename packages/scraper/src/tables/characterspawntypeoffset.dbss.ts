@@ -41,5 +41,5 @@ export const CharacterSpawnTypeOffsetDbss = dbss(
 });
 
 if (import.meta.main) {
-    await CharacterSpawnTypeOffsetDbss.load();
+    await CharacterSpawnTypeOffsetDbss.decodeIntoDisk();
 }

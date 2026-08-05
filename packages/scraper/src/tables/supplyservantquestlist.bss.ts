@@ -13,5 +13,5 @@ export const SupplyServantQuestListBss = bss(
 });
 
 if (import.meta.main) {
-    await SupplyServantQuestListBss.load();
+    await SupplyServantQuestListBss.decodeIntoDisk();
 }

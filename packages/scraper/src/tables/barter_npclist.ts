@@ -16,5 +16,5 @@ export const BarterNpcListBss = bss("barter_npclist.bss")({
 });
 
 if (import.meta.main) {
-    await BarterNpcListBss.load();
+    await BarterNpcListBss.decodeIntoDisk();
 }

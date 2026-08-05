@@ -34,5 +34,5 @@ export const ItemSubGroupOffsetDbss = dbss(
 });
 
 if (import.meta.main) {
-    await ItemSubGroupOffsetDbss.load();
+    await ItemSubGroupOffsetDbss.decodeIntoDisk();
 }

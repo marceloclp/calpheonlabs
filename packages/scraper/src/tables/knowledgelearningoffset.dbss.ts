@@ -22,5 +22,5 @@ export const KnowledgeLearningOffsetDbss = dbss(
 });
 
 if (import.meta.main) {
-    await KnowledgeLearningOffsetDbss.load();
+    await KnowledgeLearningOffsetDbss.decodeIntoDisk();
 }

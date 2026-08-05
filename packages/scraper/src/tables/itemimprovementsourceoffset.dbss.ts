@@ -20,5 +20,5 @@ export const ItemImprovementSourceOffsetDbss = dbss(
 });
 
 if (import.meta.main) {
-    await ItemImprovementSourceOffsetDbss.load();
+    await ItemImprovementSourceOffsetDbss.decodeIntoDisk();
 }

@@ -115,5 +115,5 @@ export const DetailDialogDbss = dbss(
 });
 
 if (import.meta.main) {
-    await DetailDialogDbss.load();
+    await DetailDialogDbss.decodeIntoDisk();
 }

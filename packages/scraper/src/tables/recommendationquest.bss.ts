@@ -48,5 +48,5 @@ export const RecommendationQuestBss = bss(
 });
 
 if (import.meta.main) {
-    await RecommendationQuestBss.load();
+    await RecommendationQuestBss.decodeIntoDisk();
 }

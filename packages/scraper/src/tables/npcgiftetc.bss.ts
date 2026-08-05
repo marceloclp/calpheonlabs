@@ -21,5 +21,5 @@ export const NpcGiftEtcBss = bss("gamecommondata/binary/npcgiftetc.bss")({
 });
 
 if (import.meta.main) {
-    await NpcGiftEtcBss.load();
+    await NpcGiftEtcBss.decodeIntoDisk();
 }

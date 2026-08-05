@@ -18,5 +18,5 @@ export const SeasonPassQuestListForNormalBss = bss(
 });
 
 if (import.meta.main) {
-    await SeasonPassQuestListForNormalBss.load();
+    await SeasonPassQuestListForNormalBss.decodeIntoDisk();
 }

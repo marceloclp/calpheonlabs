@@ -41,5 +41,5 @@ export const CharacterObjectOffsetDbss = dbss("characterobjectoffset.dbss")({
 });
 
 if (import.meta.main) {
-    await CharacterObjectOffsetDbss.load();
+    await CharacterObjectOffsetDbss.decodeIntoDisk();
 }

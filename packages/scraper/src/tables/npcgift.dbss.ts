@@ -23,5 +23,5 @@ export const NpcGiftDbss = dbss("gamecommondata/binary/npcgift.dbss")({
 });
 
 if (import.meta.main) {
-    await NpcGiftDbss.load();
+    await NpcGiftDbss.decodeIntoDisk();
 }

@@ -34,5 +34,5 @@ export const ItemEquipGroupBss = bss(
 });
 
 if (import.meta.main) {
-    await ItemEquipGroupBss.load();
+    await ItemEquipGroupBss.decodeIntoDisk();
 }

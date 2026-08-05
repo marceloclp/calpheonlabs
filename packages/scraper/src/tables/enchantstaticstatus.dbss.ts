@@ -70,5 +70,5 @@ export const EnchantStaticStatusDbss = dbss(
 });
 
 if (import.meta.main) {
-    await EnchantStaticStatusDbss.load();
+    await EnchantStaticStatusDbss.decodeIntoDisk();
 }

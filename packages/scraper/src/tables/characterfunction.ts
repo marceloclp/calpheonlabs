@@ -292,5 +292,5 @@ export const CharacterFunctionDbss = dbss("characterfunction.dbss")({
 });
 
 if (import.meta.main) {
-    await CharacterFunctionDbss.load();
+    await CharacterFunctionDbss.decodeIntoDisk();
 }

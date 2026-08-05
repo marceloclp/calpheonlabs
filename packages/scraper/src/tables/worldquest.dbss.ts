@@ -8,5 +8,5 @@ export const WorldQuestDbss = dbss("gamecommondata/binary/worldquest.dbss")({
 });
 
 if (import.meta.main) {
-    await WorldQuestDbss.load();
+    await WorldQuestDbss.decodeIntoDisk();
 }

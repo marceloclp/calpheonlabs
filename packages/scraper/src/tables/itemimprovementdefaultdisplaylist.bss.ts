@@ -28,5 +28,5 @@ export const ItemImprovementDefaultDisplayListBss = bss(
 });
 
 if (import.meta.main) {
-    await ItemImprovementDefaultDisplayListBss.load();
+    await ItemImprovementDefaultDisplayListBss.decodeIntoDisk();
 }

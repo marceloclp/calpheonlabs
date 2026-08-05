@@ -28,5 +28,5 @@ export const YachtNpcDiceInfoBss = bss(
 });
 
 if (import.meta.main) {
-    await YachtNpcDiceInfoBss.load();
+    await YachtNpcDiceInfoBss.decodeIntoDisk();
 }

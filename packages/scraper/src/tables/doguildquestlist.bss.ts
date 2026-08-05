@@ -19,5 +19,5 @@ export const DoGuildQuestListBss = bss(
 });
 
 if (import.meta.main) {
-    await DoGuildQuestListBss.load();
+    await DoGuildQuestListBss.decodeIntoDisk();
 }

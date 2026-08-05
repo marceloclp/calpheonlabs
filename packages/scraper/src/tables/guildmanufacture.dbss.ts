@@ -36,5 +36,5 @@ export const GuildManufactureDbss = dbss(
 });
 
 if (import.meta.main) {
-    await GuildManufactureDbss.load();
+    await GuildManufactureDbss.decodeIntoDisk();
 }

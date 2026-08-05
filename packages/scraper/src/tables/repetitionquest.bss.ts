@@ -52,5 +52,5 @@ export const RepetitionQuestBss = bss(
 });
 
 if (import.meta.main) {
-    await RepetitionQuestBss.load();
+    await RepetitionQuestBss.decodeIntoDisk();
 }

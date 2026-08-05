@@ -36,5 +36,5 @@ export const HouseInfoNeedItemDbss = dbss(
 });
 
 if (import.meta.main) {
-    await HouseInfoNeedItemDbss.load();
+    await HouseInfoNeedItemDbss.decodeIntoDisk();
 }

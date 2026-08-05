@@ -31,5 +31,5 @@ export const DialogTextDbss = dbss("gamecommondata/binary/dialogtext.dbss")({
 });
 
 if (import.meta.main) {
-    await DialogTextDbss.load();
+    await DialogTextDbss.decodeIntoDisk();
 }

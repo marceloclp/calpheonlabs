@@ -60,5 +60,5 @@ export const MentalCardDbss = dbss("gamecommondata/binary/mentalcard.dbss")({
 });
 
 if (import.meta.main) {
-    await MentalCardDbss.load();
+    await MentalCardDbss.decodeIntoDisk();
 }

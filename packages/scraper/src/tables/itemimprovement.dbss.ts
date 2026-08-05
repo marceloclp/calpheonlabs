@@ -32,5 +32,5 @@ export const ItemImprovementDbss = dbss(
 });
 
 if (import.meta.main) {
-    await ItemImprovementDbss.load();
+    await ItemImprovementDbss.decodeIntoDisk();
 }

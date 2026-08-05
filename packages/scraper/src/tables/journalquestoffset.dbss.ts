@@ -26,5 +26,5 @@ export const JournalQuestOffsetDbss = dbss(
 });
 
 if (import.meta.main) {
-    await JournalQuestOffsetDbss.load();
+    await JournalQuestOffsetDbss.decodeIntoDisk();
 }

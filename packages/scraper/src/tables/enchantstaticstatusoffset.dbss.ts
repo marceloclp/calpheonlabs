@@ -24,5 +24,5 @@ export const EnchantStaticStatusOffsetDbss = bss(
 });
 
 if (import.meta.main) {
-    await EnchantStaticStatusOffsetDbss.load();
+    await EnchantStaticStatusOffsetDbss.decodeIntoDisk();
 }

@@ -21,5 +21,5 @@ export const ManufactureConditionOffsetDbss = dbss(
 });
 
 if (import.meta.main) {
-    await ManufactureConditionOffsetDbss.load();
+    await ManufactureConditionOffsetDbss.decodeIntoDisk();
 }

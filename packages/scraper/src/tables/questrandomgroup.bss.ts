@@ -15,5 +15,5 @@ export const QuestRandomGroupBss = bss(
 });
 
 if (import.meta.main) {
-    await QuestRandomGroupBss.load();
+    await QuestRandomGroupBss.decodeIntoDisk();
 }

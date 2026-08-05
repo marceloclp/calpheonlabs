@@ -32,5 +32,5 @@ export const ItemMaxLevelOffsetDbss = bss(
 });
 
 if (import.meta.main) {
-    await ItemMaxLevelOffsetDbss.load();
+    await ItemMaxLevelOffsetDbss.decodeIntoDisk();
 }

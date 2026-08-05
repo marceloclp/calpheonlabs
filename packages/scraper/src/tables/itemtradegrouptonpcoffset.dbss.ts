@@ -20,5 +20,5 @@ export const ItemTradeGroupToNpcOffsetDbss = dbss(
 });
 
 if (import.meta.main) {
-    await ItemTradeGroupToNpcOffsetDbss.load();
+    await ItemTradeGroupToNpcOffsetDbss.decodeIntoDisk();
 }

@@ -20,5 +20,5 @@ export const MentalThemeOffsetDbss = dbss(
 });
 
 if (import.meta.main) {
-    await MentalThemeOffsetDbss.load();
+    await MentalThemeOffsetDbss.decodeIntoDisk();
 }

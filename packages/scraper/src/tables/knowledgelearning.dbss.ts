@@ -32,5 +32,5 @@ export const KnowledgeLearningDbss = dbss(
 });
 
 if (import.meta.main) {
-    await KnowledgeLearningDbss.load();
+    await KnowledgeLearningDbss.decodeIntoDisk();
 }

@@ -23,5 +23,5 @@ export const CharacterFunctionOffsetDbss = dbss("characterfunctionoffset.dbss")(
 );
 
 if (import.meta.main) {
-    await CharacterFunctionOffsetDbss.load();
+    await CharacterFunctionOffsetDbss.decodeIntoDisk();
 }

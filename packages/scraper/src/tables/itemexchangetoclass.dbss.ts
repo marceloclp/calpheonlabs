@@ -20,5 +20,5 @@ export const ItemExchangeToClassDbss = dbss("itemexchangetoclass.dbss")({
 });
 
 if (import.meta.main) {
-    await ItemExchangeToClassDbss.load();
+    await ItemExchangeToClassDbss.decodeIntoDisk();
 }

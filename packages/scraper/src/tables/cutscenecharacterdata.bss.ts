@@ -13,5 +13,5 @@ export const CutsceneCharacterDataBss = bss(
 });
 
 if (import.meta.main) {
-    await CutsceneCharacterDataBss.load();
+    await CutsceneCharacterDataBss.decodeIntoDisk();
 }

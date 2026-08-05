@@ -20,5 +20,5 @@ export const HouseInfoNeedItemOffsetDbss = dbss(
 });
 
 if (import.meta.main) {
-    await HouseInfoNeedItemOffsetDbss.load();
+    await HouseInfoNeedItemOffsetDbss.decodeIntoDisk();
 }

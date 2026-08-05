@@ -27,5 +27,5 @@ export const QuestProgressGroupBss = bss(
 });
 
 if (import.meta.main) {
-    await QuestProgressGroupBss.load();
+    await QuestProgressGroupBss.decodeIntoDisk();
 }

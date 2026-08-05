@@ -26,5 +26,5 @@ export const GuildHouseCraftSkillReverseLinkListBss = bss(
 });
 
 if (import.meta.main) {
-    await GuildHouseCraftSkillReverseLinkListBss.load();
+    await GuildHouseCraftSkillReverseLinkListBss.decodeIntoDisk();
 }

@@ -32,5 +32,5 @@ export const RepairMaxEnduranceDbss = dbss(
 });
 
 if (import.meta.main) {
-    await RepairMaxEnduranceDbss.load();
+    await RepairMaxEnduranceDbss.decodeIntoDisk();
 }

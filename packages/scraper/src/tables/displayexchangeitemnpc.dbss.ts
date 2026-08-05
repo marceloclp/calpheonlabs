@@ -24,5 +24,5 @@ export const DisplayExchangeItemNpcDbss = dbss(
 });
 
 if (import.meta.main) {
-    await DisplayExchangeItemNpcDbss.load();
+    await DisplayExchangeItemNpcDbss.decodeIntoDisk();
 }

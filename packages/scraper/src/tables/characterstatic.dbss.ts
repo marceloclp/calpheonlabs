@@ -166,7 +166,7 @@ const CharacterStaticTailControls = {
     /** Exact normalized historical `Suspension` value. */
     suspensionValue: u32(),
     /** Stored 64-bit `AttributeType` bit set as a lossless decimal string. */
-    attributeTypeMask: u64().transform((value) => value.toString()),
+    attributeTypeMask: u64().transform((v) => v.toString()),
     /** Historical stealing drop-group selector; zero means absent. */
     stealDropGroupId: u32(),
 };
@@ -260,5 +260,5 @@ export const CharacterStaticDbss = dbss("characterstatic.dbss")({
 });
 
 if (import.meta.main) {
-    await CharacterStaticDbss.load();
+    await CharacterStaticDbss.decodeIntoDisk();
 }

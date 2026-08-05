@@ -22,5 +22,5 @@ export const GuildHouseCraftSkillDbss = dbss(
 });
 
 if (import.meta.main) {
-    await GuildHouseCraftSkillDbss.load();
+    await GuildHouseCraftSkillDbss.decodeIntoDisk();
 }

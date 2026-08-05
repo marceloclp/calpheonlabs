@@ -40,5 +40,5 @@ export const JournalQuestDbss = dbss("gamecommondata/binary/journalquest.dbss")(
 );
 
 if (import.meta.main) {
-    await JournalQuestDbss.load();
+    await JournalQuestDbss.decodeIntoDisk();
 }

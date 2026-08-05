@@ -14,5 +14,5 @@ export const QuestDbss = dbss("gamecommondata/binary/quest.dbss")({
 });
 
 if (import.meta.main) {
-    await QuestDbss.load();
+    await QuestDbss.decodeIntoDisk();
 }

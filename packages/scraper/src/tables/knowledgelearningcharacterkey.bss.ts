@@ -23,5 +23,5 @@ export const KnowledgeLearningCharacterKeyBss = dbss(
 });
 
 if (import.meta.main) {
-    await KnowledgeLearningCharacterKeyBss.load();
+    await KnowledgeLearningCharacterKeyBss.decodeIntoDisk();
 }

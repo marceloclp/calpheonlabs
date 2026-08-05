@@ -18,5 +18,5 @@ export const NpcPersonalityOffsetDbss = dbss(
 });
 
 if (import.meta.main) {
-    await NpcPersonalityOffsetDbss.load();
+    await NpcPersonalityOffsetDbss.decodeIntoDisk();
 }

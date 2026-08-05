@@ -85,5 +85,5 @@ export const GuildQuestDbss = dbss("gamecommondata/binary/guildquest.dbss")({
 });
 
 if (import.meta.main) {
-    await GuildQuestDbss.load();
+    await GuildQuestDbss.decodeIntoDisk();
 }

@@ -107,5 +107,5 @@ export const CharacterSpawnTypeDbss = dbss("characterspawntype.dbss")({
 });
 
 if (import.meta.main) {
-    await CharacterSpawnTypeDbss.load();
+    await CharacterSpawnTypeDbss.decodeIntoDisk();
 }

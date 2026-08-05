@@ -206,5 +206,5 @@ export const ItemSubGroupDbss = dbss("gamecommondata/binary/itemsubgroup.dbss")(
 );
 
 if (import.meta.main) {
-    await ItemSubGroupDbss.load();
+    await ItemSubGroupDbss.decodeIntoDisk();
 }

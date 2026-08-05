@@ -20,5 +20,5 @@ export const ItemExchangeToClassOffsetDbss = dbss(
 });
 
 if (import.meta.main) {
-    await ItemExchangeToClassOffsetDbss.load();
+    await ItemExchangeToClassOffsetDbss.decodeIntoDisk();
 }

@@ -28,5 +28,5 @@ const QuestGroupDbss = dbss("gamecommondata/binary/questgroup.dbss")({
 });
 
 if (import.meta.main) {
-    await QuestGroupDbss.load();
+    await QuestGroupDbss.decodeIntoDisk();
 }

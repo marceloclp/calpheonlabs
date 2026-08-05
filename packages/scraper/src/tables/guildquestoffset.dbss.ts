@@ -20,5 +20,5 @@ export const GuildQuestOffsetDbss = dbss(
 });
 
 if (import.meta.main) {
-    await GuildQuestOffsetDbss.load();
+    await GuildQuestOffsetDbss.decodeIntoDisk();
 }

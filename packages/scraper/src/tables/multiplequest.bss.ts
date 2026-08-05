@@ -16,5 +16,5 @@ export const MultipleQuestBss = bss("gamecommondata/binary/multiplequest.bss")({
 });
 
 if (import.meta.main) {
-    await MultipleQuestBss.load();
+    await MultipleQuestBss.decodeIntoDisk();
 }

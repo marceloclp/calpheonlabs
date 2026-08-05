@@ -18,5 +18,5 @@ export const NpcGiftDataOffsetDbss = dbss(
 });
 
 if (import.meta.main) {
-    await NpcGiftDataOffsetDbss.load();
+    await NpcGiftDataOffsetDbss.decodeIntoDisk();
 }

@@ -30,4 +30,4 @@ export const HouseInfoReceipeDbss = dbss(
     rows: array(u32(), HouseInfoReceipeRow),
 });
 
-if (import.meta.main) await HouseInfoReceipeDbss.load();
+if (import.meta.main) await HouseInfoReceipeDbss.decodeIntoDisk();

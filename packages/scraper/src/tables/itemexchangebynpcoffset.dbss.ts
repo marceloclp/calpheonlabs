@@ -20,5 +20,5 @@ export const ItemExchangeByNpcOffsetDbss = dbss("itemexchangebynpcoffset.dbss")(
 );
 
 if (import.meta.main) {
-    await ItemExchangeByNpcOffsetDbss.load();
+    await ItemExchangeByNpcOffsetDbss.decodeIntoDisk();
 }

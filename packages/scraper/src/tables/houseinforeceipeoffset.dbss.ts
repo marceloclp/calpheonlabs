@@ -21,5 +21,5 @@ export const HouseInfoReceipeOffsetDbss = dbss(
 });
 
 if (import.meta.main) {
-    await HouseInfoReceipeOffsetDbss.load();
+    await HouseInfoReceipeOffsetDbss.decodeIntoDisk();
 }

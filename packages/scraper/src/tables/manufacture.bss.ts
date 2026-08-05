@@ -57,5 +57,5 @@ export const ManufactureBss = bss("gamecommondata/binary/manufacture.bss")({
 });
 
 if (import.meta.main) {
-    await ManufactureBss.load();
+    await ManufactureBss.decodeIntoDisk();
 }

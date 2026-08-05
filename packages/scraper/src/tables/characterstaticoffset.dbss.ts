@@ -33,5 +33,5 @@ export const CharacterStaticOffsetDbss = dbss("characterstaticoffset.dbss")({
 });
 
 if (import.meta.main) {
-    await CharacterStaticOffsetDbss.load();
+    await CharacterStaticOffsetDbss.decodeIntoDisk();
 }

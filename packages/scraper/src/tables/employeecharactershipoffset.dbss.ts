@@ -19,5 +19,5 @@ export const EmployeeCharacterShipOffsetDbss = dbss(
 });
 
 if (import.meta.main) {
-    await EmployeeCharacterShipOffsetDbss.load();
+    await EmployeeCharacterShipOffsetDbss.decodeIntoDisk();
 }

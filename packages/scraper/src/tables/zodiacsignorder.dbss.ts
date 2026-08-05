@@ -27,5 +27,5 @@ export const ZodiacSignOrderDbss = dbss(
 });
 
 if (import.meta.main) {
-    await ZodiacSignOrderDbss.load();
+    await ZodiacSignOrderDbss.decodeIntoDisk();
 }

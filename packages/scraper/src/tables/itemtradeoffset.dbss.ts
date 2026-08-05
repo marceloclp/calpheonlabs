@@ -20,5 +20,5 @@ export const ItemTradeOffsetDbss = dbss(
 });
 
 if (import.meta.main) {
-    await ItemTradeOffsetDbss.load();
+    await ItemTradeOffsetDbss.decodeIntoDisk();
 }

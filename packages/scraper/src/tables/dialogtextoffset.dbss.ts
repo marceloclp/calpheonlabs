@@ -21,5 +21,5 @@ export const DialogTextOffsetDbss = dbss(
 });
 
 if (import.meta.main) {
-    await DialogTextOffsetDbss.load();
+    await DialogTextOffsetDbss.decodeIntoDisk();
 }

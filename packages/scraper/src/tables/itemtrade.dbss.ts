@@ -19,5 +19,5 @@ export const ItemTradeDbss = dbss("gamecommondata/binary/itemtrade.dbss")({
 });
 
 if (import.meta.main) {
-    await ItemTradeDbss.load();
+    await ItemTradeDbss.decodeIntoDisk();
 }

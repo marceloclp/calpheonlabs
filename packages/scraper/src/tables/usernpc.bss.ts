@@ -36,5 +36,5 @@ export const UserNpcBss = bss("gamecommondata/binary/usernpc.bss")({
 });
 
 if (import.meta.main) {
-    await UserNpcBss.load();
+    await UserNpcBss.decodeIntoDisk();
 }

@@ -53,5 +53,5 @@ const NpcSimplyBss = bss("gamecommondata/binary/npcsimply.bss")({
 });
 
 if (import.meta.main) {
-    await NpcSimplyBss.load();
+    await NpcSimplyBss.decodeIntoDisk();
 }

@@ -20,5 +20,5 @@ export const GuildManufactureOffsetDbss = dbss(
 });
 
 if (import.meta.main) {
-    await GuildManufactureOffsetDbss.load();
+    await GuildManufactureOffsetDbss.decodeIntoDisk();
 }

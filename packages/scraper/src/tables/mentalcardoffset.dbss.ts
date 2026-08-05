@@ -20,5 +20,5 @@ export const MentalCardOffsetDbss = bss(
 });
 
 if (import.meta.main) {
-    await MentalCardOffsetDbss.load();
+    await MentalCardOffsetDbss.decodeIntoDisk();
 }

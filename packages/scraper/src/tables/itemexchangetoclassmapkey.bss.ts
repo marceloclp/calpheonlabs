@@ -30,5 +30,5 @@ export const ItemExchangeToClassMapKeyBss = bss(
 });
 
 if (import.meta.main) {
-    await ItemExchangeToClassMapKeyBss.load();
+    await ItemExchangeToClassMapKeyBss.decodeIntoDisk();
 }

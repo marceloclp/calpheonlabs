@@ -36,5 +36,5 @@ export const ItemEnchantOffsetDbss = dbss(
 });
 
 if (import.meta.main) {
-    await ItemEnchantOffsetDbss.load();
+    await ItemEnchantOffsetDbss.decodeIntoDisk();
 }

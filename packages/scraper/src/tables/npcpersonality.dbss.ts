@@ -65,5 +65,5 @@ export const NpcPersonalityDbss = dbss(
 });
 
 if (import.meta.main) {
-    await NpcPersonalityDbss.load();
+    await NpcPersonalityDbss.decodeIntoDisk();
 }
