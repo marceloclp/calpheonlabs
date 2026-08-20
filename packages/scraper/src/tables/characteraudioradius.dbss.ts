@@ -1,6 +1,5 @@
-import { array, f32, struct, u16, u32 } from "@marceloclp/bsd";
-
-import { dbss } from "./common/helpers";
+import { f32, struct, u16 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One character-specific audible-distance override. */
 const CharacterAudioRadiusRow = struct({
@@ -10,8 +9,11 @@ const CharacterAudioRadiusRow = struct({
     audibleRadiusCentimeters: f32(),
 });
 
-export const CharacterAudioRadiusDbss = dbss("characteraudioradius.dbss")({
-    rows: array(u32(), CharacterAudioRadiusRow),
+export const CharacterAudioRadiusDbss = table({
+    path: "gamecommondata/binary/characteraudioradius.dbss",
+    rows: {
+        CharacterAudioRadiusRow: { schema: CharacterAudioRadiusRow },
+    },
 });
 
 if (import.meta.main) {

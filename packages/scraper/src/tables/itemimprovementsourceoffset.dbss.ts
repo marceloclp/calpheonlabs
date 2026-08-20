@@ -1,5 +1,5 @@
-import { array, struct, u32 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { struct, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One twelve-byte pointer into `itemimprovementsource.dbss`. */
 const ItemImprovementSourceOffsetRow = struct({
@@ -12,11 +12,13 @@ const ItemImprovementSourceOffsetRow = struct({
 }).fixedLength(12);
 
 /** Count-prefixed improvement-source pointer rows in directory order. */
-export const ItemImprovementSourceOffsetDbss = dbss(
-    "gamecommondata/binary/itemimprovementsourceoffset.dbss",
-)({
-    /** Pointers retained in physical directory-file order. */
-    rows: array(u32(), ItemImprovementSourceOffsetRow),
+export const ItemImprovementSourceOffsetDbss = table({
+    path: "gamecommondata/binary/itemimprovementsourceoffset.dbss",
+    rows: {
+        ItemImprovementSourceOffsetRow: {
+            schema: ItemImprovementSourceOffsetRow,
+        },
+    },
 });
 
 if (import.meta.main) {

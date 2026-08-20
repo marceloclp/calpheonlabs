@@ -1,6 +1,6 @@
-import { array, bytes, struct, u32, u8 } from "@marceloclp/bsd";
+import { array, struct, u32, u8 } from "@marceloclp/bsd";
 import { markedUtf16Text } from "./common/bsd";
-import { bss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One numeric category and its index into the in-file Korean name dictionary. */
 const ItemMarketCategoryEntry = struct({
@@ -30,24 +30,18 @@ const ItemMarketCategoryRow = struct({
     fieldAfterGroups: u32(),
 }).check((row) => row.categoryKey === row.mainCategoryValue);
 
-/** Informational footer following the category-name dictionary. */
-const ItemMarketCategoryFooter = struct({
-    /** Absolute byte offset at which the dictionary's count begins. */
-    categoryNamesOffset: u32(),
-    /** Unused four-byte file terminator. */
-    reserved04: bytes(4).reserved(),
-}).fixedLength(8);
-
 /** Complete physical market-category hierarchy and Korean name dictionary. */
-export const ItemMarketCategoryBss = bss(
-    "gamecommondata/binary/itemmarketcategory.bss",
-)({
-    /** Top-level market categories in physical order. */
-    rows: array(u32(), ItemMarketCategoryRow),
-    /** Indexed Korean category-name records. */
-    categoryNames: array(u32(), markedUtf16Text()),
-    /** Informational pointer to the name dictionary. */
-    footer: ItemMarketCategoryFooter,
+export const ItemMarketCategoryBss = table({
+    path: "gamecommondata/binary/itemmarketcategory.bss",
+    pabr: true,
+    rows: {
+        ItemMarketCategoryRow: {
+            schema: ItemMarketCategoryRow,
+        },
+        Stringpool: {
+            schema: markedUtf16Text(),
+        },
+    },
 });
 
 if (import.meta.main) {

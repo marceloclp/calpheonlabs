@@ -1,5 +1,5 @@
-import { array, struct, u32 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { struct, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** Pointer to one complete fixed-width extraction row. */
 const ExtractItemOffsetRow = struct({
@@ -12,11 +12,13 @@ const ExtractItemOffsetRow = struct({
 }).fixedLength(12);
 
 /** Count-prefixed pointer index for `extractitem.dbss`. */
-export const ExtractItemOffsetDbss = dbss(
-    "gamecommondata/binary/extractitemoffset.dbss",
-)({
-    /** Extraction-row pointers in directory order. */
-    rows: array(u32(), ExtractItemOffsetRow),
+export const ExtractItemOffsetDbss = table({
+    path: "gamecommondata/binary/extractitemoffset.dbss",
+    rows: {
+        ExtractItemOffsetRow: {
+            schema: ExtractItemOffsetRow,
+        },
+    },
 });
 
 if (import.meta.main) {

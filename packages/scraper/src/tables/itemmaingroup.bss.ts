@@ -1,6 +1,6 @@
 import { array, bytes, struct, u16, u32 } from "@marceloclp/bsd";
 import { markedUtf16Text } from "./common/bsd";
-import { bss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One ten-byte reference from a main group to an item subgroup. */
 const ItemMainGroupEntry = struct({
@@ -32,22 +32,18 @@ const ItemMainGroupRow = struct({
     entries: array(u32(), ItemMainGroupEntry),
 });
 
-/** Informational footer following the main-group condition dictionary. */
-const ItemMainGroupFooter = struct({
-    /** Absolute byte offset at which the condition dictionary begins. */
-    trailerOffset: u32(),
-    /** Unused four-byte file terminator. */
-    reserved04: bytes(4).reserved(),
-}).fixedLength(8);
-
 /** Complete physical item-main-group table without companion joins. */
-export const ItemMainGroupBss = bss("gamecommondata/binary/itemmaingroup.bss")({
-    /** Main-group rows in physical file order. */
-    rows: array(u32(), ItemMainGroupRow),
-    /** Indexed condition expressions referenced by row entries. */
-    trailer: array(u32(), markedUtf16Text()),
-    /** Informational pointer to the condition dictionary. */
-    footer: ItemMainGroupFooter,
+export const ItemMainGroupBss = table({
+    path: "gamecommondata/binary/itemmaingroup.bss",
+    pabr: true,
+    rows: {
+        ItemMainGroupRow: {
+            schema: ItemMainGroupRow,
+        },
+        Stringpool: {
+            schema: markedUtf16Text(),
+        },
+    },
 });
 
 if (import.meta.main) {

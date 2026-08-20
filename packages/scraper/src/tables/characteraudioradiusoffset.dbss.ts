@@ -1,6 +1,5 @@
-import { array, bytes, struct, u16, u32 } from "@marceloclp/bsd";
-
-import { dbss } from "./common/helpers";
+import { struct, u16, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 const CharacterAudioRadiusOffsetRow = struct({
     /** Character or NPC key selecting the companion payload. */
@@ -11,15 +10,12 @@ const CharacterAudioRadiusOffsetRow = struct({
     byteLength: u32(),
 });
 
-export const CharacterAudioRadiusOffsetDbss = dbss(
-    "characteraudioradiusoffset.dbss",
-)({
-    /** Four-byte Pearl Abyss record-table signature at file offset zero. */
-    magic: bytes(4).ascii().is("PABR"),
-    /** Rows in physical order. */
-    rows: array(u32(), CharacterAudioRadiusOffsetRow),
-    /** Validated twelve-byte PABR footer. */
-    footer: bytes(12).reserved(),
+export const CharacterAudioRadiusOffsetDbss = table({
+    path: "gamecommondata/binary/characteraudioradiusoffset.dbss",
+    pabr: true,
+    rows: {
+        CharacterAudioRadiusOffsetRow: { schema: CharacterAudioRadiusOffsetRow },
+    },
 });
 
 if (import.meta.main) {

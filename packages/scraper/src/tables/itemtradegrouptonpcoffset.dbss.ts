@@ -1,5 +1,5 @@
-import { array, struct, u16, u32 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { struct, u16, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One ten-byte pointer into `itemtradegrouptonpc.dbss`. */
 const ItemTradeGroupToNpcOffsetRow = struct({
@@ -12,11 +12,13 @@ const ItemTradeGroupToNpcOffsetRow = struct({
 }).fixedLength(10);
 
 /** Physical pointer directory preserved in its stored index order. */
-export const ItemTradeGroupToNpcOffsetDbss = dbss(
-    "gamecommondata/binary/itemtradegrouptonpcoffset.dbss",
-)({
-    /** Detailed-row pointers in physical directory order. */
-    rows: array(u32(), ItemTradeGroupToNpcOffsetRow),
+export const ItemTradeGroupToNpcOffsetDbss = table({
+    path: "gamecommondata/binary/itemtradegrouptonpcoffset.dbss",
+    rows: {
+        ItemTradeGroupToNpcOffsetRow: {
+            schema: ItemTradeGroupToNpcOffsetRow,
+        },
+    },
 });
 
 if (import.meta.main) {

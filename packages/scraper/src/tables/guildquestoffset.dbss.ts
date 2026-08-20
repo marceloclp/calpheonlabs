@@ -1,5 +1,5 @@
-import { array, struct, u32 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { struct, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One authoritative pointer to a variable-width `guildquest.dbss` row. */
 const GuildQuestOffsetRow = struct({
@@ -12,11 +12,13 @@ const GuildQuestOffsetRow = struct({
 }).fixedLength(12);
 
 /** Complete raw-counted guild mission offset table. */
-export const GuildQuestOffsetDbss = dbss(
-    "gamecommondata/binary/guildquestoffset.dbss",
-)({
-    /** Guild mission pointers in directory order. */
-    rows: array(u32(), GuildQuestOffsetRow),
+export const GuildQuestOffsetDbss = table({
+    path: "gamecommondata/binary/guildquestoffset.dbss",
+    rows: {
+        GuildQuestOffsetRow: {
+            schema: GuildQuestOffsetRow,
+        },
+    },
 });
 
 if (import.meta.main) {

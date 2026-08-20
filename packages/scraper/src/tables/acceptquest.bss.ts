@@ -1,5 +1,5 @@
-import { array, struct, u16, u32 } from "@marceloclp/bsd";
-import { bss } from "./common/helpers";
+import { struct, u16 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /**
  * One physical binding from a quest to the NPC or automatic source that starts
@@ -20,8 +20,12 @@ const AcceptQuestRow = struct({
     npcIndex: u16(),
 });
 
-export const AcceptQuestBss = bss("gamecommondata/binary/acceptquest.bss")({
-    rows: array(u32(), AcceptQuestRow),
+export const AcceptQuestBss = table({
+    path: "gamecommondata/binary/acceptquest.bss",
+    pabr: true,
+    rows: {
+        AcceptQuestRow: { schema: AcceptQuestRow },
+    },
 });
 
 if (import.meta.main) {

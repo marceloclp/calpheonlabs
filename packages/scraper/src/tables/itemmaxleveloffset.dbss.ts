@@ -1,5 +1,5 @@
-import { array, bytes, struct, u32 } from "@marceloclp/bsd";
-import { bss } from "./common/helpers";
+import { bytes, struct, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One twelve-byte pointer into `itemmaxlevel.dbss`. */
 const ItemMaxLevelOffsetRow = struct({
@@ -11,24 +11,15 @@ const ItemMaxLevelOffsetRow = struct({
     reserved08: bytes(4).reserved(),
 }).fixedLength(12);
 
-/** Informational PABR footer following the fixed-width pointer rows. */
-const ItemMaxLevelOffsetFooter = struct({
-    /** Reserved four-byte range before the footer pointer. */
-    reserved00: bytes(4).reserved(),
-    /** Absolute byte offset of this twelve-byte footer. */
-    footerOffset: u32(),
-    /** Reserved four-byte terminal range. */
-    reserved08: bytes(4).reserved(),
-}).fixedLength(12);
-
 /** PABR-framed pointer directory for `itemmaxlevel.dbss`. */
-export const ItemMaxLevelOffsetDbss = bss(
-    "gamecommondata/binary/itemmaxleveloffset.dbss",
-)({
-    /** Fixed-width pointers retained in physical directory-file order. */
-    rows: array(u32(), ItemMaxLevelOffsetRow),
-    /** Informational footer retained with its non-byte pointer value. */
-    footer: ItemMaxLevelOffsetFooter,
+export const ItemMaxLevelOffsetDbss = table({
+    path: "gamecommondata/binary/itemmaxleveloffset.dbss",
+    pabr: true,
+    rows: {
+        ItemMaxLevelOffsetRow: {
+            schema: ItemMaxLevelOffsetRow,
+        },
+    },
 });
 
 if (import.meta.main) {

@@ -1,5 +1,5 @@
-import { array, struct, u32 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { struct, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** Builds one physical knowledge-source row for the selected source namespace. */
 function KnowledgeLearningRowType(code: 0 | 1) {
@@ -22,15 +22,14 @@ const CharacterSourceRow = KnowledgeLearningRowType(0);
 const ItemSourceRow = KnowledgeLearningRowType(1);
 
 /** Character and item sources that grant knowledge, kept in separate namespaces. */
-export const KnowledgeLearningDbss = dbss(
-    "gamecommondata/binary/knowledgelearning.dbss",
-)({
-    /** Character, NPC, or monster acquisition relationships. */
-    characterSources: array(u32(), CharacterSourceRow),
-    /** Item acquisition relationships. */
-    itemSources: array(u32(), ItemSourceRow),
+export const KnowledgeLearningDbss = table({
+    path: "gamecommondata/binary/knowledgelearning.dbss",
+    rows: {
+        CharacterSourceRow: { schema: CharacterSourceRow },
+        ItemSourceRow: { schema: ItemSourceRow },
+    },
 });
 
 if (import.meta.main) {
-    await KnowledgeLearningDbss.decodeIntoDisk();
+    await KnowledgeLearningDbss.decodeIntoDisk({ debug: true });
 }

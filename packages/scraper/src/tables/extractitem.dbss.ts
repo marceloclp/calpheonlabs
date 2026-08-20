@@ -1,5 +1,5 @@
 import { array, struct, u32, u64 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One item/count pair in an extraction recipe. */
 const ExtractItemStack = struct({
@@ -19,10 +19,13 @@ const ExtractItemRow = struct({
     resultItems: array(2, ExtractItemStack),
 }).fixedLength(48);
 
-/** Count-prefixed fixed-width item-extraction recipes. */
-export const ExtractItemDbss = dbss("gamecommondata/binary/extractitem.dbss")({
-    /** Extraction recipes in physical file order. */
-    rows: array(u32(), ExtractItemRow),
+export const ExtractItemDbss = table({
+    path: "gamecommondata/binary/extractitem.dbss",
+    rows: {
+        ExtractItemRow: {
+            schema: ExtractItemRow,
+        },
+    },
 });
 
 if (import.meta.main) {

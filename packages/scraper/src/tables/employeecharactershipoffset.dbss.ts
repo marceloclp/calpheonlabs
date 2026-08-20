@@ -1,5 +1,5 @@
-import { array, struct, u16, u32 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { struct, u16, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 const EmployeeCharacterShipOffsetRow = struct({
     /** Two-byte lookup key repeated by the addressed data row. */
@@ -11,11 +11,13 @@ const EmployeeCharacterShipOffsetRow = struct({
 }).fixedLength(10);
 
 /** Physical directory of ship-extension payload spans. */
-export const EmployeeCharacterShipOffsetDbss = dbss(
-    "gamecommondata/binary/employeecharactershipoffset.dbss",
-)({
-    /** Ship-extension pointers in directory order. */
-    rows: array(u32(), EmployeeCharacterShipOffsetRow),
+export const EmployeeCharacterShipOffsetDbss = table({
+    path: "gamecommondata/binary/employeecharactershipoffset.dbss",
+    rows: {
+        EmployeeCharacterShipOffsetRow: {
+            schema: EmployeeCharacterShipOffsetRow,
+        },
+    },
 });
 
 if (import.meta.main) {

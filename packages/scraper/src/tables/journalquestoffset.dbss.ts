@@ -1,5 +1,5 @@
 import { array, struct, u32 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One authoritative pointer to a journal volume row. */
 const JournalQuestOffsetEntry = struct({
@@ -19,12 +19,16 @@ const JournalQuestOffsetGroup = struct({
     entries: array(u32(), JournalQuestOffsetEntry),
 });
 
-export const JournalQuestOffsetDbss = dbss(
-    "gamecommondata/binary/journalquestoffset.dbss",
-)({
-    rows: array(u32(), JournalQuestOffsetGroup),
+export const JournalQuestOffsetDbss = table({
+    path: "gamecommondata/binary/journalquestoffset.dbss",
+    pabr: true,
+    rows: {
+        JournalQuestOffsetGroup: {
+            schema: JournalQuestOffsetGroup
+        },
+    },
 });
 
 if (import.meta.main) {
-    await JournalQuestOffsetDbss.decodeIntoDisk();
+    await JournalQuestOffsetDbss.decodeIntoDisk({ debug: true });
 }

@@ -1,5 +1,5 @@
-import { array, struct, u16, u32 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { struct, u16 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One physical two-byte identifier row. */
 const ItemTradeRow = struct({
@@ -13,9 +13,13 @@ const ItemTradeRow = struct({
 }).fixedLength(2);
 
 /** Count-prefixed NPC identifiers retained in physical file order. */
-export const ItemTradeDbss = dbss("gamecommondata/binary/itemtrade.dbss")({
-    /** Compact trade-NPC rows in physical order. */
-    rows: array(u32(), ItemTradeRow),
+export const ItemTradeDbss = table({
+    path: "gamecommondata/binary/itemtrade.dbss",
+    rows: {
+        ItemTradeRow: {
+            schema: ItemTradeRow,
+        },
+    },
 });
 
 if (import.meta.main) {

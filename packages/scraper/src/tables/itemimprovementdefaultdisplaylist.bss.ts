@@ -1,5 +1,5 @@
-import { array, bytes, struct, u32 } from "@marceloclp/bsd";
-import { bss } from "./common/helpers";
+import { struct, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One improvement source selected for the client's default display list. */
 const ItemImprovementDefaultDisplayListRow = struct({
@@ -7,24 +7,15 @@ const ItemImprovementDefaultDisplayListRow = struct({
     sourceItemId: u32().positive(),
 }).fixedLength(4);
 
-/** Informational PABR footer following the fixed-width display-list rows. */
-const ItemImprovementDefaultDisplayListFooter = struct({
-    /** Reserved four-byte range before the footer pointer. */
-    reserved00: bytes(4).reserved(),
-    /** Absolute byte offset of this twelve-byte footer. */
-    footerOffset: u32(),
-    /** Reserved four-byte terminal range. */
-    reserved08: bytes(4).reserved(),
-}).fixedLength(12);
-
 /** PABR-framed default item-improvement display list. */
-export const ItemImprovementDefaultDisplayListBss = bss(
-    "gamecommondata/binary/itemimprovementdefaultdisplaylist.bss",
-)({
-    /** Default-displayed source items in physical order. */
-    rows: array(u32(), ItemImprovementDefaultDisplayListRow),
-    /** Informational footer retained with its non-byte pointer value. */
-    footer: ItemImprovementDefaultDisplayListFooter,
+export const ItemImprovementDefaultDisplayListBss = table({
+    path: "gamecommondata/binary/itemimprovementdefaultdisplaylist.bss",
+    pabr: true,
+    rows: {
+        ItemImprovementDefaultDisplayListRow: {
+            schema: ItemImprovementDefaultDisplayListRow,
+        },
+    },
 });
 
 if (import.meta.main) {

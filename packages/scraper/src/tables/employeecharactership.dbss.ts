@@ -1,6 +1,6 @@
-import { array, bool, f32, struct, u16, u32, u8 } from "@marceloclp/bsd";
+import { bool, f32, struct, u16, u32, u8 } from "@marceloclp/bsd";
 import { utf16Text } from "./common/bsd";
-import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One ship-character extension row framed by its final condition string. */
 const EmployeeCharacterShipRow = struct({
@@ -52,11 +52,13 @@ const EmployeeCharacterShipRow = struct({
 );
 
 /** Count-prefixed ship extensions without mount-page or character-table joins. */
-export const EmployeeCharacterShipDbss = dbss(
-    "gamecommondata/binary/employeecharactership.dbss",
-)({
-    /** Ship-character extension rows in physical file order. */
-    rows: array(u32(), EmployeeCharacterShipRow),
+export const EmployeeCharacterShipDbss = table({
+    path: "gamecommondata/binary/employeecharactership.dbss",
+    rows: {
+        EmployeeCharacterShipRow: {
+            schema: EmployeeCharacterShipRow,
+        },
+    },
 });
 
 if (import.meta.main) {

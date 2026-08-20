@@ -1,5 +1,5 @@
-import { array, struct, u16, u32 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { struct, u16, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One fixed-width guild-house recipe-storage capacity row. */
 const GuildHouseCraftStorageRow = struct({
@@ -14,11 +14,13 @@ const GuildHouseCraftStorageRow = struct({
     .fixedLength(10);
 
 /** Fixed-width guild-house craft-storage table. */
-export const GuildHouseCraftStorageDbss = dbss(
-    "gamecommondata/binary/guildhousecraftstorage.dbss",
-)({
-    /** Recipe-list storage capacities in physical file order. */
-    rows: array(u32(), GuildHouseCraftStorageRow),
+export const GuildHouseCraftStorageDbss = table({
+    path: "gamecommondata/binary/guildhousecraftstorage.dbss",
+    rows: {
+        GuildHouseCraftStorageRow: {
+            schema: GuildHouseCraftStorageRow,
+        },
+    },
 });
 
 if (import.meta.main) {

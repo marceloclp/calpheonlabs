@@ -1,6 +1,5 @@
-import { array, bytes, struct, u32 } from "@marceloclp/bsd";
-
-import { dbss } from "./common/helpers";
+import { struct, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 const BaseDialogOffsetRow = struct({
     /** Full-width lookup key selecting the companion payload. */
@@ -11,12 +10,12 @@ const BaseDialogOffsetRow = struct({
     byteLength: u32(),
 });
 
-export const BaseDialogOffsetDbss = dbss("base_dialogoffset.dbss")({
-    /** Four-byte Pearl Abyss record-table signature at file offset zero. */
-    magic: bytes(4).ascii().is("PABR"),
-    rows: array(u32(), BaseDialogOffsetRow),
-    /** Validated twelve-byte PABR footer. */
-    footer: bytes(12).reserved(),
+export const BaseDialogOffsetDbss = table({
+    path: "gamecommondata/binary/base_dialogoffset.dbss",
+    pabr: true,
+    rows: {
+        BaseDialogOffsetRow: { schema: BaseDialogOffsetRow },
+    },
 });
 
 if (import.meta.main) {

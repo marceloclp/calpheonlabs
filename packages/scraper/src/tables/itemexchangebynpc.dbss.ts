@@ -1,5 +1,5 @@
-import { array, struct, u16, u32, u64 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { struct, u16, u32, u64 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One fixed 26-byte item-for-item exchange payload. */
 const ItemExchangeByNpcPayload = struct({
@@ -24,9 +24,13 @@ const ItemExchangeByNpcRow = struct({
 }).fixedLength(28);
 
 /** Complete fixed-width NPC item-exchange recipe table. */
-export const ItemExchangeByNpcDbss = dbss("itemexchangebynpc.dbss")({
-    /** Recipes retained in physical table order. */
-    rows: array(u32(), ItemExchangeByNpcRow),
+export const ItemExchangeByNpcDbss = table({
+    path: "gamecommondata/binary/itemexchangebynpc.dbss",
+    rows: {
+        ItemExchangeByNpcRow: {
+            schema: ItemExchangeByNpcRow,
+        },
+    },
 });
 
 if (import.meta.main) {

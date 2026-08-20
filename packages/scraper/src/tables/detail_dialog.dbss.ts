@@ -1,6 +1,5 @@
 import {
     array,
-    bytes,
     literal,
     struct,
     u16,
@@ -8,8 +7,8 @@ import {
     u8,
     union,
 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
 import { utf16Text, utf8Text } from "./common/bsd";
+import { table } from "./common/table";
 
 /** One service-specific prompt preceding ordinary dialogue options. */
 const DetailDialogServicePrompt = struct({
@@ -104,14 +103,16 @@ const DetailDialogRow = struct({
 }).check((row) => row.outerDialogKey === row.dialogKey)
 
 /**
- * Intrinsically framed detailed dialogues without base-dialogue or localization
- * joins.
+ * Intrinsically framed detailed dialogues without base-dialogue or
+ * localization joins.
  */
-export const DetailDialogDbss = dbss(
-    "gamecommondata/binary/detail_dialog.dbss",
-)({
-    /** Detailed-dialogue rows in physical file order. */
-    rows: array(u32(), DetailDialogRow),
+export const DetailDialogDbss = table({
+    path: "gamecommondata/binary/detail_dialog.dbss",
+    rows: {
+        DetailDialogRow: {
+            schema: DetailDialogRow,
+        },
+    },
 });
 
 if (import.meta.main) {

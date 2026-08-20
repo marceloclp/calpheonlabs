@@ -1,6 +1,6 @@
-import { array, struct, u32 } from "@marceloclp/bsd";
+import { struct, u32 } from "@marceloclp/bsd";
 import { asciiText, utf16Text } from "./common/bsd";
-import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One intrinsically framed processing-action condition row. */
 const ManufactureConditionRow = struct({
@@ -22,13 +22,13 @@ const ManufactureConditionRow = struct({
     .omit({ outerActionHash: true });
 
 /** Manufacture action names and their visibility and enablement expressions. */
-export const ManufactureConditionDbss = dbss(
-    "gamecommondata/binary/manufacturecondition.dbss",
-)({
-    /** Manufacture-condition rows in physical file order. */
-    rows: array(u32(), ManufactureConditionRow),
+export const ManufactureConditionDbss = table({
+    path: "gamecommondata/binary/manufacturecondition.dbss",
+    rows: {
+        ManufactureConditionRow: { schema: ManufactureConditionRow },
+    },
 });
 
 if (import.meta.main) {
-    await ManufactureConditionDbss.decodeIntoDisk();
+    await ManufactureConditionDbss.decodeIntoDisk({ debug: true });
 }

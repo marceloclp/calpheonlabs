@@ -1,5 +1,5 @@
-import { array, struct, u32 } from "@marceloclp/bsd";
-import { bss } from "./common/helpers";
+import { struct, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** Twelve-byte companion pointer with a four-byte lookup key. */
 export const DetailDialogOffsetRow = struct({
@@ -11,13 +11,14 @@ export const DetailDialogOffsetRow = struct({
     byteLength: u32(),
 }).fixedLength(12);
 
-
-/** Physical directory of full-width detailed-dialogue keys and payload spans. */
-export const DetailDialogOffsetDbss = bss(
-    "gamecommondata/binary/detail_dialogoffset.dbss",
-)({
-    /** Detailed-dialogue pointers in directory order. */
-    rows: array(u32(), DetailDialogOffsetRow).pad(12),
+export const DetailDialogOffsetDbss = table({
+    path: "gamecommondata/binary/detail_dialogoffset.dbss",
+    pabr: true,
+    rows: {
+        DetailDialogOffsetRow: {
+            schema: DetailDialogOffsetRow,
+        },
+    },
 });
 
 if (import.meta.main) {

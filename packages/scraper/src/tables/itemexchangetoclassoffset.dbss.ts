@@ -1,5 +1,5 @@
-import { array, struct, u32 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { struct, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One pointer to a class-specific item-exchange payload. */
 const ItemExchangeToClassOffsetRow = struct({
@@ -12,11 +12,13 @@ const ItemExchangeToClassOffsetRow = struct({
 }).fixedLength(12);
 
 /** Complete pointer directory for `itemexchangetoclass.dbss`. */
-export const ItemExchangeToClassOffsetDbss = dbss(
-    "itemexchangetoclassoffset.dbss",
-)({
-    /** Directory entries retained in their encoded order. */
-    rows: array(u32(), ItemExchangeToClassOffsetRow),
+export const ItemExchangeToClassOffsetDbss = table({
+    path: "gamecommondata/binary/itemexchangetoclassoffset.dbss",
+    rows: {
+        ItemExchangeToClassOffsetRow: {
+            schema: ItemExchangeToClassOffsetRow,
+        },
+    },
 });
 
 if (import.meta.main) {

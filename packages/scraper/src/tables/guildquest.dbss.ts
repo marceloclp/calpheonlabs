@@ -1,6 +1,6 @@
 import { array, padded, struct, u16, u32, u8 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
 import { utf16Text } from "./common/bsd";
+import { table } from "./common/table";
 
 /** One exact 178-byte guild mission item-reward record. */
 const GuildQuestReward = struct({
@@ -79,9 +79,13 @@ const GuildQuestRow = struct({
     .transform(({ tail, ...row }) => ({ ...row, ...tail }));
 
 /** Complete intrinsically framed guild mission table. */
-export const GuildQuestDbss = dbss("gamecommondata/binary/guildquest.dbss")({
-    /** Guild mission rows in physical file order. */
-    rows: array(u32(), GuildQuestRow),
+export const GuildQuestDbss = table({
+    path: "gamecommondata/binary/guildquest.dbss",
+    rows: {
+        GuildQuestRow: {
+            schema: GuildQuestRow,
+        },
+    },
 });
 
 if (import.meta.main) {

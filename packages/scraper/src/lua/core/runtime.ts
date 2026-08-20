@@ -54,6 +54,14 @@ export class LuaTable {
     readonly entries = new Map<string | number, LuaValue>();
 
     constructor(readonly id: number) { }
+
+    toJSON() {
+        return Object.fromEntries(this.entries.entries());
+    }
+
+    get<T extends LuaValue = LuaTable>(name: string | number): T {
+        return this.entries.get(name)! as T;
+    }
 }
 
 /** A value reconstructed by the assignment analyzer. */
@@ -450,7 +458,7 @@ class LuaProgram {
     }
 }
 
-export type LuaAssignments = ReadonlyMap<string, LuaValue>;
+export type LuaAssignments = Map<string, LuaValue>;
 
 /**
  * Reconstructs literal global and table assignments from one Lua prototype.

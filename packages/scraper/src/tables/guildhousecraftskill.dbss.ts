@@ -1,5 +1,5 @@
 import { array, struct, u16, u32 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One fixed-width guild-house recipe-list skill requirement row. */
 const GuildHouseCraftSkillRow = struct({
@@ -14,11 +14,13 @@ const GuildHouseCraftSkillRow = struct({
     .fixedLength(20);
 
 /** Fixed-width guild-house recipe skill table. */
-export const GuildHouseCraftSkillDbss = dbss(
-    "gamecommondata/binary/guildhousecraftskill.dbss",
-)({
-    /** Recipe-list skill requirements in physical file order. */
-    rows: array(u32(), GuildHouseCraftSkillRow),
+export const GuildHouseCraftSkillDbss = table({
+    path: "gamecommondata/binary/guildhousecraftskill.dbss",
+    rows: {
+        GuildHouseCraftSkillRow: {
+            schema: GuildHouseCraftSkillRow,
+        },
+    },
 });
 
 if (import.meta.main) {

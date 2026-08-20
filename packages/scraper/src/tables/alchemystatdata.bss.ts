@@ -1,6 +1,5 @@
-import { array, bytes, f32, struct, u32 } from "@marceloclp/bsd";
-
-import { bss } from "./common/helpers";
+import { array, f32, struct, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One ordered common/special/rare extra-item selection channel. */
 const AlchemyEventDropChannel = struct({
@@ -25,9 +24,12 @@ const AlchemyStatDataRow = struct({
     eventDropRateMillionths: u32(),
 });
 
-export const AlchemyStatDataBss = bss("alchemystatdata.bss")({
-    rows: array(u32(), AlchemyStatDataRow),
-    footer: bytes(12).reserved(),
+export const AlchemyStatDataBss = table({
+    path: "gamecommondata/binary/alchemystatdata.bss",
+    pabr: true,
+    rows: {
+        AlchemyStatDataRow: { schema: AlchemyStatDataRow },
+    },
 });
 
 if (import.meta.main) {

@@ -1,5 +1,5 @@
-import { array, bytes, padded, struct, u32 } from "@marceloclp/bsd";
-import { bss } from "./common/helpers";
+import { bytes, padded, struct, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One fixed-width item-to-search-text reference. */
 const MarketSearchListRow = struct({
@@ -10,20 +10,17 @@ const MarketSearchListRow = struct({
 }).fixedLength(12);
 
 /** Complete market-search list with its local search-text dictionary. */
-export const MarketSearchListBss = bss(
-    "gamecommondata/binary/marketsearchlist.bss",
-)({
-    /** Item-to-search-text references in physical order. */
-    rows: array(u32(), MarketSearchListRow),
-    /** Search labels addressed by each row's `searchTextIndex`. */
-    searchTexts: array(u32(), padded(1, bytes(u32()).utf16())),
-    /** Informational footer following the search-text dictionary. */
-    footer: struct({
-        /** Absolute byte offset of the counted `searchTexts` dictionary. */
-        searchTextOffset: u32().pad(4),
-    }),
+export const MarketSearchListBss = table({
+    path: "gamecommondata/binary/marketsearchlist.bss",
+    pabr: true,
+    rows: {
+        /** Item-to-search-text references in physical order. */
+        MarketSearchListRow: { schema: MarketSearchListRow },
+        /** Search labels addressed by each row's `searchTextIndex`. */
+        SearchTexts: { schema: padded(1, bytes(u32()).utf16()) },
+    },
 });
 
 if (import.meta.main) {
-    await MarketSearchListBss.decodeIntoDisk();
+    await MarketSearchListBss.decodeIntoDisk({ debug: true });
 }

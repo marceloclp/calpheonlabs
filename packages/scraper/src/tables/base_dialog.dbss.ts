@@ -1,6 +1,5 @@
 import { array, bytes, struct, u32 } from "@marceloclp/bsd";
-
-import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 const BaseDialogRow = struct({
     /**
@@ -49,8 +48,11 @@ const BaseDialogRow = struct({
     ),
 }).pad(5);
 
-export const BaseDialogDbss = dbss("base_dialog.dbss")({
-    rows: array(u32(), BaseDialogRow),
+export const BaseDialogDbss = table({
+    path: "gamecommondata/binary/base_dialog.dbss",
+    rows: {
+        BaseDialogRow: { schema: BaseDialogRow },
+    },
 });
 
 if (import.meta.main) {

@@ -14,7 +14,7 @@ import {
     union,
 } from "@marceloclp/bsd";
 import { asciiText, reserved, utf16Text } from "./common/bsd";
-import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 /**
  * Fixed 276-byte character-definition body before the asset and identity
@@ -253,10 +253,13 @@ const CharacterStaticRow = struct({
     tailFields: union(CharacterStaticVehicleTail, CharacterStaticGenericTail),
 });
 
-/** Complete intrinsic character-static table without an offset dependency. */
-export const CharacterStaticDbss = dbss("characterstatic.dbss")({
-    /** Character definitions retained in physical file order. */
-    rows: array(u32(), CharacterStaticRow),
+export const CharacterStaticDbss = table({
+    path: "gamecommondata/binary/characterstatic.dbss",
+    rows: {
+        CharacterStaticRow: {
+            schema: CharacterStaticRow,
+        },
+    },
 });
 
 if (import.meta.main) {

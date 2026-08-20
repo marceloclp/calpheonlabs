@@ -1,6 +1,6 @@
 import { array, struct, u16, u32, u8 } from "@marceloclp/bsd";
 import { utf16Text } from "./common/bsd";
-import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One intrinsically framed house or workshop recipe-list row. */
 const HouseInfoReceipeRow = struct({
@@ -23,11 +23,15 @@ const HouseInfoReceipeRow = struct({
 });
 
 /** House and workshop recipe lists without item-exchange joins. */
-export const HouseInfoReceipeDbss = dbss(
-    "gamecommondata/binary/houseinforeceipe.dbss",
-)({
-    /** House recipe-list rows in physical file order. */
-    rows: array(u32(), HouseInfoReceipeRow),
+export const HouseInfoReceipeDbss = table({
+    path: "gamecommondata/binary/houseinforeceipe.dbss",
+    rows: {
+        HouseInfoReceipeRow: {
+            schema: HouseInfoReceipeRow,
+        },
+    },
 });
 
-if (import.meta.main) await HouseInfoReceipeDbss.decodeIntoDisk();
+if (import.meta.main) {
+    await HouseInfoReceipeDbss.decodeIntoDisk();
+}

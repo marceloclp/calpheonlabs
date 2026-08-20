@@ -1,5 +1,5 @@
-import { array, struct, u16, u32 } from "@marceloclp/bsd";
-import { bss } from "./common/helpers";
+import { struct, u16 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One physical Black Desert quest identifier. */
 const QuestId = struct({
@@ -9,13 +9,15 @@ const QuestId = struct({
     questNumber: u16(),
 });
 
-
 /** Physical ordered list of guild quest identifiers eligible for execution. */
-export const DoGuildQuestListBss = bss(
-    "gamecommondata/binary/doguildquestlist.bss",
-)({
-    /** Guild quest identifiers in physical table order. */
-    rows: array(u32(), QuestId).pad(12),
+export const DoGuildQuestListBss = table({
+    path: "gamecommondata/binary/doguildquestlist.bss",
+    pabr: true,
+    rows: {
+        QuestId: {
+            schema: QuestId,
+        },
+    },
 });
 
 if (import.meta.main) {

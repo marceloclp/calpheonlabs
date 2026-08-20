@@ -1,5 +1,5 @@
 import { array, struct, u16, u32, u64, u8 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One guild-manufacturing recipe. */
 const GuildManufactureRow = struct({
@@ -28,11 +28,13 @@ const GuildManufactureRow = struct({
 }).check((row) => row.outerProductItemId === row.productItemId);
 
 /** Intrinsically framed guild-manufacturing recipes. */
-export const GuildManufactureDbss = dbss(
-    "gamecommondata/binary/guildmanufacture.dbss",
-)({
-    /** Guild-manufacturing recipes in physical file order. */
-    rows: array(u32(), GuildManufactureRow),
+export const GuildManufactureDbss = table({
+    path: "gamecommondata/binary/guildmanufacture.dbss",
+    rows: {
+        GuildManufactureRow: {
+            schema: GuildManufactureRow,
+        },
+    },
 });
 
 if (import.meta.main) {

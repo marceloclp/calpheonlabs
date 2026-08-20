@@ -1,5 +1,5 @@
 import { array, bool, struct, u32 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One fixed-width class-specific item-exchange group. */
 const ItemExchangeToClassRow = struct({
@@ -14,9 +14,13 @@ const ItemExchangeToClassRow = struct({
 });
 
 /** Complete fixed-width class-specific item-exchange table. */
-export const ItemExchangeToClassDbss = dbss("itemexchangetoclass.dbss")({
-    /** Exchange groups retained in physical table order. */
-    rows: array(u32(), ItemExchangeToClassRow),
+export const ItemExchangeToClassDbss = table({
+    path: "gamecommondata/binary/itemexchangetoclass.dbss",
+    rows: {
+        ItemExchangeToClassRow: {
+            schema: ItemExchangeToClassRow,
+        },
+    },
 });
 
 if (import.meta.main) {

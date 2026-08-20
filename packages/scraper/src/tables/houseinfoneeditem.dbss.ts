@@ -1,5 +1,5 @@
 import { array, padded, struct, u16, u32, u64 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One item and quantity required by a house transfer or upgrade tier. */
 const HouseInfoNeedItemMaterial = struct({
@@ -28,11 +28,13 @@ const HouseInfoNeedItemRow = struct({
 });
 
 /** Intrinsically framed house transfer and upgrade requirement sets. */
-export const HouseInfoNeedItemDbss = dbss(
-    "gamecommondata/binary/houseinfoneeditem.dbss",
-)({
-    /** House requirement rows in physical file order. */
-    rows: array(u32(), HouseInfoNeedItemRow),
+export const HouseInfoNeedItemDbss = table({
+    path: "gamecommondata/binary/houseinfoneeditem.dbss",
+    rows: {
+        HouseInfoNeedItemRow: {
+            schema: HouseInfoNeedItemRow,
+        },
+    },
 });
 
 if (import.meta.main) {

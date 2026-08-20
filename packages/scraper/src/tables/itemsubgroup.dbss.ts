@@ -12,7 +12,7 @@ import {
     u8,
     union,
 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** Returns whether an opaque structural byte range is entirely zero. */
 function isZero(value: Uint8Array) {
@@ -194,16 +194,14 @@ const ItemSubGroupGroup = struct({
 });
 
 /** Complete physical item-subgroup table without an offset-table dependency. */
-export const ItemSubGroupDbss = dbss("gamecommondata/binary/itemsubgroup.dbss")(
-    {
-        /** Physical subgroups, required to have unique identifiers. */
-        groups: array(u32(), ItemSubGroupGroup).check(
-            (groups) =>
-                new Set(groups.map((group) => group.groupId)).size ===
-                groups.length,
-        ),
+export const ItemSubGroupDbss = table({
+    path: "gamecommondata/binary/itemsubgroup.dbss",
+    rows: {
+        ItemSubGroupGroup: {
+            schema: ItemSubGroupGroup,
+        },
     },
-);
+});
 
 if (import.meta.main) {
     await ItemSubGroupDbss.decodeIntoDisk();

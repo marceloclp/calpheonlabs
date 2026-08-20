@@ -1,5 +1,5 @@
-import { array, padded, struct, u32 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { struct, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One twelve-byte pointer to a source payload in `knowledgelearning.dbss`. */
 const KnowledgeLearningOffsetRow = struct({
@@ -12,15 +12,17 @@ const KnowledgeLearningOffsetRow = struct({
 }).fixedLength(12);
 
 /** Physical two-section knowledge-source lookup directory. */
-export const KnowledgeLearningOffsetDbss = dbss(
-    "gamecommondata/binary/knowledgelearningoffset.dbss",
-)({
-    /** Character, NPC, or monster source pointers. */
-    characterSources: padded(4, array(u32(), KnowledgeLearningOffsetRow)),
-    /** Item source pointers. */
-    itemSources: array(u32(), KnowledgeLearningOffsetRow),
+export const KnowledgeLearningOffsetDbss = table({
+    path: "gamecommondata/binary/knowledgelearningoffset.dbss",
+    pabr: true,
+    rows: {
+        /** Character, NPC, or monster source pointers. */
+        CharacterSource: { schema: KnowledgeLearningOffsetRow },
+        /** Item source pointers. */
+        ItemSource: { schema: KnowledgeLearningOffsetRow },
+    },
 });
 
 if (import.meta.main) {
-    await KnowledgeLearningOffsetDbss.decodeIntoDisk();
+    await KnowledgeLearningOffsetDbss.decodeIntoDisk({ debug: true });
 }

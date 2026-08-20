@@ -9,8 +9,7 @@ import {
     u32,
     u8,
 } from "@marceloclp/bsd";
-
-import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 const Utf16Text = u32()
     .pad(4)
@@ -287,8 +286,11 @@ const CharacterFunctionRow = struct({
     additionalServices: CharacterFunctionAdditionalServices,
 });
 
-export const CharacterFunctionDbss = dbss("characterfunction.dbss")({
-    rows: array(u32(), padded(2, CharacterFunctionRow)),
+export const CharacterFunctionDbss = table({
+    path: "gamecommondata/binary/characterfunction.dbss",
+    rows: {
+        CharacterFunctionRow: { schema: padded(2, CharacterFunctionRow) },
+    },
 });
 
 if (import.meta.main) {

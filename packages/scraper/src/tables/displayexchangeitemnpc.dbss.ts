@@ -1,5 +1,5 @@
 import { array, struct, u16, u32 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One NPC exchange-display list with its packed key retained and decomposed. */
 const DisplayExchangeItemNpcRow = struct({
@@ -16,11 +16,13 @@ const DisplayExchangeItemNpcRow = struct({
 }).check((row) => row.displayExchangeKey === row.repeatedKey)
 
 /** Intrinsically framed NPC exchange-display lists without recipe joins. */
-export const DisplayExchangeItemNpcDbss = dbss(
-    "gamecommondata/binary/displayexchangeitemnpc.dbss",
-)({
-    /** NPC exchange-display lists in physical file order. */
-    rows: array(u32(), DisplayExchangeItemNpcRow),
+export const DisplayExchangeItemNpcDbss = table({
+    path: "gamecommondata/binary/displayexchangeitemnpc.dbss",
+    rows: {
+        DisplayExchangeItemNpcRow: {
+            schema: DisplayExchangeItemNpcRow,
+        },
+    },
 });
 
 if (import.meta.main) {

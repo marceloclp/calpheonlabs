@@ -1,5 +1,5 @@
-import { array, struct, u32 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { struct } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /**
  * Empty offset directory for the reverse-direction trade-group table.
@@ -7,10 +7,11 @@ import { dbss } from "./common/helpers";
  * The verified capture is exactly one zero count and contains no pointer row
  * from which a future non-empty offset grammar could be inferred.
  */
-export const ItemTradeGroupFromNpcOffsetDbss = dbss(
-    "gamecommondata/binary/itemtradegroupfromnpcoffset.dbss",
-)({
-    rows: array(u32(), struct({})),
+export const ItemTradeGroupFromNpcOffsetDbss = table({
+    path: "gamecommondata/binary/itemtradegroupfromnpcoffset.dbss",
+    rows: {
+        Row: { schema: struct({}) },
+    },
 });
 
 if (import.meta.main) {

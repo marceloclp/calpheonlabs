@@ -1,6 +1,5 @@
-import { array, bool, struct, u16, u32 } from "@marceloclp/bsd";
-
-import { dbss } from "./common/helpers";
+import { bool, struct, u16 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One fixed 48-byte character capability row. */
 const CharacterSpawnTypeRow = struct({
@@ -100,10 +99,11 @@ const CharacterSpawnTypeRow = struct({
     churchBuff: bool(),
 }).fixedLength(48);
 
-/** Count-prefixed character capability table in physical row order. */
-export const CharacterSpawnTypeDbss = dbss("characterspawntype.dbss")({
-    /** Fixed-width character capability rows. */
-    rows: array(u32(), CharacterSpawnTypeRow),
+export const CharacterSpawnTypeDbss = table({
+    path: "gamecommondata/binary/characterspawntype.dbss",
+    rows: {
+        CharacterSpawnTypeRow: { schema: CharacterSpawnTypeRow },
+    },
 });
 
 if (import.meta.main) {

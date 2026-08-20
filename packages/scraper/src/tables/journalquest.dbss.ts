@@ -1,6 +1,6 @@
 import { array, bool, struct, u16, u32 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
 import { asciiText, utf16Text } from "./common/bsd";
+import { table } from "./common/table";
 
 const QuestId = struct({
     /** Quest family/group identifier stored in the low two bytes. */
@@ -33,12 +33,16 @@ const JournalQuestRow = struct({
     quests: array(u32(), QuestId),
 }).pad(4);
 
-export const JournalQuestDbss = dbss("gamecommondata/binary/journalquest.dbss")(
-    {
-        rows: array(u32(), array(u32(), JournalQuestRow)),
+export const JournalQuestDbss = table({
+    path: "gamecommondata/binary/journalquest.dbss",
+    pabr: true,
+    rows: {
+        JournalQuestRow: {
+            schema: JournalQuestRow,
+        },
     },
-);
+});
 
 if (import.meta.main) {
-    await JournalQuestDbss.decodeIntoDisk();
+    await JournalQuestDbss.decodeIntoDisk({ debug: true });
 }

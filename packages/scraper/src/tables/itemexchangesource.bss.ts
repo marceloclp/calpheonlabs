@@ -12,8 +12,8 @@ import {
     union,
     type BsdInfer,
 } from "@marceloclp/bsd";
-import { bss } from "./common/helpers";
 import { mixedText } from "./common/bsd";
+import { table } from "./common/table";
 
 type ItemExchangeSourceMaterial = BsdInfer<typeof ItemExchangeSourceMaterial>;
 /** One item-and-quantity input used by a worker or workshop recipe. */
@@ -268,22 +268,19 @@ const ItemExchangeSourceRow = union(
     ItemExchangeSourceOrdinaryRow,
 );
 
-/** Informational footer following the shared recipe string pool. */
-const ItemExchangeSourceFooter = struct({
-    /** Absolute byte offset of the shared string-pool trailer. */
-    trailerOffset: u32(),
-    /** Uninterpreted four-byte file trailer. */
-    reserved04: bytes(4).reserved(),
-}).fixedLength(8);
-
 /** Complete worker and workshop production-recipe table. */
-export const ItemExchangeSourceBss = bss("itemexchangesource.bss")({
-    /** Recipes retained in physical table order. */
-    rows: array(u32(), ItemExchangeSourceRow),
-    /** Shared icon, name, and description strings. */
-    trailer: array(u32().transform((x) => x - 1).pad(5), mixedText()),
-    /** Informational trailer pointer and terminal byte range. */
-    footer: ItemExchangeSourceFooter,
+export const ItemExchangeSourceBss = table({
+    path: "gamecommondata/binary/itemexchangesource.bss",
+    pabr: true,
+    rows: {
+        ItemExchangeSourceRow: {
+            schema: ItemExchangeSourceRow,
+        },
+        Stringpool: {
+            schema: mixedText(),
+            counter: u32().transform((x) => x - 1).pad(5),
+        },
+    },
 });
 
 if (import.meta.main) {

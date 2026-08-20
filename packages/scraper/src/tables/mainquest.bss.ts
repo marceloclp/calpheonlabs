@@ -1,5 +1,5 @@
 import { array, bytes, padded, struct, u16, u32, u8 } from "@marceloclp/bsd";
-import { bss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One Quest-window entry containing only physical indexes and controls. */
 const MainQuestEntry = struct({
@@ -33,18 +33,15 @@ const MainQuestRow = struct({
     endDateStringIndex: u32(),
 }).pad(4);
 
-export const MainQuestBss = bss("gamecommondata/binary/mainquest.bss")({
-    /** Quest-window lists. */
-    rows: array(u32(), MainQuestRow),
-    /** String pool. */
-    stringPool: array(u32(), padded(1, bytes(u32()).utf16())),
-    /** Eight-byte footer pointing back to the start of `stringPool`. */
-    footer: struct({
-        /** Absolute string-pool offset repeated at end of file. */
-        stringPoolOffset: u32(),
-    }).pad(4),
+export const MainQuestBss = table({
+    path: "gamecommondata/binary/mainquest.bss",
+    pabr: true,
+    rows: {
+        MainQuestRow: { schema: MainQuestRow },
+        Stringpool: { schema: padded(1, bytes(u32()).utf16()) },
+    },
 });
 
 if (import.meta.main) {
-    await MainQuestBss.decodeIntoDisk();
+    await MainQuestBss.decodeIntoDisk({ debug: true });
 }

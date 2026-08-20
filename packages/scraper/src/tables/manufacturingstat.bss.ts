@@ -1,5 +1,5 @@
-import { array, f32, padded, struct, u32 } from "@marceloclp/bsd";
-import { bss } from "./common/helpers";
+import { array, f32, literal, padded, struct, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One fixed-width manufacturing progression row. */
 const ManufacturingStatRow = struct({
@@ -17,13 +17,18 @@ const ManufacturingStatRow = struct({
 const ManufacturingStatTrack = array(u32(), ManufacturingStatRow);
 
 /** Manufacturing profession tuning tracks; this table contains no recipes. */
-export const ManufacturingStatBss = bss(
-    "gamecommondata/binary/manufacturingstat.bss",
-)({
-    /** Six physical stat tracks stored consecutively. */
-    tracks: padded(4, array(6, ManufacturingStatTrack)).pad(12),
+export const ManufacturingStatBss = table({
+    path: "gamecommondata/binary/manufacturingstat.bss",
+    pabr: true,
+    rows: {
+        /** Six physical stat tracks stored consecutively. */
+        ManufacturingStatTrack: {
+            schema: ManufacturingStatTrack,
+            counter: padded(4, literal(6)),
+        },
+    },
 });
 
 if (import.meta.main) {
-    await ManufacturingStatBss.decodeIntoDisk();
+    await ManufacturingStatBss.decodeIntoDisk({ debug: true });
 }

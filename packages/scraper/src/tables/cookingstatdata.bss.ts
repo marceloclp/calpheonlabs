@@ -1,5 +1,5 @@
-import { array, f32, struct, u32 } from "@marceloclp/bsd";
-import { bss } from "./common/helpers";
+import { f32, struct, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One fixed-width Cooking Mastery bonus row. */
 const CookingStatDataRow = struct({
@@ -18,11 +18,14 @@ const CookingStatDataRow = struct({
 }).fixedLength(24);
 
 /** Cooking profession tuning data; it contains no ingredient or output recipes. */
-export const CookingStatDataBss = bss(
-    "gamecommondata/binary/cookingstatdata.bss",
-)({
-    /** Mastery thresholds and their associated cooking bonuses. */
-    rows: array(u32(), CookingStatDataRow).pad(12),
+export const CookingStatDataBss = table({
+    path: "gamecommondata/binary/cookingstatdata.bss",
+    pabr: true,
+    rows: {
+        CookingStatDataRow: {
+            schema: CookingStatDataRow,
+        },
+    },
 });
 
 if (import.meta.main) {

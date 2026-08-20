@@ -1,5 +1,5 @@
-import { array, bytes, struct, u32 } from "@marceloclp/bsd";
-import { bss } from "./common/helpers";
+import { struct, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One source item and the market-listed item whose price it references. */
 const ItemLinkPriceRow = struct({
@@ -9,22 +9,15 @@ const ItemLinkPriceRow = struct({
     marketPriceReferenceItemId: u32().positive(),
 }).fixedLength(8);
 
-/** Informational PABR footer following the item-price links. */
-const ItemLinkPriceFooter = struct({
-    /** Unused four-byte prefix before the footer self-pointer. */
-    reserved00: bytes(4).reserved(),
-    /** Absolute byte offset at which this footer begins. */
-    footerOffset: u32(),
-    /** Unused four-byte file terminator. */
-    reserved08: bytes(4).reserved(),
-}).fixedLength(12);
-
 /** Complete physical item-price-link table. */
-export const ItemLinkPriceBss = bss("gamecommondata/binary/itemlinkprice.bss")({
-    /** Directional item-price links in physical file order. */
-    rows: array(u32(), ItemLinkPriceRow),
-    /** Informational footer framing the table. */
-    footer: ItemLinkPriceFooter,
+export const ItemLinkPriceBss = table({
+    path: "gamecommondata/binary/itemlinkprice.bss",
+    pabr: true,
+    rows: {
+        ItemLinkPriceRow: {
+            schema: ItemLinkPriceRow,
+        },
+    },
 });
 
 if (import.meta.main) {

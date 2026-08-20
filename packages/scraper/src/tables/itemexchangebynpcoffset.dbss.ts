@@ -1,5 +1,5 @@
-import { array, struct, u16, u32 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { struct, u16, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One ten-byte directory entry for an NPC item-exchange payload. */
 const ItemExchangeByNpcOffsetRow = struct({
@@ -12,12 +12,14 @@ const ItemExchangeByNpcOffsetRow = struct({
 }).fixedLength(10);
 
 /** Complete pointer directory for `itemexchangebynpc.dbss`. */
-export const ItemExchangeByNpcOffsetDbss = dbss("itemexchangebynpcoffset.dbss")(
-    {
-        /** Directory entries retained in their encoded order. */
-        rows: array(u32(), ItemExchangeByNpcOffsetRow),
+export const ItemExchangeByNpcOffsetDbss = table({
+    path: "gamecommondata/binary/itemexchangebynpcoffset.dbss",
+    rows: {
+        ItemExchangeByNpcOffsetRow: {
+            schema: ItemExchangeByNpcOffsetRow,
+        },
     },
-);
+});
 
 if (import.meta.main) {
     await ItemExchangeByNpcOffsetDbss.decodeIntoDisk();

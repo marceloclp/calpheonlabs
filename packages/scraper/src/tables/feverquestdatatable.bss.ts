@@ -1,5 +1,5 @@
-import { array, struct, u16, u32 } from "@marceloclp/bsd";
-import { bss } from "./common/helpers";
+import { struct, u16, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One quest and the Agris Fever points consumed when it is accepted. */
 const FeverQuestDataTableRow = struct({
@@ -11,12 +11,14 @@ const FeverQuestDataTableRow = struct({
     agrisFeverCost: u32(),
 }).fixedLength(8);
 
-/** Complete counted Agris Fever quest-cost table. */
-export const FeverQuestDataTableBss = bss(
-    "gamecommondata/binary/feverquestdatatable.bss",
-)({
-    /** Quests and their Agris Fever costs in physical order. */
-    rows: array(u32(), FeverQuestDataTableRow).pad(12),
+export const FeverQuestDataTableBss = table({
+    path: "gamecommondata/binary/feverquestdatatable.bss",
+    pabr: true,
+    rows: {
+        FeverQuestDataTableRow: {
+            schema: FeverQuestDataTableRow,
+        },
+    },
 });
 
 if (import.meta.main) {

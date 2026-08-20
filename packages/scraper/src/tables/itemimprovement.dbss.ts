@@ -1,5 +1,5 @@
 import { array, bytes, struct, u32, u8 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One intrinsically framed item-improvement result group. */
 const ItemImprovementRow = struct({
@@ -24,11 +24,13 @@ const ItemImprovementRow = struct({
 });
 
 /** Count-prefixed item-improvement rows in physical file order. */
-export const ItemImprovementDbss = dbss(
-    "gamecommondata/binary/itemimprovement.dbss",
-)({
-    /** Variable-width rows framed by their own result-item counts. */
-    rows: array(u32(), ItemImprovementRow),
+export const ItemImprovementDbss = table({
+    path: "gamecommondata/binary/itemimprovement.dbss",
+    rows: {
+        ItemImprovementRow: {
+            schema: ItemImprovementRow,
+        },
+    },
 });
 
 if (import.meta.main) {

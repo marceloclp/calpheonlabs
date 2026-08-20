@@ -1,5 +1,5 @@
-import { array, struct, u16, u32 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { struct, u16, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** Ten-byte companion pointer with a two-byte lookup key. */
 const HouseInfoNeedItemOffsetRow = struct({
@@ -12,11 +12,13 @@ const HouseInfoNeedItemOffsetRow = struct({
 }).fixedLength(10);
 
 /** Physical directory of variable-width house requirement rows. */
-export const HouseInfoNeedItemOffsetDbss = dbss(
-    "gamecommondata/binary/houseinfoneeditemoffset.dbss",
-)({
-    /** House requirement pointers in directory order. */
-    rows: array(u32(), HouseInfoNeedItemOffsetRow),
+export const HouseInfoNeedItemOffsetDbss = table({
+    path: "gamecommondata/binary/houseinfoneeditemoffset.dbss",
+    rows: {
+        HouseInfoNeedItemOffsetRow: {
+            schema: HouseInfoNeedItemOffsetRow,
+        },
+    },
 });
 
 if (import.meta.main) {

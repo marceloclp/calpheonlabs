@@ -26,6 +26,16 @@ export default defineConfig({
                 icon: "book-open",
                 items: [
                     {
+                        label: "Database schema",
+                        href: "/database",
+                        icon: "database",
+                    },
+                    {
+                        label: "Item relationships",
+                        href: "/item-relationships",
+                        icon: "network",
+                    },
+                    {
                         label: "Methodology",
                         href: "/methodology",
                     },
@@ -47,6 +57,16 @@ export default defineConfig({
     search: {
         provider: "orama",
         popular: [
+            {
+                label: "Database schema",
+                href: "/database",
+                icon: "database",
+            },
+            {
+                label: "Item relationships",
+                href: "/item-relationships",
+                icon: "network",
+            },
             {
                 label: "Methodology",
                 href: "/methodology",

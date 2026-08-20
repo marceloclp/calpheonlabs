@@ -1,14 +1,13 @@
 import {
     array,
     bytes,
-    padded,
     struct,
     u24,
     u32,
     u64,
     u8,
 } from "@marceloclp/bsd";
-import { bss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One material and exact quantity consumed by a processing recipe. */
 const ManufactureMaterial = struct({
@@ -40,22 +39,21 @@ const ManufactureRow = struct({
     materials: array(u32(), ManufactureMaterial),
 }).omit({ formatMarker: true });
 
-/** Informational footer following the action-name dictionary. */
-const ManufactureFooter = struct({
-    /** Absolute byte offset of the `actions` trailer. */
-    trailerOffset: u32().pad(4),
-});
-
 /** Complete processing-recipe table, including its local action dictionary. */
-export const ManufactureBss = bss("gamecommondata/binary/manufacture.bss")({
-    /** Recipes in physical file order. */
-    rows: array(u32(), ManufactureRow),
-    /** Action names referenced by index and hash from the recipe rows. */
-    actions: array(u32().pad(1), bytes(u32()).ascii().pad(1)).pad(-1),
-    /** Informational footer following the action-name dictionary. */
-    footer: ManufactureFooter,
+export const ManufactureBss = table({
+    path: "gamecommondata/binary/manufacture.bss",
+    pabr: true,
+    rows: {
+        /** Recipes in physical file order. */
+        ManufactureRow: { schema: ManufactureRow },
+        /** Action names referenced by index and hash from the recipe rows. */
+        Action: {
+            schema: bytes(u32()).ascii().pad(1),
+            counter: u32().pad(1),
+        },
+    },
 });
 
 if (import.meta.main) {
-    await ManufactureBss.decodeIntoDisk();
+    await ManufactureBss.decodeIntoDisk({ debug: true });
 }

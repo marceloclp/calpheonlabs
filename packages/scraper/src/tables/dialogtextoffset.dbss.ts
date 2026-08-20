@@ -1,5 +1,5 @@
-import { array, struct, u32 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { struct, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** Twelve-byte companion pointer with a four-byte lookup key. */
 export const DialogTextOffsetRow = struct({
@@ -13,11 +13,13 @@ export const DialogTextOffsetRow = struct({
 
 
 /** Physical directory of named dialogue-text groups and payload spans. */
-export const DialogTextOffsetDbss = dbss(
-    "gamecommondata/binary/dialogtextoffset.dbss",
-)({
-    /** Dialogue-text group pointers in directory order. */
-    rows: array(u32(), DialogTextOffsetRow),
+export const DialogTextOffsetDbss = table({
+    path: "gamecommondata/binary/dialogtextoffset.dbss",
+    rows: {
+        DialogTextOffsetRow: {
+            schema: DialogTextOffsetRow,
+        },
+    },
 });
 
 if (import.meta.main) {

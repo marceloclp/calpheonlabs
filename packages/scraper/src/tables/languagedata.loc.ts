@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { inflateSync } from "node:zlib";
-import { bytes, repeat, struct, u16, u32, u8 } from "@marceloclp/bsd";
+import { BsdReader, bytes, repeat, struct, u16, u32, u8, type BsdInfer } from "@marceloclp/bsd";
 
 /**
  * One desktop localization row shared by every locale.
@@ -9,32 +9,23 @@ import { bytes, repeat, struct, u16, u32, u8 } from "@marceloclp/bsd";
  * The identifiers select a string in the game's broad text namespace; joins to
  * item, NPC, dialogue, and UI tables are intentionally deferred.
  */
-const LanguageDataRow = struct({
-    /** Stored UTF-16 code-unit count for `text`, excluding its terminator. */
-    textSize: u32().peek(),
-    /** Namespace identifiers and text framed by the preceding code-unit count. */
-    fields: u32().pipe((textSize) =>
-        struct({
-            /** Broad localization namespace or category code. */
-            type: u32(),
-            /** Primary identifier within the namespace selected by `type`. */
-            id1: u32(),
-            /** Secondary 16-bit localization variant identifier. */
-            id2: u16(),
-            /** Third localization variant byte. */
-            id3: u8(),
-            /** Fourth localization variant byte. */
-            id4: u8(),
-            /**
-             * UTF-16 localized text without its four-byte serialized
-             * terminator.
-             */
-            text: bytes(textSize * 2)
-                .utf16()
-                .pad(4),
-        }),
-    ),
-}).transform(({ textSize, fields }) => ({ textSize, ...fields }));
+const LanguageDataRow = u32().pipe((n) => struct({
+    /** Broad localization namespace or category code. */
+    type: u32(),
+    /** Primary identifier within the namespace selected by `type`. */
+    id1: u32(),
+    /** Secondary 16-bit localization variant identifier. */
+    id2: u16(),
+    /** Third localization variant byte. */
+    id3: u8(),
+    /** Fourth localization variant byte. */
+    id4: u8(),
+    /**
+     * UTF-16 localized text without its four-byte serialized
+     * terminator.
+     */
+    text: bytes(n * 2).utf16().pad(4),
+}));
 
 /** Inflated localization payload as a count-less sequence of self-sized rows. */
 const LanguageDataSchema = struct({
@@ -62,9 +53,9 @@ function decompressLanguageData(input: Uint8Array) {
     if (inflated.byteLength !== expectedSize) {
         throw new Error(
             "Localization size mismatch: expected " +
-                expectedSize +
-                ", got " +
-                inflated.byteLength,
+            expectedSize +
+            ", got " +
+            inflated.byteLength,
         );
     }
     return inflated;
@@ -125,9 +116,24 @@ class LanguageDataTable {
             JSON.stringify(decoded, null, 4),
         );
     }
+
+    async loadIntoMemory(locale = "pt") {
+        const buffer = await this.extract(locale);
+        return this.decode(buffer);
+    }
+
+    async *stream(locale = "pt"): AsyncGenerator<BsdInfer<typeof LanguageDataRow>> {
+        const buffer = await this.extract(locale);
+        const reader = new BsdReader(decompressLanguageData(buffer));
+        while (reader.byteOffset < reader.limit) {
+            yield LanguageDataRow.read(reader);
+        }
+    }
 }
 
 /** Locale-independent desktop localization table loader. */
 export const LanguageDataLoc = new LanguageDataTable();
 
-if (import.meta.main) await LanguageDataLoc.load();
+if (import.meta.main) {
+    await LanguageDataLoc.load();
+}

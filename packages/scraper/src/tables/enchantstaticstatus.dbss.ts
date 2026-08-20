@@ -9,7 +9,7 @@ import {
     union,
 } from "@marceloclp/bsd";
 import { utf16Text } from "./common/bsd";
-import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** Variable standard tail selected by its complete intrinsic framing. */
 const StandardTail = struct({
@@ -62,11 +62,13 @@ const EnchantStaticStatusRow = struct({
 });
 
 /** Equipment enhancement-status rows without joins to item tables. */
-export const EnchantStaticStatusDbss = dbss(
-    "gamecommondata/binary/enchantstaticstatus.dbss",
-)({
-    /** Enhancement-status rows in physical file order. */
-    rows: array(u32(), EnchantStaticStatusRow),
+export const EnchantStaticStatusDbss = table({
+    path: "gamecommondata/binary/enchantstaticstatus.dbss",
+    rows: {
+        EnchantStaticStatusRow: {
+            schema: EnchantStaticStatusRow,
+        },
+    },
 });
 
 if (import.meta.main) {

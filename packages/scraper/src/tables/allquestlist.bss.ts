@@ -1,6 +1,5 @@
-import { array, bytes, struct, u16, u32 } from "@marceloclp/bsd";
-
-import { bss } from "./common/helpers";
+import { struct, u16 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 const QuestId = struct({
     /** Quest family/group identifier stored in the low two bytes. */
@@ -9,9 +8,12 @@ const QuestId = struct({
     questNumber: u16(),
 });
 
-export const AllQuestListBss = bss("allquestlist.bss")({
-    rows: array(u32(), QuestId),
-    footer: bytes(12).reserved(),
+export const AllQuestListBss = table({
+    path: "gamecommondata/binary/allquestlist.bss",
+    pabr: true,
+    rows: {
+        QuestId: { schema: QuestId },
+    },
 });
 
 if (import.meta.main) {

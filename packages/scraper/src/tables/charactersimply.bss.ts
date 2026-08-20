@@ -11,9 +11,8 @@ import {
     u64,
     u8,
 } from "@marceloclp/bsd";
-
 import { mixedText } from "./common/bsd";
-import { bss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One fixed 118-byte compact character definition. */
 const CharacterSimplyRow = struct({
@@ -151,21 +150,13 @@ const CharacterSimplyRow = struct({
         .reserved(),
 }).fixedLength(118);
 
-const CharacterSimplyFooter = struct({
-    /** Absolute byte offset of the string-pool count. */
-    stringPoolOffset: u32(),
-    /** Required zero four-byte footer trailer. */
-    reserved: bytes(4).reserved(),
-});
-
-/** Compact character rows and their in-file mixed-encoding string pool. */
-export const CharacterSimplyBss = bss("charactersimply.bss")({
-    /** Fixed-width compact character rows in physical order. */
-    rows: array(u32(), CharacterSimplyRow),
-    /** Local string pool with its validated framing footer omitted. */
-    stringPool: array(u32(), mixedText()),
-    /** Footer used for validation. */
-    footer: CharacterSimplyFooter,
+export const CharacterSimplyBss = table({
+    path: "gamecommondata/binary/charactersimply.bss",
+    pabr: true,
+    rows: {
+        CharacterSimplyRow: { schema: CharacterSimplyRow },
+        Stringpool: { schema: mixedText() },
+    },
 });
 
 if (import.meta.main) {

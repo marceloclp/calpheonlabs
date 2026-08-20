@@ -14,6 +14,7 @@ import {
 
 import { asciiText, utf16Text } from "./common/bsd";
 import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** Identity-only transform slot used by the shared compact/housing suffix. */
 const TransformMatrix = array(16, f32());
@@ -233,8 +234,11 @@ const CharacterObjectRow = struct({
     ),
 });
 
-export const CharacterObjectDbss = dbss("characterobject.dbss")({
-    rows: array(u32(), CharacterObjectRow),
+export const CharacterObjectDbss = table({
+    path: "gamecommondata/binary/characterobject.dbss",
+    rows: {
+        CharacterObjectRow: { schema: CharacterObjectRow },
+    },
 });
 
 if (import.meta.main) {

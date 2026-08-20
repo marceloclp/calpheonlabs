@@ -1,6 +1,5 @@
 import { array, struct, u16, u32, u8 } from "@marceloclp/bsd";
-
-import { bss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One quest participating in a physical branch set. */
 const BranchQuestEntry = struct({
@@ -20,8 +19,12 @@ const BranchQuestRow = struct({
     rows: array(u32(), BranchQuestEntry),
 });
 
-export const BranchQuestBss = bss("branchquest.bss")({
-    rows: array(u32(), BranchQuestRow),
+export const BranchQuestBss = table({
+    path: "gamecommondata/binary/branchquest.bss",
+    pabr: true,
+    rows: {
+        BranchQuestRow: { schema: BranchQuestRow },
+    },
 });
 
 if (import.meta.main) {

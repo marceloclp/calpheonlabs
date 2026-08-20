@@ -1,5 +1,5 @@
-import { array, struct, u32 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { struct, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** Twelve-byte companion pointer with a four-byte lookup key. */
 const ManufactureConditionOffsetRow = struct({
@@ -11,15 +11,15 @@ const ManufactureConditionOffsetRow = struct({
     byteLength: u32(),
 }).fixedLength(12);
 
-
 /** Physical directory of variable-width manufacture-condition payloads. */
-export const ManufactureConditionOffsetDbss = dbss(
-    "gamecommondata/binary/manufactureconditionoffset.dbss",
-)({
-    /** Manufacture-condition payload pointers in directory order. */
-    rows: array(u32(), ManufactureConditionOffsetRow),
+export const ManufactureConditionOffsetDbss = table({
+    path: "gamecommondata/binary/manufactureconditionoffset.dbss",
+    rows: {
+        /** Manufacture-condition payload pointers in directory order. */
+        ManufactureConditionOffsetRow: { schema: ManufactureConditionOffsetRow },
+    },
 });
 
 if (import.meta.main) {
-    await ManufactureConditionOffsetDbss.decodeIntoDisk();
+    await ManufactureConditionOffsetDbss.decodeIntoDisk({ debug: true });
 }

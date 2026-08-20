@@ -1,5 +1,5 @@
 import { array, struct, u16, u32 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One knowledge ID followed by every character key that directly grants it. */
 const KnowledgeLearningCharacterKeyRow = u32().pipe((characterCount) =>
@@ -15,13 +15,13 @@ const KnowledgeLearningCharacterKeyRow = u32().pipe((characterCount) =>
  * Reverse index from knowledge IDs to character sources, without forward-table
  * joins.
  */
-export const KnowledgeLearningCharacterKeyBss = dbss(
-    "gamecommondata/binary/knowledgelearningcharacterkey.bss",
-)({
-    /** Knowledge-to-character reverse-index rows. */
-    rows: array(u32(), KnowledgeLearningCharacterKeyRow),
+export const KnowledgeLearningCharacterKeyBss = table({
+    path: "gamecommondata/binary/knowledgelearningcharacterkey.bss",
+    rows: {
+        KnowledgeLearningCharacterKeyRow: { schema: KnowledgeLearningCharacterKeyRow },
+    },
 });
 
 if (import.meta.main) {
-    await KnowledgeLearningCharacterKeyBss.decodeIntoDisk();
+    await KnowledgeLearningCharacterKeyBss.decodeIntoDisk({ debug: true });
 }

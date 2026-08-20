@@ -1,5 +1,5 @@
-import { array, struct, u32 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { struct, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** Twelve-byte companion pointer with a four-byte lookup key. */
 export const GuildManufactureOffsetRow = struct({
@@ -12,11 +12,13 @@ export const GuildManufactureOffsetRow = struct({
 }).fixedLength(12);
 
 /** Physical directory of variable-width guild-manufacture payloads. */
-export const GuildManufactureOffsetDbss = dbss(
-    "gamecommondata/binary/guildmanufactureoffset.dbss",
-)({
-    /** Guild-manufacture payload pointers in directory order. */
-    rows: array(u32(), GuildManufactureOffsetRow),
+export const GuildManufactureOffsetDbss = table({
+    path: "gamecommondata/binary/guildmanufactureoffset.dbss",
+    rows: {
+        GuildManufactureOffsetRow: {
+            schema: GuildManufactureOffsetRow,
+        },
+    },
 });
 
 if (import.meta.main) {

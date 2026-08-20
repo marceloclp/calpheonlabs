@@ -1,5 +1,5 @@
 import { array, struct, u16, u32 } from "@marceloclp/bsd";
-import { bss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One reverse link from a skill to a guild-house recipe list and tier. */
 const GuildHouseCraftSkillReverseLink = struct({
@@ -18,11 +18,14 @@ const GuildHouseCraftSkillReverseLinkRow = struct({
 });
 
 /** Reverse index from craft skills to guild-house recipe lists. */
-export const GuildHouseCraftSkillReverseLinkListBss = bss(
-    "gamecommondata/binary/guildhousecraftskillreverselinklist.bss",
-)({
-    /** Skill-to-recipe reverse-link rows in physical order. */
-    rows: array(u32(), GuildHouseCraftSkillReverseLinkRow).pad(12),
+export const GuildHouseCraftSkillReverseLinkListBss = table({
+    path: "gamecommondata/binary/guildhousecraftskillreverselinklist.bss",
+    pabr: true,
+    rows: {
+        GuildHouseCraftSkillReverseLinkRow: {
+            schema: GuildHouseCraftSkillReverseLinkRow,
+        },
+    },
 });
 
 if (import.meta.main) {

@@ -1,6 +1,6 @@
 import { array, struct, u16, u32 } from "@marceloclp/bsd";
 import { utf16Text } from "./common/bsd";
-import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One addressed line in a named dialogue-text group. */
 const DialogTextLine = struct({
@@ -25,9 +25,13 @@ const DialogTextRow = struct({
     .check((row) => row.outerDialogTextKey === row.dialogTextKey);
 
 /** Intrinsically framed dialogue-text groups without presentation-layer parsing. */
-export const DialogTextDbss = dbss("gamecommondata/binary/dialogtext.dbss")({
-    /** Named dialogue-text groups in physical file order. */
-    rows: array(u32(), DialogTextRow),
+export const DialogTextDbss = table({
+    path: "gamecommondata/binary/dialogtext.dbss",
+    rows: {
+        DialogTextRow: {
+            schema: DialogTextRow,
+        },
+    },
 });
 
 if (import.meta.main) {

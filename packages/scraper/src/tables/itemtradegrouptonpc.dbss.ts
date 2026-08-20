@@ -1,5 +1,5 @@
 import { array, bytes, struct, u16, u32, u8 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One fixed-width, 127-byte item-trade entry owned by an NPC. */
 const ItemTradeGroupToNpcEntry = struct({
@@ -44,11 +44,13 @@ const ItemTradeGroupToNpcRow = struct({
 });
 
 /** Complete intrinsic NPC trade-item table without offset-table dependencies. */
-export const ItemTradeGroupToNpcDbss = dbss(
-    "gamecommondata/binary/itemtradegrouptonpc.dbss",
-)({
-    /** Variable-width NPC trade rows in physical order. */
-    rows: array(u32(), ItemTradeGroupToNpcRow),
+export const ItemTradeGroupToNpcDbss = table({
+    path: "gamecommondata/binary/itemtradegrouptonpc.dbss",
+    rows: {
+        ItemTradeGroupToNpcRow: {
+            schema: ItemTradeGroupToNpcRow,
+        },
+    },
 });
 
 if (import.meta.main) {

@@ -1,4 +1,4 @@
-import { type BsdShape, type BsdStruct, bytes, struct } from "@marceloclp/bsd";
+import { type Bsd, type BsdAny, type BsdInfer, type BsdShape, type BsdStruct, bytes, struct } from "@marceloclp/bsd";
 import { JsonStreamStringify } from "json-stream-stringify";
 import { PazMeta } from "../../paz/paz-meta";
 
@@ -62,7 +62,8 @@ class Table<S extends BsdShape> {
      */
     async loadIntoMemory(meta: PazMeta) {
         const buffer = await meta.extract(this.path);
-        return this.schema.decode(buffer);
+        console.log("got buffer")
+        return this.schema.decode(buffer) as BsdUnwrap<S>;
     }
 
     async extract(bdoPath = Bun.env.BDO_GAME_PATH) {
@@ -70,3 +71,14 @@ class Table<S extends BsdShape> {
         return await meta.extract(this.path);
     }
 }
+
+// @todo(bsd): move this to bsd directly
+type BsdUnwrapInferred<T> = [T] extends [Uint8Array]
+    ? Uint8Array
+    : [T] extends [Record<string, any>]
+    ? { [K in keyof T]: BsdUnwrapInferred<BsdInfer<T[K]>> }
+    : [T] extends [Array<infer U>]
+    ? BsdUnwrap<U>[]
+    : T;
+
+type BsdUnwrap<T> = BsdUnwrapInferred<BsdInfer<T>>;

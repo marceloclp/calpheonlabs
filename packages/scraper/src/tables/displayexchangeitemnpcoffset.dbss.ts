@@ -1,5 +1,5 @@
-import { array, struct, u32 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { struct, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** Twelve-byte companion pointer with a four-byte lookup key. */
 export const DisplayExchangeItemNpcOffsetRow = struct({
@@ -11,13 +11,14 @@ export const DisplayExchangeItemNpcOffsetRow = struct({
     byteLength: u32(),
 }).fixedLength(12);
 
-
 /** Physical directory of NPC exchange-display payload spans. */
-export const DisplayExchangeItemNpcOffsetDbss = dbss(
-    "gamecommondata/binary/displayexchangeitemnpcoffset.dbss",
-)({
-    /** NPC exchange-display pointers in directory order. */
-    rows: array(u32(), DisplayExchangeItemNpcOffsetRow),
+export const DisplayExchangeItemNpcOffsetDbss = table({
+    path: "gamecommondata/binary/displayexchangeitemnpcoffset.dbss",
+    rows: {
+        DisplayExchangeItemNpcOffsetRow: {
+            schema: DisplayExchangeItemNpcOffsetRow,
+        },
+    },
 });
 
 if (import.meta.main) {

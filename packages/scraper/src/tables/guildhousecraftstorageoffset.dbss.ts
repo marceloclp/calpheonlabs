@@ -1,5 +1,5 @@
-import { array, struct, u32 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { struct, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** Twelve-byte companion pointer with a four-byte lookup key. */
 const GuildHouseCraftStorageOffsetRow = struct({
@@ -11,13 +11,15 @@ const GuildHouseCraftStorageOffsetRow = struct({
     byteLength: u32(),
 }).fixedLength(12);
 
-
 /** Directory of six-byte guild-house craft-storage payloads. */
-export const GuildHouseCraftStorageOffsetDbss = dbss(
-    "gamecommondata/binary/guildhousecraftstorageoffset.dbss",
-)({
-    /** Craft-storage payload pointers in directory order. */
-    rows: array(u32(), GuildHouseCraftStorageOffsetRow),
+export const GuildHouseCraftStorageOffsetDbss = table({
+    path: "gamecommondata/binary/guildhousecraftstorageoffset.dbss",
+    pabr: true,
+    rows: {
+        GuildHouseCraftStorageOffsetRow: {
+            schema: GuildHouseCraftStorageOffsetRow,
+        },
+    },
 });
 
 if (import.meta.main) {
