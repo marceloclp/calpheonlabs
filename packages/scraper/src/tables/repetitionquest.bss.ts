@@ -1,5 +1,5 @@
 import { array, bytes, padded, struct, u16, u32, u8 } from "@marceloclp/bsd";
-import { bss } from "./common/helpers";
+import { table } from "./common/table";
 
 /**
  * One Quest-window entry containing physical quest identifiers and string
@@ -37,20 +37,17 @@ const RepetitionQuestRow = struct({
 }).pad(4);
 
 /** Physical recurring-quest window lists and their string pool. */
-export const RepetitionQuestBss = bss(
-    "gamecommondata/binary/repetitionquest.bss",
-)({
-    /** Recurring-quest lists in physical order. */
-    rows: array(u32(), RepetitionQuestRow),
-    /** Strings addressed by row and entry string indexes. */
-    stringPool: array(u32(), padded(1, bytes(u32()).utf16())),
-    /** Informational footer following the quest-menu string pool. */
-    footer: struct({
-        /** Absolute byte offset of the counted `stringPool`. */
-        stringPoolOffset: u32(),
-    }).pad(4),
+export const RepetitionQuestBss = table({
+    path: "gamecommondata/binary/repetitionquest.bss",
+    pabr: true,
+    rows: {
+        /** Recurring-quest lists in physical order. */
+        RepetitionQuestRow: { schema: RepetitionQuestRow },
+        /** Strings addressed by row and entry string indexes. */
+        Stringpool: { schema: padded(1, bytes(u32()).utf16()) },
+    },
 });
 
 if (import.meta.main) {
-    await RepetitionQuestBss.decodeIntoDisk();
+    await RepetitionQuestBss.decodeIntoDisk({ debug: true });
 }

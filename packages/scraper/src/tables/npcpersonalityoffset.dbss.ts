@@ -1,6 +1,5 @@
-import { array, struct, u16, u32 } from "@marceloclp/bsd";
-
-import { dbss } from "./common/helpers";
+import { struct, u16, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 const NpcPersonalityOffsetRow = struct({
     /** Character or NPC key selecting the companion payload. */
@@ -11,12 +10,13 @@ const NpcPersonalityOffsetRow = struct({
     byteLength: u32(),
 });
 
-export const NpcPersonalityOffsetDbss = dbss(
-    "gamecommondata/binary/npcpersonalityoffset.dbss",
-)({
-    rows: array(u32(), NpcPersonalityOffsetRow),
+export const NpcPersonalityOffsetDbss = table({
+    path: "gamecommondata/binary/npcpersonalityoffset.dbss",
+    rows: {
+        NpcPersonalityOffsetRow: { schema: NpcPersonalityOffsetRow },
+    },
 });
 
 if (import.meta.main) {
-    await NpcPersonalityOffsetDbss.decodeIntoDisk();
+    await NpcPersonalityOffsetDbss.decodeIntoDisk({ debug: true });
 }

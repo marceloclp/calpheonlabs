@@ -1,6 +1,5 @@
 import { array, struct, u16, u32 } from "@marceloclp/bsd";
-
-import { bss } from "./common/helpers";
+import { table } from "./common/table";
 
 const QuestProgressGroupEntry = struct({
     /** Progress-group identifier repeated from the enclosing row. */
@@ -20,12 +19,14 @@ const QuestProgressGroupRow = struct({
     entries: array(u32(), QuestProgressGroupEntry),
 });
 
-export const QuestProgressGroupBss = bss(
-    "gamecommondata/binary/questprogressgroup.bss",
-)({
-    rows: array(u32(), QuestProgressGroupRow),
+export const QuestProgressGroupBss = table({
+    path: "gamecommondata/binary/questprogressgroup.bss",
+    pabr: true,
+    rows: {
+        QuestProgressGroupRow: { schema: QuestProgressGroupRow },
+    },
 });
 
 if (import.meta.main) {
-    await QuestProgressGroupBss.decodeIntoDisk();
+    await QuestProgressGroupBss.decodeIntoDisk({ debug: true });
 }

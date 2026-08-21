@@ -1,5 +1,5 @@
 import { array, bytes, struct, u32 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One material that can restore maximum durability to the row's target item. */
 const RepairMaxEnduranceMaterial = struct({
@@ -24,13 +24,14 @@ const RepairMaxEnduranceRow = struct({
 }).check((row) => row.itemId === row.repeatedItemId);
 
 /** Maximum-durability repair recipes keyed by the item being repaired. */
-export const RepairMaxEnduranceDbss = dbss(
-    "gamecommondata/binary/repairmaxendurance.dbss",
-)({
-    /** Repair-target rows in physical file order. */
-    rows: array(u32(), RepairMaxEnduranceRow),
+export const RepairMaxEnduranceDbss = table({
+    path: "gamecommondata/binary/repairmaxendurance.dbss",
+    rows: {
+        /** Repair-target rows in physical file order. */
+        RepairMaxEnduranceRow: { schema: RepairMaxEnduranceRow },
+    },
 });
 
 if (import.meta.main) {
-    await RepairMaxEnduranceDbss.decodeIntoDisk();
+    await RepairMaxEnduranceDbss.decodeIntoDisk({ debug: true });
 }

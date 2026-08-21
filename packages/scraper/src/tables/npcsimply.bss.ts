@@ -1,7 +1,6 @@
-import { array, bool, bytes, struct, u16, u32 } from "@marceloclp/bsd";
-
+import { bool, struct, u16, u32 } from "@marceloclp/bsd";
 import { mixedText } from "./common/bsd";
-import { bss } from "./common/helpers";
+import { table } from "./common/table";
 
 /**
  * One fixed 33-byte compact NPC row with pool references left as physical
@@ -32,26 +31,18 @@ const NpcSimplyRow = struct({
     reservedStringIndex: u32().is(0),
 });
 
-const NpcSimplyFooter = struct({
-    /**
-     * Absolute offset to the string pool; used for initial validation of
-     * physical layout.
-     */
-    stringPoolOffset: u32(),
-    /** Footer padding. */
-    reserved: bytes(4).reserved(),
-}).omit({ reserved: true });
-
 /** Physical compact-NPC table, mixed string pool, and validated pool pointer. */
-const NpcSimplyBss = bss("gamecommondata/binary/npcsimply.bss")({
-    /** Fixed-width compact NPC rows. */
-    rows: array(u32(), NpcSimplyRow),
-    /** Mixed UTF-8/UTF-16 pool and its absolute start offset. */
-    stringPool: array(u32(), mixedText()),
-    /** Footer pointing back to the string pool. */
-    footer: NpcSimplyFooter,
+export const NpcSimplyBss = table({
+    path: "gamecommondata/binary/npcsimply.bss",
+    pabr: true,
+    rows: {
+        /** Fixed-width compact NPC rows. */
+        NpcSimplyRow: { schema: NpcSimplyRow },
+        /** Mixed UTF-8/UTF-16 pool and its absolute start offset. */
+        Stringpool: { schema: mixedText() },
+    },
 });
 
 if (import.meta.main) {
-    await NpcSimplyBss.decodeIntoDisk();
+    await NpcSimplyBss.decodeIntoDisk({ debug: true });
 }

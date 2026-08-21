@@ -1,8 +1,7 @@
-import { array, bytes, u16, u32 } from "@marceloclp/bsd";
+import { array, bytes, literal, struct, u16, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
-import { bss } from "./common/helpers";
-
-export const NpcGiftEtcBss = bss("gamecommondata/binary/npcgiftetc.bss")({
+const NpcGiftEtcRow = struct({
     /** Energy costs for the two gift-related interactions. */
     energyCosts: array(2, u16()),
     /** Amity required before confession becomes available. */
@@ -20,6 +19,17 @@ export const NpcGiftEtcBss = bss("gamecommondata/binary/npcgiftetc.bss")({
     footer: bytes(4).reserved(),
 });
 
+export const NpcGiftEtcBss = table({
+    path: "gamecommondata/binary/npcgiftetc.bss",
+    pabr: true,
+    rows: {
+        NpcGiftEtcRow: {
+            schema: NpcGiftEtcRow,
+            counter: literal(1),
+        },
+    },
+});
+
 if (import.meta.main) {
-    await NpcGiftEtcBss.decodeIntoDisk();
+    await NpcGiftEtcBss.decodeIntoDisk({ debug: true });
 }

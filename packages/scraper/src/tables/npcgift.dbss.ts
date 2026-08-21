@@ -1,6 +1,5 @@
 import { array, struct, u16, u32 } from "@marceloclp/bsd";
-
-import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 const NpcGiftItem = struct({
     /** Item identifier accepted by this NPC. */
@@ -18,10 +17,13 @@ const NpcGiftRow = struct({
     items: array(u32(), NpcGiftItem),
 });
 
-export const NpcGiftDbss = dbss("gamecommondata/binary/npcgift.dbss")({
-    rows: array(u32(), NpcGiftRow),
+export const NpcGiftDbss = table({
+    path: "gamecommondata/binary/npcgift.dbss",
+    rows: {
+        NpcGiftRow: { schema: NpcGiftRow },
+    },
 });
 
 if (import.meta.main) {
-    await NpcGiftDbss.decodeIntoDisk();
+    await NpcGiftDbss.decodeIntoDisk({ debug: true });
 }

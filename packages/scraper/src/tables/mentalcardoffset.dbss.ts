@@ -1,5 +1,5 @@
-import { array, struct, u32 } from "@marceloclp/bsd";
-import { bss } from "./common/helpers";
+import { struct, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One twelve-byte mental-card pointer using 32-bit keys and span fields. */
 const MentalCardOffsetRow = struct({
@@ -12,13 +12,15 @@ const MentalCardOffsetRow = struct({
 }).fixedLength(12);
 
 /** Complete pointer index for `mentalcard.dbss`. */
-export const MentalCardOffsetDbss = bss(
-    "gamecommondata/binary/mentalcardoffset.dbss",
-)({
-    /** Mental-card pointers in directory order. */
-    rows: array(u32(), MentalCardOffsetRow).pad(12),
+export const MentalCardOffsetDbss = table({
+    path: "gamecommondata/binary/mentalcardoffset.dbss",
+    pabr: true,
+    rows: {
+        /** Mental-card pointers in directory order. */
+        MentalCardOffsetRow: { schema: MentalCardOffsetRow },
+    },
 });
 
 if (import.meta.main) {
-    await MentalCardOffsetDbss.decodeIntoDisk();
+    await MentalCardOffsetDbss.decodeIntoDisk({ debug: true });
 }

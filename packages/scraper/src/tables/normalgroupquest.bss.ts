@@ -1,13 +1,15 @@
-import { array, struct, u32 } from "@marceloclp/bsd";
-import { bss } from "./common/helpers";
+import { struct } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
-export const NormalGroupQuestBss = bss(
-    "gamecommondata/binary/normalgroupquest.bss",
-)({
-    /** This table has no rows. */
-    rows: array(u32(), struct({})),
+export const NormalGroupQuestBss = table({
+    path: "gamecommondata/binary/normalgroupquest.bss",
+    pabr: true,
+    rows: {
+        /** This table has no rows. */
+        NormalGroupQuestRow: { schema: struct({}) },
+    },
 });
 
 if (import.meta.main) {
-    await NormalGroupQuestBss.decodeIntoDisk();
+    await NormalGroupQuestBss.decodeIntoDisk({ debug: true });
 }

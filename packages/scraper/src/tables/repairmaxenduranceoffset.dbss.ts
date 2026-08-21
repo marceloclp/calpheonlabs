@@ -1,5 +1,5 @@
-import { array, struct, u32 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { struct, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One pointer from a repair target key to its variable-width recipe payload. */
 const RepairMaxEnduranceOffsetRow = struct({
@@ -12,13 +12,14 @@ const RepairMaxEnduranceOffsetRow = struct({
 }).fixedLength(12);
 
 /** Count-prefixed index for `repairmaxendurance.dbss`. */
-export const RepairMaxEnduranceOffsetDbss = dbss(
-    "gamecommondata/binary/repairmaxenduranceoffset.dbss",
-)({
-    /** Repair-target pointers in directory order. */
-    rows: array(u32(), RepairMaxEnduranceOffsetRow),
+export const RepairMaxEnduranceOffsetDbss = table({
+    path: "gamecommondata/binary/repairmaxenduranceoffset.dbss",
+    rows: {
+        /** Repair-target pointers in directory order. */
+        RepairMaxEnduranceOffsetRow: { schema: RepairMaxEnduranceOffsetRow },
+    },
 });
 
 if (import.meta.main) {
-    await RepairMaxEnduranceOffsetDbss.decodeIntoDisk();
+    await RepairMaxEnduranceOffsetDbss.decodeIntoDisk({ debug: true });
 }

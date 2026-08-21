@@ -1,6 +1,6 @@
 import { array, bool, struct, u16, u32 } from "@marceloclp/bsd";
 import { utf16Text } from "./common/bsd";
-import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One intrinsically framed knowledge-theme row. */
 const MentalThemeRow = struct({
@@ -33,11 +33,14 @@ const MentalThemeRow = struct({
     .omit({ outerThemeKey: true });
 
 /** Mental-theme hierarchy without card, item, localization, or parent joins. */
-export const MentalThemeDbss = dbss("gamecommondata/binary/mentaltheme.dbss")({
-    /** Mental-theme rows in physical file order. */
-    rows: array(u32(), MentalThemeRow),
+export const MentalThemeDbss = table({
+    path: "gamecommondata/binary/mentaltheme.dbss",
+    rows: {
+        /** Mental-theme rows in physical file order. */
+        MentalThemeRow: { schema: MentalThemeRow },
+    },
 });
 
 if (import.meta.main) {
-    await MentalThemeDbss.decodeIntoDisk();
+    await MentalThemeDbss.decodeIntoDisk({ debug: true });
 }

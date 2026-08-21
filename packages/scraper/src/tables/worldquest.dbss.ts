@@ -1,12 +1,14 @@
-import { array, struct, u32 } from "@marceloclp/bsd";
+import { struct } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
-import { dbss } from "./common/helpers";
-
-export const WorldQuestDbss = dbss("gamecommondata/binary/worldquest.dbss")({
-    /** Table has no rows. */
-    rows: array(u32(), struct({})),
+export const WorldQuestDbss = table({
+    path: "gamecommondata/binary/worldquest.dbss",
+    rows: {
+        /** Table has no rows. */
+        WorldQuestRow: { schema: struct({}) },
+    },
 });
 
 if (import.meta.main) {
-    await WorldQuestDbss.decodeIntoDisk();
+    await WorldQuestDbss.decodeIntoDisk({ debug: true });
 }

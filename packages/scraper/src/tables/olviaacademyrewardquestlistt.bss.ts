@@ -1,6 +1,5 @@
-import { array, bytes, struct, u16, u32 } from "@marceloclp/bsd";
-
-import { bss } from "./common/helpers";
+import { struct, u16 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One physical Black Desert quest identifier, without a join to quest metadata. */
 const QuestIdRow = struct({
@@ -10,13 +9,14 @@ const QuestIdRow = struct({
     questNumber: u16(),
 });
 
-export const OlviaAcademyRewardQuestListBss = bss(
-    "gamecommondata/binary/olviaacademyrewardquestlist.bss",
-)({
-    rows: array(u32(), QuestIdRow),
-    footer: bytes(12).reserved(),
+export const OlviaAcademyRewardQuestListBss = table({
+    path: "gamecommondata/binary/olviaacademyrewardquestlist.bss",
+    pabr: true,
+    rows: {
+        QuestIdRow: { schema: QuestIdRow },
+    },
 });
 
 if (import.meta.main) {
-    await OlviaAcademyRewardQuestListBss.decodeIntoDisk();
+    await OlviaAcademyRewardQuestListBss.decodeIntoDisk({ debug: true });
 }

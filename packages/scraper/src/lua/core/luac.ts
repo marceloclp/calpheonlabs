@@ -10,7 +10,6 @@ export function luac(path: string) {
     }
 }
 
-
 class LuaFile<T> {
     constructor(
         /** Archive-relative file name, including the `.luac` extension. */

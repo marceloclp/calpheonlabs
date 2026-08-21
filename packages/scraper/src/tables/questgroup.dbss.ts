@@ -1,6 +1,5 @@
 import { array, bytes, find, struct, u16, u32 } from "@marceloclp/bsd";
-
-import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One physical Black Desert quest identifier, without a join to quest metadata. */
 const QuestId = struct({
@@ -23,10 +22,13 @@ const QuestGroupRow = struct({
     members: array(u32(), QuestId).pad((v) => (v.length ? 4 : 2)),
 });
 
-const QuestGroupDbss = dbss("gamecommondata/binary/questgroup.dbss")({
-    rows: array(u32(), QuestGroupRow),
+export const QuestGroupDbss = table({
+    path: "gamecommondata/binary/questgroup.dbss",
+    rows: {
+        QuestGroupRow: { schema: QuestGroupRow },
+    },
 });
 
 if (import.meta.main) {
-    await QuestGroupDbss.decodeIntoDisk();
+    await QuestGroupDbss.decodeIntoDisk({ debug: true });
 }

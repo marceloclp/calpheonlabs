@@ -1,6 +1,5 @@
-import { array, bytes, u32 } from "@marceloclp/bsd";
-
-import { bss } from "./common/helpers";
+import { bytes } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /**
  * One exact 32-byte random-group record whose internal fields remain
@@ -8,12 +7,14 @@ import { bss } from "./common/helpers";
  */
 const QuestRandomGroupRow = bytes(32).transform((x) => Array.from(x));
 
-export const QuestRandomGroupBss = bss(
-    "gamecommondata/binary/questrandomgroup.bss",
-)({
-    rows: array(u32(), QuestRandomGroupRow),
+export const QuestRandomGroupBss = table({
+    path: "gamecommondata/binary/questrandomgroup.bss",
+    pabr: true,
+    rows: {
+        QuestRandomGroupRow: { schema: QuestRandomGroupRow },
+    },
 });
 
 if (import.meta.main) {
-    await QuestRandomGroupBss.decodeIntoDisk();
+    await QuestRandomGroupBss.decodeIntoDisk({ debug: true });
 }

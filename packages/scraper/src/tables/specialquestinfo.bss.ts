@@ -1,5 +1,5 @@
 import { array, struct, u16, u32 } from "@marceloclp/bsd";
-import { bss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One physical Black Desert quest identifier. */
 const QuestId = struct({
@@ -18,13 +18,15 @@ const SpecialQuestInfoRow = struct({
 });
 
 /** Complete special-quest grouping table. */
-export const SpecialQuestInfoBss = bss(
-    "gamecommondata/binary/specialquestinfo.bss",
-)({
-    /** Special-quest condition groups in physical order. */
-    rows: array(u32(), SpecialQuestInfoRow).pad(12),
+export const SpecialQuestInfoBss = table({
+    path: "gamecommondata/binary/specialquestinfo.bss",
+    pabr: true,
+    rows: {
+        /** Special-quest condition groups in physical order. */
+        SpecialQuestInfoRow: { schema: SpecialQuestInfoRow },
+    },
 });
 
 if (import.meta.main) {
-    await SpecialQuestInfoBss.decodeIntoDisk();
+    await SpecialQuestInfoBss.decodeIntoDisk({ debug: true });
 }

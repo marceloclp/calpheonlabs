@@ -1,5 +1,5 @@
-import { array, struct, u16, u32 } from "@marceloclp/bsd";
-import { bss } from "./common/helpers";
+import { struct, u16 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One physical Black Desert quest identifier. */
 const QuestId = struct({
@@ -10,13 +10,15 @@ const QuestId = struct({
 });
 
 /** Physical ordered list of special quest identifiers. */
-export const SpecialQuestListBss = bss(
-    "gamecommondata/binary/specialquestlist.bss",
-)({
-    /** Special quest identifiers in physical table order. */
-    rows: array(u32(), QuestId).pad(12),
+export const SpecialQuestListBss = table({
+    path: "gamecommondata/binary/specialquestlist.bss",
+    pabr: true,
+    rows: {
+        /** Special quest identifiers in physical table order. */
+        QuestId: { schema: QuestId },
+    },
 });
 
 if (import.meta.main) {
-    await SpecialQuestListBss.decodeIntoDisk();
+    await SpecialQuestListBss.decodeIntoDisk({ debug: true });
 }

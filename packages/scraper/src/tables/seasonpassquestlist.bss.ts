@@ -1,5 +1,5 @@
-import { array, struct, u16, u32 } from "@marceloclp/bsd";
-import { bss } from "./common/helpers";
+import { struct, u16 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One physical Black Desert quest identifier. */
 const QuestId = struct({
@@ -10,13 +10,15 @@ const QuestId = struct({
 });
 
 /** Physical ordered master list of Season Pass quest identifiers. */
-export const SeasonPassQuestListBss = bss(
-    "gamecommondata/binary/seasonpassquestlist.bss",
-)({
-    /** Season Pass quest identifiers in physical table order. */
-    rows: array(u32(), QuestId).pad(12),
+export const SeasonPassQuestListBss = table({
+    path: "gamecommondata/binary/seasonpassquestlist.bss",
+    pabr: true,
+    rows: {
+        /** Season Pass quest identifiers in physical table order. */
+        QuestId: { schema: QuestId },
+    },
 });
 
 if (import.meta.main) {
-    await SeasonPassQuestListBss.decodeIntoDisk();
+    await SeasonPassQuestListBss.decodeIntoDisk({ debug: true });
 }

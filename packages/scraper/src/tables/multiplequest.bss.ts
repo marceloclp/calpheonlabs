@@ -1,5 +1,5 @@
-import { array, struct, u16, u32 } from "@marceloclp/bsd";
-import { bss } from "./common/helpers";
+import { struct, u16 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One inclusive range treated as a multiple-quest family. */
 const MultipleQuestRow = struct({
@@ -11,10 +11,14 @@ const MultipleQuestRow = struct({
     lastQuestNumber: u16(),
 });
 
-export const MultipleQuestBss = bss("gamecommondata/binary/multiplequest.bss")({
-    rows: array(u32(), MultipleQuestRow),
+export const MultipleQuestBss = table({
+    path: "gamecommondata/binary/multiplequest.bss",
+    pabr: true,
+    rows: {
+        MultipleQuestRow: { schema: MultipleQuestRow },
+    },
 });
 
 if (import.meta.main) {
-    await MultipleQuestBss.decodeIntoDisk();
+    await MultipleQuestBss.decodeIntoDisk({ debug: true });
 }

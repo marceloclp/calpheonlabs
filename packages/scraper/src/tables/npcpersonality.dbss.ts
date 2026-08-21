@@ -1,6 +1,5 @@
 import { array, bytes, struct, u16, u32 } from "@marceloclp/bsd";
-
-import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 /**
  * Unpacks the stored upper half of an IEEE-754 float into its integer-valued
@@ -58,12 +57,13 @@ const NpcPersonalityRow = struct({
     zodiacSignOrderId: u16(),
 });
 
-export const NpcPersonalityDbss = dbss(
-    "gamecommondata/binary/npcpersonality.dbss",
-)({
-    rows: array(u32(), NpcPersonalityRow),
+export const NpcPersonalityDbss = table({
+    path: "gamecommondata/binary/npcpersonality.dbss",
+    rows: {
+        NpcPersonalityRow: { schema: NpcPersonalityRow },
+    },
 });
 
 if (import.meta.main) {
-    await NpcPersonalityDbss.decodeIntoDisk();
+    await NpcPersonalityDbss.decodeIntoDisk({ debug: true });
 }

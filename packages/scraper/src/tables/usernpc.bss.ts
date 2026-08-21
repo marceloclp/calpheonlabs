@@ -1,5 +1,5 @@
-import { array, bytes, f32, struct, u32, u64, u8 } from "@marceloclp/bsd";
-import { bss } from "./common/helpers";
+import { bytes, f32, struct, u32, u64, u8 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One placed player-avatar display. */
 const UserNpcRow = struct({
@@ -23,18 +23,17 @@ const UserNpcRow = struct({
 const UserNpcAction = u8().is(0).pipe(bytes(u32()).ascii());
 
 /** User-avatar placements and their in-file action-name pool. */
-export const UserNpcBss = bss("gamecommondata/binary/usernpc.bss")({
-    /** Fixed-width placed-avatar rows. */
-    rows: array(u32(), UserNpcRow),
-    /** Action names addressed by each row's `actionIndex`. */
-    actions: array(u32(), UserNpcAction),
-    /** Informational footer following the action-name pool. */
-    footer: struct({
-        /** Absolute byte offset of the counted `actions` pool. */
-        actionPoolOffset: u32().pad(4),
-    }),
+export const UserNpcBss = table({
+    path: "gamecommondata/binary/usernpc.bss",
+    pabr: true,
+    rows: {
+        /** Fixed-width placed-avatar rows. */
+        UserNpcRow: { schema: UserNpcRow },
+        /** Action names addressed by each row's `actionIndex`. */
+        UserNpcAction: { schema: UserNpcAction },
+    },
 });
 
 if (import.meta.main) {
-    await UserNpcBss.decodeIntoDisk();
+    await UserNpcBss.decodeIntoDisk({ debug: true });
 }

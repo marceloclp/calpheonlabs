@@ -13,7 +13,6 @@ import {
 } from "@marceloclp/bsd";
 
 import { asciiText, utf16Text } from "./common/bsd";
-import { dbss } from "./common/helpers";
 import { table } from "./common/table";
 
 /** Identity-only transform slot used by the shared compact/housing suffix. */

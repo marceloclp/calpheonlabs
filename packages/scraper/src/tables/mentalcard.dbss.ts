@@ -1,6 +1,6 @@
 import { array, f32, struct, u16, u32, u8 } from "@marceloclp/bsd";
 import { asciiText, utf16Text } from "./common/bsd";
-import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One intrinsically framed knowledge or mental-card row. */
 const MentalCardRow = struct({
@@ -54,11 +54,14 @@ const MentalCardRow = struct({
 });
 
 /** Physical mental-card table without item, theme, or localization joins. */
-export const MentalCardDbss = dbss("gamecommondata/binary/mentalcard.dbss")({
-    /** Mental-card rows in physical file order. */
-    rows: array(u32(), MentalCardRow),
+export const MentalCardDbss = table({
+    path: "gamecommondata/binary/mentalcard.dbss",
+    rows: {
+        /** Mental-card rows in physical file order. */
+        MentalCardRow: { schema: MentalCardRow },
+    },
 });
 
 if (import.meta.main) {
-    await MentalCardDbss.decodeIntoDisk();
+    await MentalCardDbss.decodeIntoDisk({ debug: true });
 }

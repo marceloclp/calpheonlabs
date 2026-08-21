@@ -1,5 +1,5 @@
-import { array, struct, u16, u32 } from "@marceloclp/bsd";
-import { bss } from "./common/helpers";
+import { struct, u16 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
 /** One physical Black Desert quest identifier. */
 const QuestId = struct({
@@ -9,15 +9,16 @@ const QuestId = struct({
     questNumber: u16(),
 });
 
-
 /** Physical ordered list of regional monster-kill quest identifiers. */
-export const RegionMonsterKillQuestListBss = bss(
-    "gamecommondata/binary/regionmonsterkillquestlist.bss",
-)({
-    /** Regional monster-kill quest identifiers in physical order. */
-    rows: array(u32(), QuestId).pad(12),
+export const RegionMonsterKillQuestListBss = table({
+    path: "gamecommondata/binary/regionmonsterkillquestlist.bss",
+    pabr: true,
+    rows: {
+        /** Regional monster-kill quest identifiers in physical order. */
+        QuestId: { schema: QuestId },
+    },
 });
 
 if (import.meta.main) {
-    await RegionMonsterKillQuestListBss.decodeIntoDisk();
+    await RegionMonsterKillQuestListBss.decodeIntoDisk({ debug: true });
 }

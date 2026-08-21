@@ -1,5 +1,5 @@
 import { array, bytes, padded, struct, u16, u32, u8 } from "@marceloclp/bsd";
-import { bss } from "./common/helpers";
+import { table } from "./common/table";
 
 const RecommendationQuestEntry = struct({
     /** Quest group identifier. */
@@ -33,20 +33,17 @@ export const RecommendationQuestRow = struct({
 }).pad(4);
 
 /** Physical recommended-quest window lists and their string pool. */
-export const RecommendationQuestBss = bss(
-    "gamecommondata/binary/recommendationquest.bss",
-)({
-    /** Recommended-quest lists in physical order. */
-    rows: array(u32(), RecommendationQuestRow),
-    /** Strings addressed by row and entry string indexes. */
-    stringPool: array(u32(), padded(1, bytes(u32()).utf16())),
-    /** Informational footer following the quest-menu string pool. */
-    footer: struct({
-        /** Absolute byte offset of the counted `stringPool`. */
-        stringPoolOffset: u32(),
-    }).pad(4),
+export const RecommendationQuestBss = table({
+    path: "gamecommondata/binary/recommendationquest.bss",
+    pabr: true,
+    rows: {
+        /** Recommended-quest lists in physical order. */
+        RecommendationQuestRow: { schema: RecommendationQuestRow },
+        /** Strings addressed by row and entry string indexes. */
+        Stringpool: { schema: padded(1, bytes(u32()).utf16()) },
+    },
 });
 
 if (import.meta.main) {
-    await RecommendationQuestBss.decodeIntoDisk();
+    await RecommendationQuestBss.decodeIntoDisk({ debug: true });
 }

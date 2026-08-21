@@ -1,5 +1,5 @@
 import { array, struct, u16, u32, u8 } from "@marceloclp/bsd";
-import { dbss } from "./common/helpers";
+import { table } from "./common/table";
 
 /** One intrinsically framed zodiac conversation-order row. */
 const ZodiacSignOrderRow = struct({
@@ -19,13 +19,14 @@ const ZodiacSignOrderRow = struct({
     .omit({ repeatedOrderId: true });
 
 /** Zodiac order rows with the player-facing horoscope identifier exposed. */
-export const ZodiacSignOrderDbss = dbss(
-    "gamecommondata/binary/zodiacsignorder.dbss",
-)({
-    /** Zodiac conversation-order rows in physical file order. */
-    rows: array(u32(), ZodiacSignOrderRow),
+export const ZodiacSignOrderDbss = table({
+    path: "gamecommondata/binary/zodiacsignorder.dbss",
+    rows: {
+        /** Zodiac conversation-order rows in physical file order. */
+        ZodiacSignOrderRow: { schema: ZodiacSignOrderRow },
+    },
 });
 
 if (import.meta.main) {
-    await ZodiacSignOrderDbss.decodeIntoDisk();
+    await ZodiacSignOrderDbss.decodeIntoDisk({ debug: true });
 }

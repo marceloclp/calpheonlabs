@@ -1,8 +1,7 @@
-import { array, bytes, struct, u16, u32 } from "@marceloclp/bsd";
+import { bytes, struct, u16, u32 } from "@marceloclp/bsd";
+import { table } from "./common/table";
 
-import { dbss } from "./common/helpers";
-
-const NpcGiftDataRowBSD = struct({
+const NpcGiftDataRow = struct({
     /** Character key owning the response. */
     npcId: u16(),
     /**
@@ -23,10 +22,13 @@ const NpcGiftDataRowBSD = struct({
     unknownTrailer: u32(),
 });
 
-export const NpcGiftDataDbss = dbss("gamecommondata/binary/npcgiftdata.dbss")({
-    rows: array(u32(), NpcGiftDataRowBSD),
+export const NpcGiftDataDbss = table({
+    path: "gamecommondata/binary/npcgiftdata.dbss",
+    rows: {
+        NpcGiftDataRow: { schema: NpcGiftDataRow },
+    },
 });
 
 if (import.meta.main) {
-    await NpcGiftDataDbss.decodeIntoDisk();
+    await NpcGiftDataDbss.decodeIntoDisk({ debug: true });
 }
